@@ -40,8 +40,8 @@ const CATEGORIES: { id: string; label: string; pupilLabel: string; hint: string 
   {
     id: "sexual",
     label: "Sexual",
-    pupilLabel: "Uncomfortable touching",
-    hint: "Someone touching you in a way that feels wrong, showing you things that make you uncomfortable, or asking you to do something that doesn\u2019t feel right."
+    pupilLabel: "My body, my rules",
+    hint: "Someone touched you in a way you didn\u2019t like, showed you something that made you uncomfortable, or asked you to do something that didn\u2019t feel right. Your body belongs to you."
   },
   {
     id: "relational",

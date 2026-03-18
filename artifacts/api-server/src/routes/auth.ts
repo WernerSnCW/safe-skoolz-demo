@@ -148,6 +148,46 @@ router.post("/auth/parent/login", async (req, res): Promise<void> => {
   });
 });
 
+router.patch("/auth/profile", authMiddleware, async (req, res): Promise<void> => {
+  const jwtUser = (req as any).user as JwtPayload;
+  const { firstName, lastName, email, avatarType, avatarValue } = req.body;
+
+  const updates: Record<string, any> = {};
+  if (firstName !== undefined) updates.firstName = firstName;
+  if (lastName !== undefined) updates.lastName = lastName;
+  if (email !== undefined) updates.email = email;
+  if (avatarType !== undefined) updates.avatarType = avatarType;
+  if (avatarValue !== undefined) updates.avatarValue = avatarValue;
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ error: "No fields to update" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(usersTable)
+    .set(updates)
+    .where(eq(usersTable.id, jwtUser.userId))
+    .returning();
+
+  if (!updated) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  await writeAudit({
+    schoolId: jwtUser.schoolId,
+    eventType: "profile_updated",
+    actor: jwtUser,
+    targetType: "user",
+    targetId: jwtUser.userId,
+    details: updates,
+    req,
+  });
+
+  res.json(formatUser(updated));
+});
+
 router.get("/auth/me", authMiddleware, async (req, res): Promise<void> => {
   const jwtUser = (req as any).user as JwtPayload;
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, jwtUser.userId));

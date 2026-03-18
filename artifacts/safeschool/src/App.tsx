@@ -16,6 +16,7 @@ import IncidentDetail from "@/pages/incidents/detail";
 import ProtocolsList from "@/pages/protocols";
 import AlertsList from "@/pages/alerts";
 import NotificationsList from "@/pages/notifications";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,9 @@ function Router() {
       </Route>
       <Route path="/notifications">
         {() => <ProtectedRoute component={NotificationsList} />}
+      </Route>
+      <Route path="/settings">
+        {() => <ProtectedRoute component={Settings} />}
       </Route>
       <Route component={NotFound} />
     </Switch>

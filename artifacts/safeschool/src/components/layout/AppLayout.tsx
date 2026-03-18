@@ -40,6 +40,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         ...base,
         { name: "Report Incident", href: "/report", icon: AlertTriangle },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
+        { name: "Settings", href: "/settings", icon: Settings },
       ];
     }
 
@@ -50,6 +51,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "My Class", href: "/class", icon: Users },
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
+        { name: "Settings", href: "/settings", icon: Settings },
       ];
     }
 
@@ -60,6 +62,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       { name: "Protocols", href: "/protocols", icon: FileText },
       { name: "Alerts", href: "/alerts", icon: Activity },
       { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
+      { name: "Settings", href: "/settings", icon: Settings },
     ];
   };
 

@@ -77,7 +77,7 @@ const formSchema = z.object({
   personInvolvedText: z.string().optional(),
   witnessText: z.string().optional(),
   description: z.string().optional(),
-  emotionalState: z.string().optional(),
+  emotions: z.array(z.string()).optional(),
   happeningToMe: z.boolean().default(true),
   anonymous: z.boolean().default(false),
   childrenSeparated: z.boolean().optional(),
@@ -105,7 +105,7 @@ export default function ReportIncident() {
 
   const isPupil = user?.role === "pupil";
   const watchCategories = watch("categories") || [];
-  const watchEmotion = watch("emotionalState");
+  const watchEmotions = watch("emotions") || [];
   const [openHint, setOpenHint] = useState<string | null>(null);
 
   const onSubmit = async (data: FormData) => {
@@ -118,7 +118,7 @@ export default function ReportIncident() {
           personInvolvedText: data.personInvolvedText || null,
           witnessText: data.witnessText || null,
           description: data.description,
-          emotionalState: data.emotionalState,
+          emotionalState: data.emotions?.length ? data.emotions.join(",") : undefined,
           happeningToMe: data.happeningToMe,
           anonymous: data.anonymous,
           childrenSeparated: data.childrenSeparated,
@@ -221,23 +221,31 @@ export default function ReportIncident() {
 
               {isPupil && (
                 <div>
-                  <Label className="text-base mb-3">How are you feeling about it?</Label>
+                  <Label className="text-base mb-3">How are you feeling about it? <span className="text-muted-foreground font-normal text-sm">(pick all that fit)</span></Label>
                   <div className="flex flex-wrap gap-3">
-                    {EMOTIONS.map(emo => (
-                      <button
-                        key={emo.id}
-                        type="button"
-                        onClick={() => setValue("emotionalState", emo.id)}
-                        className={`flex flex-col items-center p-3 rounded-xl border-2 min-w-[80px] transition-all ${
-                          watchEmotion === emo.id
-                            ? "border-secondary bg-secondary/10"
-                            : "border-border hover:bg-muted"
-                        }`}
-                      >
-                        <span className="text-3xl mb-1">{emo.emoji}</span>
-                        <span className="text-xs font-bold text-foreground">{emo.label}</span>
-                      </button>
-                    ))}
+                    {EMOTIONS.map(emo => {
+                      const isSelected = watchEmotions.includes(emo.id);
+                      return (
+                        <button
+                          key={emo.id}
+                          type="button"
+                          onClick={() => {
+                            const updated = isSelected
+                              ? watchEmotions.filter((e: string) => e !== emo.id)
+                              : [...watchEmotions, emo.id];
+                            setValue("emotions", updated);
+                          }}
+                          className={`flex flex-col items-center p-3 rounded-xl border-2 min-w-[80px] transition-all ${
+                            isSelected
+                              ? "border-secondary bg-secondary/10"
+                              : "border-border hover:bg-muted"
+                          }`}
+                        >
+                          <span className="text-3xl mb-1">{emo.emoji}</span>
+                          <span className="text-xs font-bold text-foreground">{emo.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}

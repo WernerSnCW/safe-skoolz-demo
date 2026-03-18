@@ -24,7 +24,7 @@ export const incidentsTable = pgTable("incidents", {
   personInvolvedText: text("person_involved_text"),
   witnessIds: uuid("witness_ids").array(),
   witnessText: text("witness_text"),
-  emotionalState: varchar("emotional_state", { length: 30 }),
+  emotionalState: varchar("emotional_state", { length: 200 }),
   emotionalFreetext: text("emotional_freetext"),
   happeningToMe: boolean("happening_to_me").default(false).notNull(),
   happeningToSomeoneElse: boolean("happening_to_someone_else").default(false).notNull(),

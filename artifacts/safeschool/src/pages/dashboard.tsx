@@ -1,13 +1,15 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { 
   useGetCoordinatorDashboard, 
   useListIncidents, 
-  useListAlerts 
+  useListAlerts,
+  useListNotifications 
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { 
-  AlertTriangle, ShieldAlert, HeartHandshake, 
+  AlertTriangle, ShieldAlert, HeartHandshake, Bell,
   ArrowRight, FileText, Activity, TrendingUp, Users 
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -172,6 +174,173 @@ function CoordinatorDashboardView() {
   );
 }
 
+// --- Teacher / Head of Year Dashboard ---
+function TeacherDashboard({ user }: { user: any }) {
+  const { data: pupilData } = useQuery<any>({
+    queryKey: ["/api/my-pupils"],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/my-pupils", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+  });
+
+  const { data: incidentsData } = useListIncidents({ limit: 5 });
+  const incidents = incidentsData?.data || [];
+
+  const totalPupils = pupilData ? Object.values(pupilData.classes as Record<string, any[]>).reduce((sum: number, arr: any[]) => sum + arr.length, 0) : 0;
+  const scopeLabel = pupilData?.scopeLabel || "";
+  const isHoY = user.role === "head_of_year";
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-display font-bold">Welcome back, {user.firstName}</h1>
+        <p className="text-muted-foreground mt-1">
+          {isHoY ? `Head of Year for ${scopeLabel}` : `Class teacher for ${scopeLabel}`} — {totalPupils} pupils
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link href="/report">
+          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+              <div className="p-4 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <AlertTriangle size={28} />
+              </div>
+              <h3 className="font-bold text-lg">Report Incident</h3>
+              <p className="text-sm text-muted-foreground">Log a new concern or incident</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/class">
+          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+              <div className="p-4 rounded-2xl bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-white transition-colors">
+                <Users size={28} />
+              </div>
+              <h3 className="font-bold text-lg">{isHoY ? "My Year Group" : "My Class"}</h3>
+              <p className="text-sm text-muted-foreground">{totalPupils} pupils in your care</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/incidents">
+          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+              <div className="p-4 rounded-2xl bg-amber-100 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors dark:bg-amber-900/30 dark:text-amber-400">
+                <FileText size={28} />
+              </div>
+              <h3 className="font-bold text-lg">View Incidents</h3>
+              <p className="text-sm text-muted-foreground">Review and track incidents</p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle>Recent Incidents</CardTitle>
+          <Link href="/incidents" className="text-primary text-sm font-bold hover:underline flex items-center">
+            View all <ArrowRight size={16} className="ml-1" />
+          </Link>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 mt-2">
+            {incidents.map((inc) => (
+              <Link key={inc.id} href={`/incidents/${inc.id}`}>
+                <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer border border-border/50">
+                  <div className={`w-2 h-10 rounded-full shrink-0 ${inc.escalationTier === 3 ? "bg-destructive" : inc.escalationTier === 2 ? "bg-warning" : "bg-secondary"}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">{inc.referenceNumber}</span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted capitalize">{inc.status}</span>
+                    </div>
+                    <p className="font-bold capitalize truncate">{inc.category?.split(",").join(", ")}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(inc.incidentDate)}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+            {incidents.length === 0 && <p className="text-muted-foreground text-sm py-4 text-center">No recent incidents.</p>}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// --- Parent Dashboard ---
+function ParentDashboard({ user }: { user: any }) {
+  const { data: notificationsData } = useListNotifications();
+  const notifications = notificationsData?.data || [];
+  const unread = notifications.filter((n: any) => !n.acknowledgedAt);
+
+  return (
+    <div className="space-y-8 max-w-4xl mx-auto">
+      <div>
+        <h1 className="text-3xl font-display font-bold">Welcome, {user.firstName}</h1>
+        <p className="text-muted-foreground mt-1">Stay informed about your child's wellbeing at school.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/report">
+          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+            <CardContent className="p-8">
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                <AlertTriangle size={32} />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Report a Concern</h2>
+              <p className="text-muted-foreground">If you are worried about something, let the school know.</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/notifications">
+          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full relative">
+            <CardContent className="p-8">
+              <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-white transition-colors">
+                <Bell size={32} />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Notifications</h2>
+              <p className="text-muted-foreground">
+                {unread.length > 0
+                  ? `You have ${unread.length} unread notification${unread.length !== 1 ? "s" : ""}.`
+                  : "No new notifications at the moment."}
+              </p>
+            </CardContent>
+            {unread.length > 0 && (
+              <span className="absolute top-4 right-4 w-6 h-6 rounded-full bg-destructive text-white text-xs font-bold flex items-center justify-center">
+                {unread.length}
+              </span>
+            )}
+          </Card>
+        </Link>
+      </div>
+
+      {unread.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Recent Updates</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 mt-2">
+              {unread.slice(0, 5).map((n: any) => (
+                <div key={n.id} className="p-4 rounded-xl border border-border bg-primary/5">
+                  <p className="font-bold text-sm">{n.title || "School Notification"}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{n.message}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{formatDate(n.createdAt)}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 // --- Main Switcher ---
 export default function Dashboard() {
   const { user } = useAuth();
@@ -181,15 +350,16 @@ export default function Dashboard() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {user.role === "pupil" ? (
         <PupilDashboard user={user} />
+      ) : user.role === "parent" ? (
+        <ParentDashboard user={user} />
       ) : user.role === "coordinator" || user.role === "head_teacher" || user.role === "senco" ? (
         <CoordinatorDashboardView />
+      ) : user.role === "teacher" || user.role === "head_of_year" || user.role === "support_staff" ? (
+        <TeacherDashboard user={user} />
       ) : (
         <div className="max-w-3xl mx-auto py-12 text-center">
-          <div className="w-24 h-24 mx-auto bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
-            <Users size={48} />
-          </div>
           <h1 className="text-3xl font-display font-bold">Welcome back, {user.firstName}</h1>
-          <p className="text-muted-foreground mt-4 text-lg">Use the navigation menu to view your class details, report incidents, or check notifications.</p>
+          <p className="text-muted-foreground mt-4 text-lg">Use the navigation menu to get started.</p>
           <Link href="/report">
             <Button size="lg" className="mt-8">Report an Incident</Button>
           </Link>

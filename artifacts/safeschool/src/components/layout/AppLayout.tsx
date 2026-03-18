@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { 
-  ShieldCheck, Home, AlertTriangle, FileText, 
+  ShieldCheck, Home, AlertTriangle, FileText, Shield,
   Bell, Settings, LogOut, Menu, X, Users, Activity
 } from "lucide-react";
 import { useListNotifications } from "@workspace/api-client-react";
@@ -69,9 +69,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     // Coordinator, Head Teacher, SENCO
     return [
       ...base,
-      { name: "Incidents", href: "/incidents", icon: AlertTriangle },
+      { name: "Report Incident", href: "/report", icon: AlertTriangle },
+      { name: "Incidents", href: "/incidents", icon: FileText },
       { name: "All Pupils", href: "/class", icon: Users },
-      { name: "Protocols", href: "/protocols", icon: FileText },
+      { name: "Protocols", href: "/protocols", icon: Shield },
       { name: "Alerts", href: "/alerts", icon: Activity },
       { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
       { name: "Settings", href: "/settings", icon: Settings },

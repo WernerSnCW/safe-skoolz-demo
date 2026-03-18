@@ -116,12 +116,14 @@ Multi-role safeguarding and incident reporting platform for schools.
 
 ### Frontend Pages
 - `/login` - Multi-tab login (pupil/staff/parent) + Quick Demo Login panel
-- `/` - Dashboard (role-specific views)
+- `/` - Dashboard (role-specific: pupil→speak up, teacher→action cards + recent incidents, parent→concerns + notifications, coordinator→stats overview)
 - `/report` - Report incident form
 - `/class` - My Class / My Year Group / All Pupils (role-scoped, with "View incidents" per pupil)
 - `/incidents` - Incidents list with filters (category, status, year, class, pupil) — accessible to coordinator, head_teacher, senco, head_of_year, teacher
-- `/incidents/:id` - Incident detail (role-scoped access)
-- `/protocols` - Protocols list
+- `/incidents/:id` - Incident detail (role-scoped access, actions: status change, open protocol)
+- `/protocols` - Protocols list (coordinator, head_teacher, senco)
+- `/protocols/new` - Open formal protocol form (pre-fills from linked incident)
+- `/protocols/:id` - Protocol detail view
 - `/alerts` - Pattern alerts
 - `/notifications` - Notifications
 - `/settings` - Edit profile (name, email for staff, avatar for pupils)

@@ -14,6 +14,8 @@ import ReportIncident from "@/pages/report-incident";
 import IncidentsList from "@/pages/incidents";
 import IncidentDetail from "@/pages/incidents/detail";
 import ProtocolsList from "@/pages/protocols";
+import NewProtocol from "@/pages/protocols/new";
+import ProtocolDetail from "@/pages/protocols/detail";
 import AlertsList from "@/pages/alerts";
 import NotificationsList from "@/pages/notifications";
 import Settings from "@/pages/settings";
@@ -63,6 +65,12 @@ function Router() {
       </Route>
       <Route path="/incidents/:id">
         {() => <ProtectedRoute component={IncidentDetail} />}
+      </Route>
+      <Route path="/protocols/new">
+        {() => <ProtectedRoute component={NewProtocol} />}
+      </Route>
+      <Route path="/protocols/:id">
+        {() => <ProtectedRoute component={ProtocolDetail} />}
       </Route>
       <Route path="/protocols">
         {() => <ProtectedRoute component={ProtocolsList} />}

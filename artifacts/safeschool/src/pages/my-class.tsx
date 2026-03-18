@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, Button } from "@/components/ui-polished";
-import { Users, GraduationCap, School, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, GraduationCap, School, ChevronDown, ChevronUp, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Pupil {
@@ -174,7 +175,14 @@ function PupilCard({ pupil }: { pupil: Pupil }) {
         {pupil.avatarValue || pupil.firstName.charAt(0)}
       </div>
       <p className="font-bold text-sm text-center">{pupil.firstName} {pupil.lastName}</p>
-      <p className="text-xs text-muted-foreground">{pupil.yearGroup} · {pupil.className}</p>
+      <p className="text-xs text-muted-foreground mb-2">{pupil.yearGroup} · {pupil.className}</p>
+      <Link
+        href={`/incidents?pupilId=${pupil.id}&pupilName=${encodeURIComponent(pupil.firstName + " " + pupil.lastName)}`}
+        className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline"
+      >
+        <ShieldAlert size={10} />
+        View incidents
+      </Link>
     </div>
   );
 }

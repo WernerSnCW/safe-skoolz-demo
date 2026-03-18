@@ -14,7 +14,7 @@ import { runPatternDetection } from "../lib/patternDetection";
 
 const router: IRouter = Router();
 
-router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teacher"), async (req, res): Promise<void> => {
+router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teacher", "senco", "head_of_year", "teacher"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const query = ListIncidentsQueryParams.safeParse(req.query);
   const page = query.success ? (query.data.page ?? 1) : 1;
@@ -27,13 +27,73 @@ router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teache
     conditions.push(eq(incidentsTable.status, query.data.status));
   }
   if (query.success && query.data.category) {
-    conditions.push(eq(incidentsTable.category, query.data.category));
+    conditions.push(sql`${incidentsTable.category} ILIKE ${"%" + query.data.category + "%"}`);
   }
   if (query.success && query.data.from) {
     conditions.push(gte(incidentsTable.incidentDate, query.data.from));
   }
   if (query.success && query.data.to) {
     conditions.push(lte(incidentsTable.incidentDate, query.data.to));
+  }
+
+  const yearGroup = req.query.yearGroup as string | undefined;
+  const className = req.query.className as string | undefined;
+  const pupilId = req.query.pupilId as string | undefined;
+
+  if (pupilId) {
+    conditions.push(
+      sql`(${incidentsTable.victimIds} @> ARRAY[${pupilId}]::uuid[] OR ${incidentsTable.perpetratorIds} @> ARRAY[${pupilId}]::uuid[] OR ${incidentsTable.reporterId} = ${pupilId})`
+    );
+  }
+
+  if (yearGroup || className) {
+    const pupilConditions: any[] = [
+      eq(usersTable.schoolId, user.schoolId),
+      eq(usersTable.role, "pupil"),
+    ];
+    if (yearGroup) pupilConditions.push(eq(usersTable.yearGroup, yearGroup));
+    if (className) pupilConditions.push(eq(usersTable.className, className));
+
+    const matchingPupils = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(and(...pupilConditions));
+
+    if (matchingPupils.length > 0) {
+      const pupilIds = matchingPupils.map((p) => p.id);
+      conditions.push(
+        sql`(${incidentsTable.victimIds} && ARRAY[${sql.join(pupilIds.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.perpetratorIds} && ARRAY[${sql.join(pupilIds.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.reporterId} = ANY(ARRAY[${sql.join(pupilIds.map(id => sql`${id}::uuid`), sql`, `)}]))`
+      );
+    } else {
+      res.json({ data: [], total: 0, page, limit });
+      return;
+    }
+  }
+
+  if (user.role === "teacher") {
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    if (me?.className) {
+      const classPupils = await db.select({ id: usersTable.id }).from(usersTable)
+        .where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil"), eq(usersTable.className, me.className)));
+      if (classPupils.length > 0) {
+        const ids = classPupils.map(p => p.id);
+        conditions.push(
+          sql`(${incidentsTable.victimIds} && ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.perpetratorIds} && ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.reporterId} = ANY(ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}]))`
+        );
+      }
+    }
+  } else if (user.role === "head_of_year") {
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    if (me?.yearGroup && !yearGroup && !className) {
+      const yearPupils = await db.select({ id: usersTable.id }).from(usersTable)
+        .where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil"), eq(usersTable.yearGroup, me.yearGroup)));
+      if (yearPupils.length > 0) {
+        const ids = yearPupils.map(p => p.id);
+        conditions.push(
+          sql`(${incidentsTable.victimIds} && ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.perpetratorIds} && ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.reporterId} = ANY(ARRAY[${sql.join(ids.map(id => sql`${id}::uuid`), sql`, `)}]))`
+        );
+      }
+    }
   }
 
   const whereClause = conditions.length === 1 ? conditions[0] : and(...conditions);
@@ -173,10 +233,33 @@ router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => 
     return;
   }
 
-  if (["pupil", "parent", "teacher", "head_of_year", "support_staff"].includes(user.role)) {
+  if (user.role === "pupil" || user.role === "parent") {
     if (incident.reporterId !== user.userId) {
       res.status(403).json({ error: "Insufficient permissions" });
       return;
+    }
+  } else if (user.role === "teacher" || user.role === "head_of_year" || user.role === "support_staff") {
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    if (me) {
+      let visiblePupilIds: string[] = [];
+      if (me.role === "teacher" && me.className) {
+        const classPupils = await db.select({ id: usersTable.id }).from(usersTable)
+          .where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil"), eq(usersTable.className, me.className)));
+        visiblePupilIds = classPupils.map(p => p.id);
+      } else if (me.role === "head_of_year" && me.yearGroup) {
+        const yearPupils = await db.select({ id: usersTable.id }).from(usersTable)
+          .where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil"), eq(usersTable.yearGroup, me.yearGroup)));
+        visiblePupilIds = yearPupils.map(p => p.id);
+      }
+      const isOwnReport = incident.reporterId === user.userId;
+      const involvesVisiblePupil = visiblePupilIds.length > 0 && (
+        (incident.victimIds || []).some(id => visiblePupilIds.includes(id)) ||
+        (incident.perpetratorIds || []).some(id => visiblePupilIds.includes(id))
+      );
+      if (!isOwnReport && !involvesVisiblePupil && visiblePupilIds.length > 0) {
+        res.status(403).json({ error: "Insufficient permissions" });
+        return;
+      }
     }
   }
 

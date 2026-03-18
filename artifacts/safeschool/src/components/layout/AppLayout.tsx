@@ -49,6 +49,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         ...base,
         { name: "Report Incident", href: "/report", icon: AlertTriangle },
         { name: user.role === "head_of_year" ? "My Year Group" : "My Class", href: "/class", icon: Users },
+        { name: "Incidents", href: "/incidents", icon: FileText },
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },

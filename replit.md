@@ -94,21 +94,33 @@ Multi-role safeguarding and incident reporting platform for schools.
 
 ### Key Features
 - Role-based login (pupil selector, staff/parent email login)
-- Incident reporting with emotional state tracking (pupils) and safeguarding checks (staff)
+- **Quick Demo Login** panel on login page with instant one-click access for every role
+- Incident reporting with emotional state tracking (multi-select), safeguarding checks (staff)
 - Escalation tiers: sexual/coercive→tier3, physical/psychological/online→tier2, others→tier1
+- **Incident filtering**: by child, year group, class, category, status
+- Victim/perpetrator names shown on incident cards
 - Pattern detection alerts (async, post-incident)
 - Safeguarding protocols management
 - Notifications with acknowledgment
 - Audit logging
 - Coordinator dashboard with stats
 
+### Demo Incidents (seed-demo)
+- 11 pre-seeded incidents across all categories and escalation tiers
+- Boy B is main perpetrator (4 incidents against Boy A — bullying pattern)
+- Girl B: neglect/safeguarding concern
+- Girl C: tier 3 sexual safeguarding case (LOPIVI)
+- Girl D: social exclusion
+- Boy D: psychological bullying (anonymous)
+- Run: `pnpm --filter @workspace/scripts run seed-demo`
+
 ### Frontend Pages
-- `/login` - Multi-tab login (pupil/staff/parent)
+- `/login` - Multi-tab login (pupil/staff/parent) + Quick Demo Login panel
 - `/` - Dashboard (role-specific views)
 - `/report` - Report incident form
-- `/class` - My Class / My Year Group / All Pupils (role-scoped visibility)
-- `/incidents` - Incidents list (coordinator/head_teacher)
-- `/incidents/:id` - Incident detail
+- `/class` - My Class / My Year Group / All Pupils (role-scoped, with "View incidents" per pupil)
+- `/incidents` - Incidents list with filters (category, status, year, class, pupil) — accessible to coordinator, head_teacher, senco, head_of_year, teacher
+- `/incidents/:id` - Incident detail (role-scoped access)
 - `/protocols` - Protocols list
 - `/alerts` - Pattern alerts
 - `/notifications` - Notifications

@@ -53,7 +53,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(14),
       location: "playground",
-      description: "Someone in my class keeps calling me names at break time. They say horrible things about how I look.",
+      description: "Someone in my class keeps calling me unkind names at break time. It makes me feel really upset and I don't want to go outside anymore.",
       victimIds: [boyA.id],
       perpetratorIds: [boyB.id],
       personInvolvedText: "Boy B",
@@ -75,7 +75,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(12),
       location: "corridor",
-      description: "I was pushed really hard in the corridor between classes. I fell down and hurt my knee.",
+      description: "Someone bumped into me on purpose in the corridor and I fell over. My knee got a scrape and it really hurt.",
       victimIds: [girlA.id],
       perpetratorIds: [boyB.id],
       personInvolvedText: "Boy B",
@@ -96,12 +96,12 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(10),
       location: "classroom",
-      description: "Witnessed sustained verbal intimidation of Boy A by Boy B during group work. Boy B was excluding Boy A from the group and making derogatory comments. This is the third time I have observed this dynamic.",
+      description: "Observed Boy B leaving Boy A out of group work on purpose and saying unkind things to him. Boy A looked upset. This is the third time I have noticed this happening between them.",
       victimIds: [boyA.id],
       perpetratorIds: [boyB.id],
       childrenSeparated: true,
       coordinatorNotified: true,
-      immediateActionTaken: "Separated pupils, spoke with both individually. Logged with coordinator.",
+      immediateActionTaken: "Moved pupils to different groups. Spoke with both children. Logged with coordinator.",
       partOfKnownPattern: true,
       status: "investigating",
     },
@@ -116,7 +116,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(8),
       location: "online",
-      description: "Someone made a group chat and they are saying really mean things about a girl in my class. They share bad pictures and videos to embarrass her.",
+      description: "Someone made a group chat and they are writing unkind things about a girl in my class. They are sharing things to upset her and it is not fair.",
       victimIds: [girlA.id],
       personInvolvedText: "Some people in Y5",
       emotionalState: "worried,confused",
@@ -136,7 +136,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(7),
       location: "playground",
-      description: "An older kid keeps taking my snack at break time and pushes me if I say no.",
+      description: "An older child keeps taking my snack at break time and won't give it back. When I ask for it back they push me away.",
       victimIds: [boyC.id],
       perpetratorIds: [boyD.id],
       personInvolvedText: "Boy D",
@@ -157,11 +157,11 @@ async function seedDemo() {
       safeguardingTrigger: true,
       incidentDate: daysAgo(6),
       location: "classroom",
-      description: "Girl B has come to school without proper clothing for the third consecutive week. She appears not to have eaten breakfast and was visibly distressed during morning registration. Previous welfare checks have raised concerns about the home environment.",
+      description: "Girl B has arrived at school without a coat or warm clothes several times this term. She seemed tired and hungry this morning. I want to make sure she is getting the support she needs.",
       victimIds: [girlB.id],
       childrenSeparated: false,
       coordinatorNotified: true,
-      immediateActionTaken: "Provided breakfast from pastoral care supplies. Notified coordinator for welfare follow-up.",
+      immediateActionTaken: "Offered breakfast from the school kitchen. Notified coordinator so we can check in with the family.",
       toldByChild: false,
       status: "escalated",
     },
@@ -171,16 +171,16 @@ async function seedDemo() {
       reporterId: coordinator.id,
       reporterRole: "coordinator",
       anonymous: false,
-      category: "sexual",
+      category: "safeguarding",
       escalationTier: 3,
       safeguardingTrigger: true,
       incidentDate: daysAgo(5),
       location: "other",
-      description: "Following referral from Teacher B, formal safeguarding investigation opened. Child disclosed concerning behaviour by an adult known to the family during a supervised conversation. LOPIVI protocol activated. External referral to Fiscalía de Menores initiated.",
+      description: "Following a referral from Teacher B, a safeguarding concern has been raised for Girl C. The school is following the correct steps to make sure she is safe and supported. LOPIVI protocol started. External support has been contacted.",
       victimIds: [girlC.id],
       childrenSeparated: true,
       coordinatorNotified: true,
-      immediateActionTaken: "Immediate safe space provided. Parents notified per protocol. External referral submitted.",
+      immediateActionTaken: "Made sure the child feels safe at school. Contacted the right people for help.",
       toldByChild: true,
       childConsentToShare: true,
       formalResponseRequested: true,
@@ -199,7 +199,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(4),
       location: "classroom",
-      description: "Nobody will let me join in at play time. They run away when I come over. It happens every day.",
+      description: "The other children won't let me join in their games at play time. They walk away when I come over. It happens nearly every day and it makes me feel lonely.",
       victimIds: [girlD.id],
       emotionalState: "sad,lonely",
       happeningToMe: true,
@@ -218,7 +218,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(3),
       location: "playground",
-      description: "Boy B pushed me again today and said he would hurt me if I told anyone. I am really scared to come to school now.",
+      description: "The same person pushed me again today at break. They told me not to tell anyone. I feel worried about coming to school.",
       victimIds: [boyA.id],
       perpetratorIds: [boyB.id],
       personInvolvedText: "Boy B",
@@ -239,7 +239,7 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(2),
       location: "classroom",
-      description: "Some kids keep laughing at me when I read out loud. They copy my voice and make fun of me. It makes me not want to come to school.",
+      description: "Some children keep laughing when I read out loud in class. They copy my voice afterwards. It makes me feel embarrassed and I don't want to read anymore.",
       victimIds: [boyD.id],
       emotionalState: "embarrassed,sad",
       happeningToMe: true,
@@ -258,12 +258,12 @@ async function seedDemo() {
       safeguardingTrigger: false,
       incidentDate: daysAgo(1),
       location: "playground",
-      description: "Pattern alert follow-up: Boy B involved in another physical altercation with Boy A at morning break. Boy B shoved Boy A against the wall. Multiple witnesses. This is the fourth recorded incident involving Boy B as perpetrator in 2 weeks. Requesting formal Convivèxit protocol activation.",
+      description: "Pattern follow-up: Boy B was involved in another incident with Boy A at morning break. Boy B pushed Boy A. Other children saw it happen. This is the fourth time this has been reported in 2 weeks. Requesting that the Convivèxit process is started.",
       victimIds: [boyA.id],
       perpetratorIds: [boyB.id],
       childrenSeparated: true,
       coordinatorNotified: true,
-      immediateActionTaken: "Boys separated. Boy B moved to different break area pending investigation.",
+      immediateActionTaken: "Children separated. Boy B given a different break area while we look into this.",
       partOfKnownPattern: true,
       formalResponseRequested: true,
       status: "investigating",
@@ -277,11 +277,11 @@ async function seedDemo() {
 
   console.log(`\nSeeded ${incidents.length} demo incidents.`);
   console.log("\nKey patterns to observe:");
-  console.log("  - Boy B appears as perpetrator in 4 incidents (bullying pattern against Boy A)");
-  console.log("  - Girl B: neglect/safeguarding concern");
-  console.log("  - Girl C: tier 3 sexual safeguarding case (LOPIVI)");
-  console.log("  - Girl D: social exclusion");
-  console.log("  - Boy D: psychological bullying (anonymous report)");
+  console.log("  - Boy B appears in 4 incidents involving Boy A (repeated unkind behaviour)");
+  console.log("  - Girl B: welfare concern (teacher noticed she needs extra support)");
+  console.log("  - Girl C: tier 3 safeguarding case (LOPIVI protocol)");
+  console.log("  - Girl D: feeling left out (exclusion)");
+  console.log("  - Boy D: being made fun of in class (anonymous report)");
   process.exit(0);
 }
 

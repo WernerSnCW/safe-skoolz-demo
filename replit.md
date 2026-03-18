@@ -106,12 +106,12 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Coordinator dashboard with stats
 
 ### Demo Incidents (seed-demo)
-- 11 pre-seeded incidents across all categories and escalation tiers
-- Boy B is main perpetrator (4 incidents against Boy A — bullying pattern)
-- Girl B: neglect/safeguarding concern
-- Girl C: tier 3 sexual safeguarding case (LOPIVI)
-- Girl D: social exclusion
-- Boy D: psychological bullying (anonymous)
+- 11 pre-seeded incidents across all categories and escalation tiers (child-friendly language throughout)
+- Boy B appears in 4 incidents involving Boy A (repeated unkind behaviour pattern)
+- Girl B: welfare concern (teacher noticed she needs extra support)
+- Girl C: tier 3 safeguarding case (LOPIVI protocol)
+- Girl D: feeling left out (exclusion)
+- Boy D: being made fun of in class (anonymous report)
 - Run: `pnpm --filter @workspace/scripts run seed-demo`
 
 ### Frontend Pages

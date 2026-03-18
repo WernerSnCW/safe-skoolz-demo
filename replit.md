@@ -152,6 +152,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `GET /case-tasks` - Protocol task list (filterable by protocolId, status)
 - `POST /case-tasks` - Create task
 - `PATCH /case-tasks/:id` - Update/complete task
+- `GET /dashboard/analytics` - Analytics data: incidents by type, year group, status, location, escalation tier, monthly trend, top victims/perpetrators (coordinator, head_teacher, senco)
 
 ## TypeScript & Composite Projects
 

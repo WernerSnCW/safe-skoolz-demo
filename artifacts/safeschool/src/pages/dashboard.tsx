@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -10,10 +11,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { 
   AlertTriangle, ShieldAlert, HeartHandshake, Bell,
-  ArrowRight, FileText, Activity, TrendingUp, Users 
+  ArrowRight, FileText, Activity, TrendingUp, Users, BarChart3, PieChart as PieChartIcon, Eye
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend, LineChart, Line
+} from "recharts";
 
 // --- Pupil Dashboard ---
 function PupilDashboard({ user }: { user: any }) {
@@ -69,10 +74,45 @@ function PupilDashboard({ user }: { user: any }) {
   );
 }
 
-// --- Coordinator Dashboard ---
+const CHART_COLORS = ["#14b8a6", "#6366f1", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981", "#ec4899", "#3b82f6", "#f97316", "#06b6d4"];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  bullying: "Bullying",
+  cyberbullying: "Cyberbullying",
+  physical: "Physical",
+  verbal: "Verbal",
+  emotional: "Emotional",
+  sexual: "Sexual",
+  neglect: "Neglect",
+  discrimination: "Discrimination",
+  safeguarding: "Safeguarding",
+  other: "Other",
+  coercive_control: "Coercive Control",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  open: "Open",
+  under_investigation: "Under Investigation",
+  resolved: "Resolved",
+  escalated: "Escalated",
+  closed: "Closed",
+};
+
 function CoordinatorDashboardView() {
+  const [activeTab, setActiveTab] = useState<"overview" | "analytics">("overview");
   const { data, isLoading } = useGetCoordinatorDashboard();
-  const { data: alerts } = useListAlerts({ limit: 5 });
+
+  const { data: analytics, isLoading: analyticsLoading } = useQuery<any>({
+    queryKey: ["/api/dashboard/analytics"],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/dashboard/analytics", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+  });
 
   if (isLoading) return <div className="animate-pulse space-y-8">
     <div className="h-10 bg-muted rounded w-64"></div>
@@ -80,96 +120,348 @@ function CoordinatorDashboardView() {
   </div>;
 
   const stats = [
-    { label: "Open Protocols", value: data?.openProtocols || 0, icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Red Alerts", value: data?.patternAlerts?.red || 0, icon: ShieldAlert, color: "text-destructive", bg: "bg-destructive/10" },
-    { label: "Amber Alerts", value: data?.patternAlerts?.amber || 0, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10" },
+    { label: "Total Incidents", value: analytics?.totalIncidents || 0, icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Open Protocols", value: data?.openProtocols || 0, icon: ShieldAlert, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { label: "Safeguarding", value: analytics?.safeguardingCount || 0, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
     { label: "Reports (Month)", value: data?.reportsThisMonth || 0, icon: Activity, color: "text-primary", bg: "bg-primary/10" },
   ];
 
+  const categoryData = (analytics?.byCategory || []).map((c: any) => ({
+    ...c,
+    name: CATEGORY_LABELS[c.name] || c.name,
+  }));
+
+  const statusData = (analytics?.byStatus || []).map((s: any) => ({
+    ...s,
+    name: STATUS_LABELS[s.name] || s.name,
+  }));
+
+  const yearGroupData = analytics?.byYearGroup || [];
+  const locationData = analytics?.byLocation || [];
+  const monthlyData = analytics?.monthlyTrend || [];
+  const topVictims = analytics?.topVictims || [];
+  const topPerpetrators = analytics?.topPerpetrators || [];
+  const escalationData = analytics?.byEscalationTier || [];
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Overview</h1>
-        <p className="text-muted-foreground mt-1">School safeguarding summary & pending actions.</p>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Safeguarding overview and incident analytics.</p>
+        </div>
+        <div className="flex gap-1 bg-muted p-1 rounded-xl">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === "overview" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === "analytics" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <BarChart3 size={14} className="inline mr-1.5 -mt-0.5" />Analytics
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s, i) => (
           <Card key={i}>
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className={`p-4 rounded-2xl ${s.bg} ${s.color}`}>
-                <s.icon size={28} />
+            <CardContent className="p-5 flex items-center gap-3">
+              <div className={`p-3 rounded-xl ${s.bg} ${s.color}`}>
+                <s.icon size={22} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-muted-foreground">{s.label}</p>
-                <p className="text-3xl font-bold text-foreground">{s.value}</p>
+                <p className="text-xs font-semibold text-muted-foreground">{s.label}</p>
+                <p className="text-2xl font-bold text-foreground">{s.value}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle>Recent Incidents</CardTitle>
-            <Link href="/incidents" className="text-primary text-sm font-bold hover:underline flex items-center">
-              View all <ArrowRight size={16} className="ml-1" />
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 mt-4">
-              {data?.recentIncidents?.slice(0, 5).map((inc) => (
-                <div key={inc.id} className="flex items-start gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors border border-border/50">
-                  <div className={`w-2 h-12 rounded-full ${inc.escalationTier === 3 ? 'bg-destructive' : inc.escalationTier === 2 ? 'bg-warning' : 'bg-secondary'}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-foreground truncate">{inc.category.replace('_', ' ')}</p>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <span>{formatDate(inc.incidentDate)}</span>
-                      <span>•</span>
-                      <span className="truncate">{inc.location || 'Unknown location'}</span>
-                    </p>
-                  </div>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-muted text-muted-foreground capitalize">
-                    {inc.status}
-                  </span>
-                </div>
-              ))}
-              {!data?.recentIncidents?.length && <p className="text-muted-foreground text-sm">No recent incidents.</p>}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle>Active Pattern Alerts</CardTitle>
-            <Link href="/alerts" className="text-primary text-sm font-bold hover:underline flex items-center">
-              Review alerts <ArrowRight size={16} className="ml-1" />
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 mt-4">
-              {data?.recentAlerts?.slice(0, 5).map((alert) => (
-                <div key={alert.id} className="flex items-start gap-4 p-4 rounded-xl bg-destructive/5 border border-destructive/20">
-                  <ShieldAlert className="text-destructive mt-1 shrink-0" size={20} />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-foreground">{alert.ruleLabel || 'Pattern Detected'}</p>
-                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-sm ${alert.alertLevel === 'red' ? 'bg-destructive text-white' : 'bg-warning text-warning-foreground'}`}>
-                        {alert.alertLevel}
+      {activeTab === "overview" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg">Recent Incidents</CardTitle>
+              <Link href="/incidents" className="text-primary text-sm font-bold hover:underline flex items-center">
+                View all <ArrowRight size={16} className="ml-1" />
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 mt-2">
+                {data?.recentIncidents?.slice(0, 5).map((inc) => (
+                  <Link key={inc.id} href={`/incidents/${inc.id}`}>
+                    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer border border-border/50">
+                      <div className={`w-2 h-10 rounded-full shrink-0 ${inc.escalationTier === 3 ? 'bg-destructive' : inc.escalationTier === 2 ? 'bg-warning' : 'bg-secondary'}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-foreground text-sm truncate capitalize">{inc.category.replace(/_/g, ' ')}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(inc.incidentDate)} &middot; {inc.location || 'Unknown'}</p>
+                      </div>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground capitalize whitespace-nowrap">
+                        {inc.status.replace(/_/g, ' ')}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Involves {alert.victimName || 'unknown student'}. Triggered {formatDate(alert.triggeredAt)}.
-                    </p>
+                  </Link>
+                ))}
+                {!data?.recentIncidents?.length && <p className="text-muted-foreground text-sm py-4 text-center">No recent incidents.</p>}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg">Active Pattern Alerts</CardTitle>
+              <Link href="/alerts" className="text-primary text-sm font-bold hover:underline flex items-center">
+                Review <ArrowRight size={16} className="ml-1" />
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 mt-2">
+                {data?.recentAlerts?.slice(0, 5).map((alert) => (
+                  <div key={alert.id} className="flex items-start gap-3 p-3 rounded-xl bg-destructive/5 border border-destructive/20">
+                    <ShieldAlert className="text-destructive mt-0.5 shrink-0" size={18} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-bold text-sm text-foreground">{alert.ruleLabel || 'Pattern Detected'}</p>
+                        <span className={`text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-sm ${alert.alertLevel === 'red' ? 'bg-destructive text-white' : 'bg-warning text-warning-foreground'}`}>
+                          {alert.alertLevel}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Involves {alert.victimName || 'unknown student'}. {formatDate(alert.triggeredAt)}.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-              {!data?.recentAlerts?.length && <p className="text-muted-foreground text-sm">No active alerts. All clear.</p>}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                ))}
+                {!data?.recentAlerts?.length && <p className="text-muted-foreground text-sm py-4 text-center">No active alerts.</p>}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === "analytics" && !analyticsLoading && analytics && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BarChart3 size={18} className="text-primary" />
+                  Incidents by Type
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {categoryData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <BarChart data={categoryData} layout="vertical" margin={{ left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={100} />
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }} />
+                      <Bar dataKey="count" fill="#14b8a6" radius={[0, 6, 6, 0]} name="Incidents" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-muted-foreground text-sm py-8 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <PieChartIcon size={18} className="text-violet-500" />
+                  Incidents by Year Group
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {yearGroupData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie data={yearGroupData} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label={({ name, count }) => `${name} (${count})`} labelLine={false}>
+                        {yearGroupData.map((_: any, i: number) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-muted-foreground text-sm py-8 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp size={18} className="text-blue-500" />
+                  Monthly Trend
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {monthlyData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))" }} />
+                      <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={2} dot={{ r: 4, fill: "#6366f1" }} name="Incidents" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-muted-foreground text-sm py-8 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <PieChartIcon size={18} className="text-amber-500" />
+                  Incident Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {statusData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie data={statusData} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} label={({ name, count }) => `${count}`}>
+                        {statusData.map((_: any, i: number) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-muted-foreground text-sm py-8 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Eye size={18} className="text-red-500" />
+                  Escalation Tiers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {escalationData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={escalationData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))" }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]} name="Incidents">
+                        {escalationData.map((_: any, i: number) => (
+                          <Cell key={i} fill={i === 0 ? "#10b981" : i === 1 ? "#f59e0b" : "#ef4444"} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-muted-foreground text-sm py-8 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BarChart3 size={18} className="text-teal-500" />
+                  Incidents by Location
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {locationData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={locationData} layout="vertical" margin={{ left: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} />
+                      <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid hsl(var(--border))" }} />
+                      <Bar dataKey="count" fill="#06b6d4" radius={[0, 6, 6, 0]} name="Incidents" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-muted-foreground text-sm py-8 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users size={18} className="text-rose-500" />
+                  Students Most Affected (Victims)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {topVictims.length > 0 ? (
+                  <div className="space-y-2 mt-2">
+                    {topVictims.map((v: any, i: number) => (
+                      <Link key={v.id} href={`/class`}>
+                        <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer border border-border/50">
+                          <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-sm font-bold dark:bg-rose-900/30 dark:text-rose-400">
+                            {i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">{v.name}</p>
+                            <p className="text-xs text-muted-foreground">{v.yearGroup} &middot; {v.className}</p>
+                          </div>
+                          <span className="text-lg font-bold text-rose-500">{v.count}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : <p className="text-muted-foreground text-sm py-4 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users size={18} className="text-amber-500" />
+                  Students with Repeated Behaviour (Perpetrators)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {topPerpetrators.length > 0 ? (
+                  <div className="space-y-2 mt-2">
+                    {topPerpetrators.map((p: any, i: number) => (
+                      <Link key={p.id} href={`/class`}>
+                        <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer border border-border/50">
+                          <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm font-bold dark:bg-amber-900/30 dark:text-amber-400">
+                            {i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">{p.name}</p>
+                            <p className="text-xs text-muted-foreground">{p.yearGroup} &middot; {p.className}</p>
+                          </div>
+                          <span className="text-lg font-bold text-amber-500">{p.count}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : <p className="text-muted-foreground text-sm py-4 text-center">No data yet.</p>}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "analytics" && analyticsLoading && (
+        <div className="animate-pulse space-y-6">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="h-80 bg-muted rounded-2xl" />
+            <div className="h-80 bg-muted rounded-2xl" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

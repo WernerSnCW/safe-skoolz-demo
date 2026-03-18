@@ -5,7 +5,7 @@ import { authMiddleware, requireRole, type JwtPayload } from "../lib/auth";
 
 const router: IRouter = Router();
 
-router.get("/dashboard/coordinator", authMiddleware, requireRole("coordinator", "head_teacher"), async (req, res): Promise<void> => {
+router.get("/dashboard/coordinator", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -141,6 +141,85 @@ router.get("/dashboard/coordinator", authMiddleware, requireRole("coordinator", 
       notes: a.notes,
       victimName: a.victimId ? (userMap[a.victimId] || null) : null,
     })),
+  });
+});
+
+router.get("/dashboard/analytics", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+
+  const allIncidents = await db.select().from(incidentsTable).where(eq(incidentsTable.schoolId, user.schoolId));
+  const allPupils = await db.select().from(usersTable).where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil")));
+
+  const byCategory: Record<string, number> = {};
+  const byStatus: Record<string, number> = {};
+  const byYearGroup: Record<string, number> = {};
+  const byLocation: Record<string, number> = {};
+  const byEscalationTier: Record<string, number> = { "1": 0, "2": 0, "3": 0 };
+  const victimCounts: Record<string, number> = {};
+  const perpetratorCounts: Record<string, number> = {};
+  const byMonth: Record<string, number> = {};
+
+  const pupilMap: Record<string, { name: string; yearGroup: string; className: string }> = {};
+  for (const p of allPupils) {
+    pupilMap[p.id] = { name: `${p.firstName} ${p.lastName}`, yearGroup: p.yearGroup || "", className: p.className || "" };
+  }
+
+  for (const inc of allIncidents) {
+    const cats = (inc.category || "").split(",").map(c => c.trim()).filter(Boolean);
+    for (const cat of cats) {
+      byCategory[cat] = (byCategory[cat] || 0) + 1;
+    }
+
+    byStatus[inc.status] = (byStatus[inc.status] || 0) + 1;
+    byEscalationTier[String(inc.escalationTier)] = (byEscalationTier[String(inc.escalationTier)] || 0) + 1;
+
+    if (inc.location) {
+      byLocation[inc.location] = (byLocation[inc.location] || 0) + 1;
+    }
+
+    for (const vid of (inc.victimIds || [])) {
+      victimCounts[vid] = (victimCounts[vid] || 0) + 1;
+      const pupil = pupilMap[vid];
+      if (pupil) {
+        const yg = pupil.yearGroup || "Unknown";
+        byYearGroup[yg] = (byYearGroup[yg] || 0) + 1;
+      }
+    }
+
+    for (const pid of (inc.perpetratorIds || [])) {
+      perpetratorCounts[pid] = (perpetratorCounts[pid] || 0) + 1;
+    }
+
+    const month = inc.incidentDate ? inc.incidentDate.substring(0, 7) : "Unknown";
+    byMonth[month] = (byMonth[month] || 0) + 1;
+  }
+
+  const topVictims = Object.entries(victimCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([id, count]) => ({ id, name: pupilMap[id]?.name || "Unknown", yearGroup: pupilMap[id]?.yearGroup || "", className: pupilMap[id]?.className || "", count }));
+
+  const topPerpetrators = Object.entries(perpetratorCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([id, count]) => ({ id, name: pupilMap[id]?.name || "Unknown", yearGroup: pupilMap[id]?.yearGroup || "", className: pupilMap[id]?.className || "", count }));
+
+  const monthlyTrend = Object.entries(byMonth)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([month, count]) => ({ month, count }));
+
+  res.json({
+    totalIncidents: allIncidents.length,
+    totalPupils: allPupils.length,
+    safeguardingCount: allIncidents.filter(i => i.safeguardingTrigger).length,
+    byCategory: Object.entries(byCategory).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
+    byStatus: Object.entries(byStatus).map(([name, count]) => ({ name, count })),
+    byYearGroup: Object.entries(byYearGroup).sort((a, b) => a[0].localeCompare(b[0])).map(([name, count]) => ({ name, count })),
+    byLocation: Object.entries(byLocation).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
+    byEscalationTier: Object.entries(byEscalationTier).map(([tier, count]) => ({ name: `Tier ${tier}`, count })),
+    topVictims,
+    topPerpetrators,
+    monthlyTrend,
   });
 });
 

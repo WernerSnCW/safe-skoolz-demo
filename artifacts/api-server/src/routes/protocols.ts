@@ -8,7 +8,7 @@ import { writeAudit } from "../lib/auditHelper";
 
 const router: IRouter = Router();
 
-router.get("/protocols", authMiddleware, requireRole("coordinator", "head_teacher"), async (req, res): Promise<void> => {
+router.get("/protocols", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const query = ListProtocolsQueryParams.safeParse(req.query);
   const page = query.success ? (query.data.page ?? 1) : 1;
@@ -40,7 +40,7 @@ router.get("/protocols", authMiddleware, requireRole("coordinator", "head_teache
   });
 });
 
-router.post("/protocols", authMiddleware, requireRole("coordinator"), async (req, res): Promise<void> => {
+router.post("/protocols", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const parsed = CreateProtocolBody.safeParse(req.body);
   if (!parsed.success) {
@@ -95,7 +95,7 @@ router.post("/protocols", authMiddleware, requireRole("coordinator"), async (req
   res.status(201).json(enriched[0]);
 });
 
-router.get("/protocols/:id", authMiddleware, requireRole("coordinator", "head_teacher"), async (req, res): Promise<void> => {
+router.get("/protocols/:id", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
@@ -205,7 +205,7 @@ router.get("/protocols/:id", authMiddleware, requireRole("coordinator", "head_te
   });
 });
 
-router.patch("/protocols/:id", authMiddleware, requireRole("coordinator"), async (req, res): Promise<void> => {
+router.patch("/protocols/:id", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 

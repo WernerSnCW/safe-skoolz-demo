@@ -67,17 +67,22 @@ Multi-role safeguarding and incident reporting platform for schools.
 
 ### Seed Data
 - 1 school: International School of Mallorca
-- 8 pupils (PIN: 1234), 5 staff (password: password123), 2 parents (password: parent123)
+- 8 pupils: Boy A–D, Girl A–D (PIN: 1234)
+- 5 staff: Coordinator A, Head Teacher A, Teacher A, Teacher B, SENCO A (password: password123)
+- 2 parents: Parent A, Parent B (password: parent123)
 - Run: `pnpm --filter @workspace/scripts run seed`
 - Compliance data: 15 annex templates, 10 referral bodies, 4 delegated role appointments
 - Run: `pnpm --filter @workspace/scripts run seed-compliance`
 
 ### Demo Credentials
-- Coordinator: coordinator@safeschool.dev / password123
-- Head Teacher: head@safeschool.dev / password123
-- Teacher: teacher@safeschool.dev / password123
-- Parent: parent.martinez@safeschool.dev / parent123
-- Pupils: Select school → select name → PIN 1234
+- Coordinator A: coordinator@safeschool.dev / password123
+- Head Teacher A: head@safeschool.dev / password123
+- Teacher A: teacher@safeschool.dev / password123
+- Teacher B: teacher2@safeschool.dev / password123
+- SENCO A: senco@safeschool.dev / password123
+- Parent A: parent.a@safeschool.dev / parent123
+- Parent B: parent.b@safeschool.dev / parent123
+- Pupils: Boy A, Boy B, Boy C, Boy D, Girl A, Girl B, Girl C, Girl D → PIN 1234
 
 ### Key Features
 - Role-based login (pupil selector, staff/parent email login)

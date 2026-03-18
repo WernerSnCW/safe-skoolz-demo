@@ -31,14 +31,14 @@ async function seed() {
   const parentPassword = await bcrypt.hash("parent123", BCRYPT_ROUNDS);
 
   const pupils = [
-    { firstName: "Lucia", lastName: "Martinez", yearGroup: "Y6", className: "6A", avatarType: "animal", avatarValue: "\uD83E\uDD8A" },
-    { firstName: "Marc", lastName: "Garcia", yearGroup: "Y6", className: "6A", avatarType: "animal", avatarValue: "\uD83D\uDC3B" },
-    { firstName: "Sofia", lastName: "Lopez", yearGroup: "Y5", className: "5B", avatarType: "animal", avatarValue: "\uD83D\uDC2C" },
-    { firstName: "Pablo", lastName: "Fernandez", yearGroup: "Y5", className: "5B", avatarType: "animal", avatarValue: "\uD83E\uDD8B" },
-    { firstName: "Mia", lastName: "Torres", yearGroup: "Y4", className: "4A", avatarType: "animal", avatarValue: "\uD83D\uDC27" },
-    { firstName: "Leo", lastName: "Ruiz", yearGroup: "Y4", className: "4A", avatarType: "animal", avatarValue: "\uD83E\uDD81" },
-    { firstName: "Emma", lastName: "Navarro", yearGroup: "Y3", className: "3A", avatarType: "animal", avatarValue: "\uD83D\uDC28" },
-    { firstName: "Daniel", lastName: "Moreno", yearGroup: "Y3", className: "3A", avatarType: "animal", avatarValue: "\uD83D\uDC3A" },
+    { firstName: "Boy", lastName: "A", yearGroup: "Y6", className: "6A", avatarType: "animal", avatarValue: "\uD83E\uDD8A" },
+    { firstName: "Boy", lastName: "B", yearGroup: "Y6", className: "6A", avatarType: "animal", avatarValue: "\uD83D\uDC3B" },
+    { firstName: "Girl", lastName: "A", yearGroup: "Y5", className: "5B", avatarType: "animal", avatarValue: "\uD83D\uDC2C" },
+    { firstName: "Girl", lastName: "B", yearGroup: "Y5", className: "5B", avatarType: "animal", avatarValue: "\uD83E\uDD8B" },
+    { firstName: "Boy", lastName: "C", yearGroup: "Y4", className: "4A", avatarType: "animal", avatarValue: "\uD83D\uDC27" },
+    { firstName: "Girl", lastName: "C", yearGroup: "Y4", className: "4A", avatarType: "animal", avatarValue: "\uD83E\uDD81" },
+    { firstName: "Boy", lastName: "D", yearGroup: "Y3", className: "3A", avatarType: "animal", avatarValue: "\uD83D\uDC28" },
+    { firstName: "Girl", lastName: "D", yearGroup: "Y3", className: "3A", avatarType: "animal", avatarValue: "\uD83D\uDC3A" },
   ];
 
   const pupilRecords = [];
@@ -63,11 +63,11 @@ async function seed() {
   }
 
   const staffMembers = [
-    { firstName: "Ana", lastName: "Coordinator", role: "coordinator", email: "coordinator@safeschool.dev" },
-    { firstName: "Carlos", lastName: "HeadTeacher", role: "head_teacher", email: "head@safeschool.dev" },
-    { firstName: "Maria", lastName: "Teacher", role: "teacher", email: "teacher@safeschool.dev", className: "6A" },
-    { firstName: "Juan", lastName: "SENCO", role: "senco", email: "senco@safeschool.dev" },
-    { firstName: "Elena", lastName: "Teacher2", role: "teacher", email: "teacher2@safeschool.dev", className: "5B" },
+    { firstName: "Coordinator", lastName: "A", role: "coordinator", email: "coordinator@safeschool.dev" },
+    { firstName: "Head Teacher", lastName: "A", role: "head_teacher", email: "head@safeschool.dev" },
+    { firstName: "Teacher", lastName: "A", role: "teacher", email: "teacher@safeschool.dev", className: "6A" },
+    { firstName: "Teacher", lastName: "B", role: "teacher", email: "teacher2@safeschool.dev", className: "5B" },
+    { firstName: "SENCO", lastName: "A", role: "senco", email: "senco@safeschool.dev" },
   ];
 
   for (const s of staffMembers) {
@@ -85,8 +85,8 @@ async function seed() {
   }
 
   const parents = [
-    { firstName: "Isabel", lastName: "Martinez", email: "parent.martinez@safeschool.dev", childIndex: 0 },
-    { firstName: "Roberto", lastName: "Garcia", email: "parent.garcia@safeschool.dev", childIndex: 1 },
+    { firstName: "Parent", lastName: "A", email: "parent.a@safeschool.dev", childIndex: 0 },
+    { firstName: "Parent", lastName: "B", email: "parent.b@safeschool.dev", childIndex: 2 },
   ];
 
   for (const p of parents) {
@@ -100,7 +100,7 @@ async function seed() {
       parentOf: [pupilRecords[p.childIndex].id],
       active: true,
     });
-    console.log(`  Parent: ${p.firstName} ${p.lastName} (password: parent123, child: ${pupils[p.childIndex].firstName})`);
+    console.log(`  Parent: ${p.firstName} ${p.lastName} (password: parent123, child: ${pupils[p.childIndex].firstName} ${pupils[p.childIndex].lastName})`);
   }
 
   console.log("\nSeed complete!");
@@ -108,8 +108,9 @@ async function seed() {
   console.log("  Coordinator: coordinator@safeschool.dev / password123");
   console.log("  Head Teacher: head@safeschool.dev / password123");
   console.log("  Teacher: teacher@safeschool.dev / password123");
-  console.log("  Parent: parent.martinez@safeschool.dev / parent123");
-  console.log("  Pupil: Select school, select pupil, PIN: 1234");
+  console.log("  SENCO: senco@safeschool.dev / password123");
+  console.log("  Parent: parent.a@safeschool.dev / parent123");
+  console.log("  Pupil: Select school, select name (Boy A, Girl A, etc.), PIN: 1234");
 
   process.exit(0);
 }

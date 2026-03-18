@@ -12,7 +12,7 @@ export const incidentsTable = pgTable("incidents", {
   reporterRole: varchar("reporter_role", { length: 20 }).notNull(),
   anonymous: boolean("anonymous").default(false).notNull(),
   submissionDevice: varchar("submission_device", { length: 20 }).default("web"),
-  category: varchar("category", { length: 30 }).notNull(),
+  category: varchar("category", { length: 200 }).notNull(),
   escalationTier: integer("escalation_tier").notNull(),
   safeguardingTrigger: boolean("safeguarding_trigger").default(false).notNull(),
   incidentDate: date("incident_date").notNull(),

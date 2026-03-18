@@ -71,7 +71,7 @@ const CATEGORIES: { id: string; label: string; pupilLabel: string; hint: string 
 
 // Reusing the OpenAPI schema rules loosely
 const formSchema = z.object({
-  category: z.string().min(1, "Please select what happened"),
+  categories: z.array(z.string()).min(1, "Please select at least one"),
   incidentDate: z.string().min(1, "Date is required"),
   location: z.string().optional(),
   personInvolvedText: z.string().optional(),
@@ -96,6 +96,7 @@ export default function ReportIncident() {
   const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      categories: [],
       happeningToMe: true,
       anonymous: false,
       incidentDate: new Date().toISOString().split('T')[0]
@@ -103,7 +104,7 @@ export default function ReportIncident() {
   });
 
   const isPupil = user?.role === "pupil";
-  const watchCategory = watch("category");
+  const watchCategories = watch("categories") || [];
   const watchEmotion = watch("emotionalState");
   const [openHint, setOpenHint] = useState<string | null>(null);
 
@@ -111,7 +112,7 @@ export default function ReportIncident() {
     try {
       await createMutation.mutateAsync({
         data: {
-          category: data.category,
+          category: data.categories.join(","),
           incidentDate: new Date(data.incidentDate).toISOString(),
           location: data.location,
           personInvolvedText: data.personInvolvedText || null,
@@ -166,15 +167,22 @@ export default function ReportIncident() {
             {/* Step 1: Category & Basic Info */}
             <div className="space-y-6">
               <div>
-                <Label className="text-base mb-3">What kind of incident is this?</Label>
+                <Label className="text-base mb-3">What kind of incident is this? <span className="text-muted-foreground font-normal text-sm">(select all that apply)</span></Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {CATEGORIES.map(cat => (
+                  {CATEGORIES.map(cat => {
+                    const isSelected = watchCategories.includes(cat.id);
+                    return (
                     <div key={cat.id} className="relative">
                       <button
                         type="button"
-                        onClick={() => setValue("category", cat.id, { shouldValidate: true })}
+                        onClick={() => {
+                          const updated = isSelected
+                            ? watchCategories.filter((c: string) => c !== cat.id)
+                            : [...watchCategories, cat.id];
+                          setValue("categories", updated, { shouldValidate: true });
+                        }}
                         className={`w-full p-3 rounded-xl border-2 text-sm font-bold transition-all ${
-                          watchCategory === cat.id 
+                          isSelected 
                             ? "border-primary bg-primary/10 text-primary" 
                             : "border-border hover:border-primary/30 text-muted-foreground"
                         }`}
@@ -202,12 +210,13 @@ export default function ReportIncident() {
                         )}
                       </AnimatePresence>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 {openHint && (
                   <div className="fixed inset-0 z-[5]" onClick={() => setOpenHint(null)} />
                 )}
-                {errors.category && <p className="text-destructive text-sm mt-2">{errors.category.message}</p>}
+                {errors.categories && <p className="text-destructive text-sm mt-2">{errors.categories.message}</p>}
               </div>
 
               {isPupil && (

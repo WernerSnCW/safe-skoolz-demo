@@ -74,11 +74,12 @@ const formSchema = z.object({
   category: z.string().min(1, "Please select what happened"),
   incidentDate: z.string().min(1, "Date is required"),
   location: z.string().optional(),
+  personInvolvedText: z.string().optional(),
+  witnessText: z.string().optional(),
   description: z.string().optional(),
   emotionalState: z.string().optional(),
   happeningToMe: z.boolean().default(true),
   anonymous: z.boolean().default(false),
-  // Adult fields
   childrenSeparated: z.boolean().optional(),
   coordinatorNotified: z.boolean().optional(),
 });
@@ -113,6 +114,8 @@ export default function ReportIncident() {
           category: data.category,
           incidentDate: new Date(data.incidentDate).toISOString(),
           location: data.location,
+          personInvolvedText: data.personInvolvedText || null,
+          witnessText: data.witnessText || null,
           description: data.description,
           emotionalState: data.emotionalState,
           happeningToMe: data.happeningToMe,
@@ -239,6 +242,29 @@ export default function ReportIncident() {
                 <div>
                   <Label htmlFor="location">Where did it happen? (optional)</Label>
                   <Input id="location" placeholder="e.g. Playground, Online..." {...register("location")} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="personInvolved">
+                    {isPupil ? "Who was involved? (optional)" : "Person involved (optional)"}
+                  </Label>
+                  <Input
+                    id="personInvolved"
+                    placeholder={isPupil ? "Their name or nickname..." : "Name of person involved..."}
+                    {...register("personInvolvedText")}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="witnesses">
+                    {isPupil ? "Did anyone else see it? (optional)" : "Witnesses (optional)"}
+                  </Label>
+                  <Input
+                    id="witnesses"
+                    placeholder={isPupil ? "Names of anyone who saw..." : "Witness names..."}
+                    {...register("witnessText")}
+                  />
                 </div>
               </div>
 

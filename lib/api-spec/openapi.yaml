@@ -756,10 +756,14 @@ components:
           type: array
           items:
             type: string
+        personInvolvedText:
+          type: ["string", "null"]
         witnessIds:
           type: array
           items:
             type: string
+        witnessText:
+          type: ["string", "null"]
         emotionalState:
           type: ["string", "null"]
         emotionalFreetext:
@@ -832,10 +836,14 @@ components:
           type: array
           items:
             type: string
+        personInvolvedText:
+          type: ["string", "null"]
         witnessIds:
           type: array
           items:
             type: string
+        witnessText:
+          type: ["string", "null"]
         emotionalState:
           type: ["string", "null"]
         emotionalFreetext:

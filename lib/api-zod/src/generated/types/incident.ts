@@ -26,7 +26,11 @@ export interface Incident {
   description?: string | null;
   victimIds?: string[];
   perpetratorIds?: string[];
+  /** @nullable */
+  personInvolvedText?: string | null;
   witnessIds?: string[];
+  /** @nullable */
+  witnessText?: string | null;
   /** @nullable */
   emotionalState?: string | null;
   /** @nullable */

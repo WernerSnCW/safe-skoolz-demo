@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { schoolsTable } from "./schools";
@@ -24,7 +24,11 @@ export const protocolsTable = pgTable("protocols", {
   protectiveMeasures: text("protective_measures").array(),
   externalReferralRequired: boolean("external_referral_required").default(false).notNull(),
   externalReferralBody: varchar("external_referral_body", { length: 100 }),
+  externalReferralBodyId: uuid("external_referral_body_id"),
   externalReferralAt: timestamp("external_referral_at", { withTimezone: true }),
+  riskFactors: jsonb("risk_factors"),
+  protectiveFactors: jsonb("protective_factors"),
+  familyContext: jsonb("family_context"),
   status: varchar("status", { length: 30 }).default("open").notNull(),
   resolutionNotes: text("resolution_notes"),
   closedAt: timestamp("closed_at", { withTimezone: true }),

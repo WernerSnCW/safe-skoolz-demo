@@ -53,13 +53,24 @@ Multi-role safeguarding and incident reporting platform for schools.
 - API server mounts all routes at `/api` prefix
 
 ### Database Schema
-- schools, users, incidents, protocols, interviews, notifications, patternAlerts, auditLog
+- Core: schools, users, incidents, protocols, interviews, notifications, patternAlerts, auditLog
+- Compliance: delegatedRoles, annexTemplates, referralBodies, caseTasks
+- Protocols extended with: riskFactors (jsonb), protectiveFactors (jsonb), familyContext (jsonb), externalReferralBodyId
 - All in `lib/db/src/schema/index.ts`
+
+### Compliance Frameworks
+- **LOPIVI**: Protection delegate governance via delegated_roles, duty to report, safe environment assessments
+- **Convivèxit 2024**: Anti-bullying protocol with 7 annexes (ANNEX-I through ANNEX-VII) in annex_templates
+- **Machista Violence (CAIB)**: Gender-based violence protocol with 4 annexes (MV-I through MV-IV), risk/protective factors on protocols
+- Delegated role types: lopivi_delegate, convivexit_coordinator, machista_protocol_lead, safeguarding_governor, senco_lead
+- Referral body types: ib_dona, municipal_services, policia_nacional, guardia_civil, fiscalia_menores, servicios_sociales, salud_mental, caib_education
 
 ### Seed Data
 - 1 school: International School of Mallorca
 - 8 pupils (PIN: 1234), 5 staff (password: password123), 2 parents (password: parent123)
 - Run: `pnpm --filter @workspace/scripts run seed`
+- Compliance data: 15 annex templates, 10 referral bodies, 4 delegated role appointments
+- Run: `pnpm --filter @workspace/scripts run seed-compliance`
 
 ### Demo Credentials
 - Coordinator: coordinator@safeschool.dev / password123
@@ -98,6 +109,18 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `GET /schools/:id/pupils` - List pupils for login (public, last names truncated)
 - `GET /schools/:id/staff` - List staff (coordinator/head_teacher only)
 - CRUD for incidents, protocols, alerts, notifications, dashboard
+- `GET /delegated-roles` - Governance appointments (coordinator/head_teacher)
+- `POST /delegated-roles` - Create appointment
+- `PATCH /delegated-roles/:id/revoke` - Revoke appointment
+- `GET /annex-templates` - List all annex templates
+- `GET /annex-templates/:framework` - Filter by framework
+- `POST /annex-templates` - Create template
+- `GET /referral-bodies` - External referral contacts
+- `POST /referral-bodies` - Add referral body
+- `PATCH /referral-bodies/:id` - Update referral body
+- `GET /case-tasks` - Protocol task list (filterable by protocolId, status)
+- `POST /case-tasks` - Create task
+- `PATCH /case-tasks/:id` - Update/complete task
 
 ## TypeScript & Composite Projects
 

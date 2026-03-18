@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label } from "@/components/ui-polished";
-import { AlertTriangle, CheckCircle2, ShieldCheck } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ShieldCheck, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const EMOTIONS = [
@@ -18,8 +18,55 @@ const EMOTIONS = [
   { id: "okay", emoji: "😐", label: "Okay" }
 ];
 
-const CATEGORIES = [
-  "physical", "verbal", "psychological", "sexual", "relational", "coercive", "property", "online"
+const CATEGORIES: { id: string; label: string; pupilLabel: string; hint: string }[] = [
+  {
+    id: "physical",
+    label: "Physical",
+    pupilLabel: "Physical",
+    hint: "Hitting, pushing, kicking, throwing things at someone, or hurting someone's body."
+  },
+  {
+    id: "verbal",
+    label: "Verbal",
+    pupilLabel: "Verbal",
+    hint: "Name-calling, shouting, saying mean or hurtful things to someone."
+  },
+  {
+    id: "psychological",
+    label: "Psychological",
+    pupilLabel: "Mind games",
+    hint: "Making someone feel scared, worthless, or confused on purpose \u2014 like threatening, ignoring, or playing mind games."
+  },
+  {
+    id: "sexual",
+    label: "Sexual",
+    pupilLabel: "Touching / sexual",
+    hint: "Unwanted touching, rude pictures, or making someone do something that feels wrong with their body."
+  },
+  {
+    id: "relational",
+    label: "Relational",
+    pupilLabel: "Leaving out",
+    hint: "Deliberately leaving someone out, spreading rumours, or turning friends against someone."
+  },
+  {
+    id: "coercive",
+    label: "Coercive",
+    pupilLabel: "Pressure / control",
+    hint: "Forcing or pressuring someone to do things they don\u2019t want to, controlling who they can talk to, or making threats."
+  },
+  {
+    id: "property",
+    label: "Property",
+    pupilLabel: "Property",
+    hint: "Breaking, stealing, hiding or damaging someone\u2019s belongings on purpose."
+  },
+  {
+    id: "online",
+    label: "Online",
+    pupilLabel: "Online",
+    hint: "Cyberbullying, mean messages, sharing private photos, or being cruel on social media or chat."
+  }
 ];
 
 // Reusing the OpenAPI schema rules loosely
@@ -57,6 +104,7 @@ export default function ReportIncident() {
   const isPupil = user?.role === "pupil";
   const watchCategory = watch("category");
   const watchEmotion = watch("emotionalState");
+  const [openHint, setOpenHint] = useState<string | null>(null);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -118,20 +166,44 @@ export default function ReportIncident() {
                 <Label className="text-base mb-3">What kind of incident is this?</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {CATEGORIES.map(cat => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setValue("category", cat, { shouldValidate: true })}
-                      className={`p-3 rounded-xl border-2 text-sm font-bold capitalize transition-all ${
-                        watchCategory === cat 
-                          ? "border-primary bg-primary/10 text-primary" 
-                          : "border-border hover:border-primary/30 text-muted-foreground"
-                      }`}
-                    >
-                      {cat.replace('_', ' ')}
-                    </button>
+                    <div key={cat.id} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setValue("category", cat.id, { shouldValidate: true })}
+                        className={`w-full p-3 rounded-xl border-2 text-sm font-bold transition-all ${
+                          watchCategory === cat.id 
+                            ? "border-primary bg-primary/10 text-primary" 
+                            : "border-border hover:border-primary/30 text-muted-foreground"
+                        }`}
+                      >
+                        {isPupil ? cat.pupilLabel : cat.label}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setOpenHint(openHint === cat.id ? null : cat.id); }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                        aria-label={`What does ${isPupil ? cat.pupilLabel : cat.label} mean?`}
+                      >
+                        <Info size={12} />
+                      </button>
+                      <AnimatePresence>
+                        {openHint === cat.id && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            className="absolute z-10 top-full mt-2 left-0 right-0 p-3 rounded-xl bg-white border border-border shadow-lg text-xs text-foreground leading-relaxed"
+                          >
+                            {cat.hint}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   ))}
                 </div>
+                {openHint && (
+                  <div className="fixed inset-0 z-[5]" onClick={() => setOpenHint(null)} />
+                )}
                 {errors.category && <p className="text-destructive text-sm mt-2">{errors.category.message}</p>}
               </div>
 

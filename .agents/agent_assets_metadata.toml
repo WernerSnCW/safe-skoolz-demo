@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "l_BoBrvgtbbEy8pe92VLl"
+uri = "file://safeschool-features-v0.2.0.json"
+type = "unspecified"
+title = "SafeSchool v0.2.0 — Complete Feature List"

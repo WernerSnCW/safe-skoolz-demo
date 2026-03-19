@@ -103,7 +103,8 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Victim/perpetrator names shown on incident cards
 - Pattern detection alerts (async, post-incident)
 - **Protocol risk assessment**: Structured risk level (low/medium/high/critical) selector, fixed-category risk factor checkboxes (8 options), protective factor checkboxes (4 options), additional risk notes. All displayed on protocol detail page with color-coded badges
-- **Teacher assessment workflow**: Staff can assess incidents (add to pupil file, write staff notes, witness statements, parent summary). Toggle to share with parents. Role-based response filtering: parents see only curated parent summary (no other children's names/details); pupils see basic info; staff see full details. Authorization: teachers can only assess incidents involving their class pupils
+- **Teacher assessment workflow**: Staff can assess incidents (add to pupil file, write staff notes, multi-witness statements with timestamps, parent summary). Toggle to share with parents. Role-based response filtering: parents see only curated parent summary (no other children's names/details); pupils see basic info; staff see full details. Authorization: teachers can only assess incidents involving their class pupils
+- **Multi-witness statements**: witnessStatements stored as JSONB array on incidents. Each entry: { witnessId?, witnessName, statement, recordedAt, recordedBy? }. Assessment panel has add/remove buttons per witness. Display shows individual statements with name, timestamp. Timestamps enable response-time KPI tracking
 - Safeguarding protocols management
 - Notifications with acknowledgment
 - Audit logging

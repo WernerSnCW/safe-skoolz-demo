@@ -372,7 +372,13 @@ export const AssessIncidentBody = zod.object({
   addedToFile: zod.boolean().optional(),
   parentVisible: zod.boolean().optional(),
   staffNotes: zod.string().nullish(),
-  witnessStatements: zod.string().nullish(),
+  witnessStatements: zod.array(zod.object({
+    witnessId: zod.string().nullish(),
+    witnessName: zod.string(),
+    statement: zod.string(),
+    recordedAt: zod.string(),
+    recordedBy: zod.string().nullish(),
+  })).nullish(),
   parentSummary: zod.string().nullish(),
   status: zod.string().optional(),
 });

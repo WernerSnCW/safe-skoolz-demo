@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users, FileText, Eye, EyeOff, Save, ClipboardList } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users, FileText, Eye, EyeOff, Save, ClipboardList, Plus, Trash2 } from "lucide-react";
 
 const STAFF_ROLES = ["teacher", "head_of_year", "coordinator", "head_teacher", "senco", "support_staff"];
 
@@ -23,13 +23,14 @@ export default function IncidentDetail() {
   const updateStatus = useUpdateIncidentStatus();
   const assessMutation = useAssessIncident();
   
+  type WitnessEntry = { witnessId?: string | null; witnessName: string; statement: string; recordedAt: string; recordedBy?: string | null };
   const [isUpdating, setIsUpdating] = useState(false);
   const [showAssessment, setShowAssessment] = useState(false);
   const [assessForm, setAssessForm] = useState({
     addedToFile: false,
     parentVisible: false,
     staffNotes: "",
-    witnessStatements: "",
+    witnessStatements: [] as WitnessEntry[],
     parentSummary: "",
   });
   const [assessmentSaved, setAssessmentSaved] = useState(false);
@@ -50,11 +51,17 @@ export default function IncidentDetail() {
 
   const openAssessmentPanel = () => {
     const i = inc as any;
+    let existingStatements: WitnessEntry[] = [];
+    if (Array.isArray(i?.witnessStatements)) {
+      existingStatements = i.witnessStatements;
+    } else if (typeof i?.witnessStatements === "string" && i.witnessStatements) {
+      existingStatements = [{ witnessName: "Unknown", statement: i.witnessStatements, recordedAt: new Date().toISOString() }];
+    }
     setAssessForm({
       addedToFile: i?.addedToFile || false,
       parentVisible: i?.parentVisible || false,
       staffNotes: i?.staffNotes || "",
-      witnessStatements: i?.witnessStatements || "",
+      witnessStatements: existingStatements,
       parentSummary: i?.parentSummary || "",
     });
     setAssessmentSaved(false);
@@ -290,16 +297,70 @@ export default function IncidentDetail() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">
                         Witness Statements
                       </label>
-                      <textarea
-                        value={assessForm.witnessStatements}
-                        onChange={(e) => setAssessForm(f => ({ ...f, witnessStatements: e.target.value }))}
-                        rows={3}
-                        placeholder="Record what witnesses said..."
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      />
+                      {assessForm.witnessStatements.map((ws, idx) => (
+                        <div key={idx} className="mb-3 p-3 rounded-lg border border-border bg-muted/20 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 flex-1">
+                              <User size={14} className="text-muted-foreground shrink-0" />
+                              <input
+                                type="text"
+                                value={ws.witnessName}
+                                onChange={(e) => {
+                                  const updated = [...assessForm.witnessStatements];
+                                  updated[idx] = { ...updated[idx], witnessName: e.target.value };
+                                  setAssessForm(f => ({ ...f, witnessStatements: updated }));
+                                }}
+                                placeholder="Witness name..."
+                                className="flex-1 h-8 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = assessForm.witnessStatements.filter((_, i) => i !== idx);
+                                setAssessForm(f => ({ ...f, witnessStatements: updated }));
+                              }}
+                              className="ml-2 p-1 text-muted-foreground hover:text-destructive transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <textarea
+                            value={ws.statement}
+                            onChange={(e) => {
+                              const updated = [...assessForm.witnessStatements];
+                              updated[idx] = { ...updated[idx], statement: e.target.value };
+                              setAssessForm(f => ({ ...f, witnessStatements: updated }));
+                            }}
+                            rows={2}
+                            placeholder="What did this witness say..."
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            <Clock size={10} className="inline mr-1" />
+                            Recorded: {ws.recordedAt ? formatDateTime(ws.recordedAt) : "Not yet saved"}
+                          </p>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAssessForm(f => ({
+                            ...f,
+                            witnessStatements: [
+                              ...f.witnessStatements,
+                              { witnessName: "", statement: "", recordedAt: new Date().toISOString(), recordedBy: user?.id || null },
+                            ],
+                          }));
+                        }}
+                        className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                      >
+                        <Plus size={14} />
+                        Add witness statement
+                      </button>
                     </div>
 
                     <div>
@@ -377,15 +438,33 @@ export default function IncidentDetail() {
         </Card>
       )}
 
-      {isStaff && incAny.witnessStatements && !showAssessment && (
+      {isStaff && incAny.witnessStatements && (Array.isArray(incAny.witnessStatements) ? incAny.witnessStatements.length > 0 : !!incAny.witnessStatements) && !showAssessment && (
         <Card>
           <CardHeader className="border-b border-border/50 bg-muted/10">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Users size={18} /> Witness Statements
+              <Users size={18} /> Witness Statements ({Array.isArray(incAny.witnessStatements) ? incAny.witnessStatements.length : 1})
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
-            <p className="whitespace-pre-wrap text-sm">{incAny.witnessStatements}</p>
+          <CardContent className="p-6 space-y-4">
+            {Array.isArray(incAny.witnessStatements) ? (
+              incAny.witnessStatements.map((ws: any, idx: number) => (
+                <div key={idx} className="p-3 rounded-lg border border-border bg-muted/10 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-bold flex items-center gap-1.5">
+                      <User size={14} className="text-primary" />
+                      {ws.witnessName || "Unknown witness"}
+                    </p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock size={10} />
+                      {ws.recordedAt ? formatDateTime(ws.recordedAt) : "No timestamp"}
+                    </p>
+                  </div>
+                  <p className="whitespace-pre-wrap text-sm pl-5">{ws.statement}</p>
+                </div>
+              ))
+            ) : (
+              <p className="whitespace-pre-wrap text-sm">{incAny.witnessStatements}</p>
+            )}
           </CardContent>
         </Card>
       )}

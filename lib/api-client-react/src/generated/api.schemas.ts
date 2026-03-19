@@ -211,7 +211,13 @@ export interface AssessIncidentBody {
   /** @nullable */
   staffNotes?: string | null;
   /** @nullable */
-  witnessStatements?: string | null;
+  witnessStatements?: Array<{
+    witnessId?: string | null;
+    witnessName: string;
+    statement: string;
+    recordedAt: string;
+    recordedBy?: string | null;
+  }> | null;
   /** @nullable */
   parentSummary?: string | null;
   status?: string;

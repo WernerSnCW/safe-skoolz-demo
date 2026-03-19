@@ -44,7 +44,7 @@ export const incidentsTable = pgTable("incidents", {
   addedToFile: boolean("added_to_file").default(false).notNull(),
   parentVisible: boolean("parent_visible").default(false).notNull(),
   staffNotes: text("staff_notes"),
-  witnessStatements: text("witness_statements"),
+  witnessStatements: jsonb("witness_statements"),
   parentSummary: text("parent_summary"),
   assessedBy: uuid("assessed_by").references(() => usersTable.id),
   assessedAt: timestamp("assessed_at", { withTimezone: true }),

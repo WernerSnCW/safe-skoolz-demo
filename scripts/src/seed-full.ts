@@ -723,7 +723,10 @@ async function seedFull() {
         assessedBy: teacherA.id,
         assessedAt: daysAgo(0),
         staffNotes: "Observed repeated pattern of unkind behaviour from Boy B towards Boy A. I have personally witnessed two incidents. Boy A is becoming reluctant to come to school. Convivèxit protocol now in progress.",
-        witnessStatements: "Girl A confirmed witnessing physical pushing on the playground. Another pupil (unnamed) also reported seeing name-calling in the corridor.",
+        witnessStatements: [
+          { witnessName: "Girl A", statement: "I saw Boy B push Boy A on the playground during break. Boy A fell over and looked really upset.", recordedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), recordedBy: "Teacher A" },
+          { witnessName: "Unknown pupil", statement: "Another pupil (unnamed) reported seeing name-calling in the corridor between lessons.", recordedAt: new Date(Date.now() - 2.5 * 24 * 60 * 60 * 1000).toISOString(), recordedBy: "Teacher A" },
+        ],
         parentSummary: "We are aware of some difficulties your child has been having with another pupil. The school is taking this seriously and has started a formal process to make sure things improve. We will keep you updated.",
         parentVisible: true,
         addedToFile: true,

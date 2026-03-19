@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, gte, lte, desc, sql, inArray } from "drizzle-orm";
-import { db, incidentsTable, usersTable, notificationsTable } from "@workspace/db";
+import { db, incidentsTable, usersTable, notificationsTable, patternAlertsTable } from "@workspace/db";
 import {
   CreateIncidentBody,
   ListIncidentsQueryParams,
@@ -259,8 +259,16 @@ router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => 
         (incident.perpetratorIds || []).some(id => visiblePupilIds.includes(id))
       );
       if (!isOwnReport && !involvesVisiblePupil && visiblePupilIds.length > 0) {
-        res.status(403).json({ error: "Insufficient permissions" });
-        return;
+        const linkedAlert = await db.select({ id: patternAlertsTable.id }).from(patternAlertsTable)
+          .where(and(
+            eq(patternAlertsTable.schoolId, user.schoolId),
+            sql`${patternAlertsTable.linkedIncidentIds} @> ARRAY[${incident.id}]::uuid[]`
+          ))
+          .limit(1);
+        if (linkedAlert.length === 0) {
+          res.status(403).json({ error: "Insufficient permissions" });
+          return;
+        }
       }
     }
   }

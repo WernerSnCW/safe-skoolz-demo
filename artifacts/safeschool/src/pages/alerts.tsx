@@ -1,8 +1,9 @@
 import { useListAlerts } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui-polished";
 import { formatDate } from "@/lib/utils";
-import { Activity, AlertTriangle, ShieldAlert } from "lucide-react";
+import { Activity, AlertTriangle, ShieldAlert, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 
 export default function AlertsList() {
   const { data, isLoading } = useListAlerts({ limit: 50 });
@@ -25,44 +26,71 @@ export default function AlertsList() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {alerts.map((alert, idx) => (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ delay: idx * 0.05 }}
-              key={alert.id}
-            >
-              <Card className={`border-l-4 ${alert.alertLevel === 'red' ? 'border-l-destructive bg-destructive/5' : 'border-l-warning bg-warning/5'}`}>
-                <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row gap-4 sm:items-center">
-                  <div className={`p-3 rounded-full shrink-0 ${alert.alertLevel === 'red' ? 'bg-destructive/20 text-destructive' : 'bg-warning/20 text-warning'}`}>
-                    {alert.alertLevel === 'red' ? <ShieldAlert size={28}/> : <AlertTriangle size={28}/>}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${alert.alertLevel === 'red' ? 'bg-destructive text-white' : 'bg-warning text-warning-foreground'}`}>
-                        {alert.alertLevel} Alert
-                      </span>
-                      <span className="text-xs text-muted-foreground">{formatDate(alert.triggeredAt)}</span>
-                    </div>
-                    <h3 className="font-bold text-lg text-foreground">{alert.ruleLabel || 'Behavior Pattern Detected'}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      System identified a pattern involving <strong>{alert.victimName || 'multiple students'}</strong>. 
-                      Linked to {alert.linkedIncidentIds?.length || 0} recent incidents.
-                    </p>
-                  </div>
+          {alerts.map((alert, idx) => {
+            const incidentIds = (alert as any).linkedIncidentIds || [];
+            const firstIncidentId = incidentIds[0];
 
-                  <div className="sm:text-right mt-2 sm:mt-0">
-                    <span className={`text-xs font-bold uppercase px-3 py-1.5 rounded-full ${
-                      alert.status === 'open' ? 'bg-background border border-border shadow-sm text-foreground' : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {alert.status}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+            return (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: idx * 0.05 }}
+                key={alert.id}
+              >
+                <Card className={`border-l-4 ${alert.alertLevel === 'red' ? 'border-l-destructive bg-destructive/5' : 'border-l-warning bg-warning/5'}`}>
+                  <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row gap-4 sm:items-center">
+                    <div className={`p-3 rounded-full shrink-0 ${alert.alertLevel === 'red' ? 'bg-destructive/20 text-destructive' : 'bg-warning/20 text-warning'}`}>
+                      {alert.alertLevel === 'red' ? <ShieldAlert size={28}/> : <AlertTriangle size={28}/>}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${alert.alertLevel === 'red' ? 'bg-destructive text-white' : 'bg-warning text-warning-foreground'}`}>
+                          {alert.alertLevel} Alert
+                        </span>
+                        <span className="text-xs text-muted-foreground">{formatDate(alert.triggeredAt)}</span>
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">{alert.ruleLabel || 'Behavior Pattern Detected'}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        System identified a pattern involving <strong>{alert.victimName || 'multiple students'}</strong>. 
+                        Linked to {incidentIds.length || 0} recent incidents.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2 mt-2 sm:mt-0">
+                      <span className={`text-xs font-bold uppercase px-3 py-1.5 rounded-full ${
+                        alert.status === 'open' ? 'bg-background border border-border shadow-sm text-foreground' : 'bg-muted text-muted-foreground'
+                      }`}>
+                        {alert.status}
+                      </span>
+                      {firstIncidentId && (
+                        <Link
+                          href={`/incidents/${firstIncidentId}`}
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline px-3 py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
+                        >
+                          <ExternalLink size={14} />
+                          View Incident
+                        </Link>
+                      )}
+                      {incidentIds.length > 1 && (
+                        <div className="flex flex-wrap gap-1 justify-end">
+                          {incidentIds.slice(1).map((id: string, i: number) => (
+                            <Link
+                              key={id}
+                              href={`/incidents/${id}`}
+                              className="text-[10px] text-primary hover:underline px-2 py-0.5 rounded bg-primary/5 hover:bg-primary/10 transition-colors"
+                            >
+                              Incident {i + 2}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
           {alerts.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
               No active pattern alerts.

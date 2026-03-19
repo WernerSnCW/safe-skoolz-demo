@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, ilike, or, sql } from "drizzle-orm";
 import { db, schoolsTable, usersTable } from "@workspace/db";
 import { authMiddleware, requireRole, type JwtPayload } from "../lib/auth";
 
@@ -184,6 +184,40 @@ router.post("/users/:id/avatar", authMiddleware, async (req, res): Promise<void>
     avatarValue: updated.avatarValue,
     avatarImageUrl: updated.avatarImageUrl,
   });
+});
+
+router.get("/pupils/search", authMiddleware, requireRole(...ALL_STAFF_ROLES, "pupil"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+  const q = (req.query.q as string || "").trim();
+  if (q.length < 1) {
+    res.json([]);
+    return;
+  }
+
+  const searchPattern = `%${q}%`;
+  const pupils = await db
+    .select({
+      id: usersTable.id,
+      firstName: usersTable.firstName,
+      lastName: usersTable.lastName,
+      yearGroup: usersTable.yearGroup,
+      className: usersTable.className,
+    })
+    .from(usersTable)
+    .where(
+      and(
+        eq(usersTable.schoolId, user.schoolId),
+        eq(usersTable.role, "pupil"),
+        or(
+          ilike(usersTable.firstName, searchPattern),
+          ilike(usersTable.lastName, searchPattern),
+          sql`concat(${usersTable.firstName}, ' ', ${usersTable.lastName}) ILIKE ${searchPattern}`
+        )
+      )
+    )
+    .limit(10);
+
+  res.json(pupils);
 });
 
 export default router;

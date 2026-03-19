@@ -4,7 +4,7 @@ import { useGetIncident, useUpdateIncidentStatus } from "@workspace/api-client-r
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { formatDateTime, formatDate } from "@/lib/utils";
-import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users } from "lucide-react";
 
 export default function IncidentDetail() {
   const [, params] = useRoute("/incidents/:id");
@@ -23,7 +23,6 @@ export default function IncidentDetail() {
         id,
         data: { status: newStatus }
       });
-      // Invalidate queries correctly
       queryClient.invalidateQueries({ queryKey: ['/api/incidents'] });
       queryClient.invalidateQueries({ queryKey: [`/api/incidents/${id}`] });
     } finally {
@@ -33,6 +32,8 @@ export default function IncidentDetail() {
 
   if (isLoading) return <div className="animate-pulse h-96 bg-muted rounded-2xl m-8"></div>;
   if (!inc) return <div className="p-8 text-center text-destructive">Incident not found</div>;
+
+  const unknownDescs: any[] = (inc as any).unknownPersonDescriptions || [];
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -181,6 +182,87 @@ export default function IncidentDetail() {
           </Card>
         </div>
       </div>
+
+      {unknownDescs.length > 0 && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users size={18} />
+              Person Descriptions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {unknownDescs.map((desc: any, i: number) => (
+                <div key={i} className="border border-border rounded-xl p-4 space-y-3 bg-muted/10">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-sm text-muted-foreground">Person {i + 1}</p>
+                    {desc.roleInIncident && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                        desc.roleInIncident === "victim" ? "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" :
+                        desc.roleInIncident === "perpetrator" ? "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400" :
+                        "bg-gray-100 text-gray-700"
+                      }`}>
+                        {desc.roleInIncident}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {desc.gender && (
+                      <div>
+                        <span className="text-muted-foreground text-xs block">Gender</span>
+                        <span className="font-medium capitalize">{desc.gender}</span>
+                      </div>
+                    )}
+                    {desc.staffOrPupil && (
+                      <div>
+                        <span className="text-muted-foreground text-xs block">Type</span>
+                        <span className="font-medium capitalize">{desc.staffOrPupil}</span>
+                      </div>
+                    )}
+                    {desc.ageRelation && (
+                      <div>
+                        <span className="text-muted-foreground text-xs block">Age</span>
+                        <span className="font-medium capitalize">{desc.ageRelation}</span>
+                      </div>
+                    )}
+                    {desc.yearGroup && (
+                      <div>
+                        <span className="text-muted-foreground text-xs block">Year group</span>
+                        <span className="font-medium">{desc.yearGroup}</span>
+                      </div>
+                    )}
+                    {desc.howMany > 1 && (
+                      <div>
+                        <span className="text-muted-foreground text-xs block">How many</span>
+                        <span className="font-medium">{desc.howMany}</span>
+                      </div>
+                    )}
+                  </div>
+                  {desc.physicalDescription && (
+                    <div>
+                      <span className="text-muted-foreground text-xs block">Physical description</span>
+                      <p className="text-sm font-medium mt-0.5">{desc.physicalDescription}</p>
+                    </div>
+                  )}
+                  {desc.friendsWith && (
+                    <div>
+                      <span className="text-muted-foreground text-xs block">Friends with</span>
+                      <p className="text-sm font-medium mt-0.5">{desc.friendsWith}</p>
+                    </div>
+                  )}
+                  {desc.whereSeenThem && (
+                    <div>
+                      <span className="text-muted-foreground text-xs block">Where seen</span>
+                      <p className="text-sm font-medium mt-0.5">{desc.whereSeenThem}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

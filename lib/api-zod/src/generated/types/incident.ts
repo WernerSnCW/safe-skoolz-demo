@@ -28,6 +28,7 @@ export interface Incident {
   perpetratorIds?: string[];
   /** @nullable */
   personInvolvedText?: string | null;
+  unknownPersonDescriptions?: any[];
   witnessIds?: string[];
   /** @nullable */
   witnessText?: string | null;

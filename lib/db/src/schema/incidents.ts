@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, date, time, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, boolean, timestamp, date, time, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { schoolsTable } from "./schools";
@@ -22,6 +22,7 @@ export const incidentsTable = pgTable("incidents", {
   victimIds: uuid("victim_ids").array(),
   perpetratorIds: uuid("perpetrator_ids").array(),
   personInvolvedText: text("person_involved_text"),
+  unknownPersonDescriptions: jsonb("unknown_person_descriptions"),
   witnessIds: uuid("witness_ids").array(),
   witnessText: text("witness_text"),
   emotionalState: varchar("emotional_state", { length: 200 }),

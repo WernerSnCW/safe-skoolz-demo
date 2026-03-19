@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCreateProtocol, useGetIncident } from "@workspace/api-client-react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label } from "@/components/ui-polished";
-import { ArrowLeft, Shield, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 const PROTOCOL_TYPES = [
   { value: "convivexit", label: "Convivèxit (Bullying)" },
@@ -19,6 +19,31 @@ const PROTOCOL_SOURCES = [
   { value: "parent_concern", label: "Parent concern" },
   { value: "pattern_alert", label: "Pattern alert" },
   { value: "external_referral", label: "External referral" },
+];
+
+const RISK_LEVELS = [
+  { value: "low", label: "Low", color: "bg-green-100 text-green-700 border-green-300", desc: "No immediate concern, monitoring recommended" },
+  { value: "medium", label: "Medium", color: "bg-amber-100 text-amber-700 border-amber-300", desc: "Some concern, intervention and review needed" },
+  { value: "high", label: "High", color: "bg-orange-100 text-orange-700 border-orange-300", desc: "Significant concern, urgent action required" },
+  { value: "critical", label: "Critical", color: "bg-red-100 text-red-700 border-red-300", desc: "Immediate danger, emergency response needed" },
+];
+
+const RISK_FACTORS = [
+  "Repeat behaviour",
+  "Power imbalance",
+  "Age gap between children",
+  "Vulnerability (SEN/disability)",
+  "Self-harm risk",
+  "Family concerns",
+  "Online element",
+  "Group involvement",
+];
+
+const PROTECTIVE_FACTORS = [
+  "Supportive family",
+  "Good peer relationships",
+  "Child is willing to talk",
+  "Already receiving external support",
 ];
 
 export default function NewProtocol() {
@@ -57,7 +82,10 @@ export default function NewProtocol() {
   const [genderBasedViolence, setGenderBasedViolence] = useState(false);
   const [context, setContext] = useState("");
   const [victimId, setVictimId] = useState("");
-  const [riskAssessment, setRiskAssessment] = useState("");
+  const [riskLevel, setRiskLevel] = useState("");
+  const [riskFactors, setRiskFactors] = useState<string[]>([]);
+  const [protectiveFactors, setProtectiveFactors] = useState<string[]>([]);
+  const [riskNotes, setRiskNotes] = useState("");
   const [externalReferralRequired, setExternalReferralRequired] = useState(false);
   const [error, setError] = useState("");
 
@@ -79,12 +107,21 @@ export default function NewProtocol() {
     }
   }, [incident]);
 
+  function toggleArrayItem(arr: string[], item: string): string[] {
+    return arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!protocolType || !victimId) {
       setError("Please select a protocol type and victim.");
+      return;
+    }
+
+    if (!riskLevel) {
+      setError("Please select a risk level.");
       return;
     }
 
@@ -97,7 +134,10 @@ export default function NewProtocol() {
           context: context || undefined,
           linkedIncidentIds: incidentId ? [incidentId] : [],
           victimId,
-          riskAssessment: riskAssessment || undefined,
+          riskLevel,
+          riskAssessment: riskNotes || undefined,
+          riskFactors,
+          protectiveFactors,
           externalReferralRequired,
         },
       });
@@ -221,13 +261,89 @@ export default function NewProtocol() {
                 className="w-full min-h-[120px] rounded-xl border border-input bg-background px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 mt-1 resize-y"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader className="border-b border-border/50">
+            <CardTitle>Risk Assessment</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div>
+              <Label className="mb-3 block">Risk Level</Label>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {RISK_LEVELS.map((rl) => (
+                  <button
+                    key={rl.value}
+                    type="button"
+                    onClick={() => setRiskLevel(rl.value)}
+                    className={`p-4 rounded-xl border-2 text-left transition-all ${
+                      riskLevel === rl.value
+                        ? `${rl.color} border-current ring-2 ring-current/20`
+                        : "border-border hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    <p className="font-bold text-sm">{rl.label}</p>
+                    <p className="text-xs mt-1 opacity-80">{rl.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div>
-              <Label>Risk Assessment</Label>
+              <Label className="mb-3 block">Risk Factors <span className="text-muted-foreground font-normal text-sm">(select all that apply)</span></Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {RISK_FACTORS.map((rf) => (
+                  <label
+                    key={rf}
+                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      riskFactors.includes(rf)
+                        ? "border-orange-300 bg-orange-50 dark:bg-orange-950/20"
+                        : "border-border hover:bg-muted/50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={riskFactors.includes(rf)}
+                      onChange={() => setRiskFactors(toggleArrayItem(riskFactors, rf))}
+                      className="w-4 h-4 rounded border-input"
+                    />
+                    <span className="text-sm font-medium">{rf}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="mb-3 block">Protective Factors <span className="text-muted-foreground font-normal text-sm">(select all that apply)</span></Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {PROTECTIVE_FACTORS.map((pf) => (
+                  <label
+                    key={pf}
+                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      protectiveFactors.includes(pf)
+                        ? "border-green-300 bg-green-50 dark:bg-green-950/20"
+                        : "border-border hover:bg-muted/50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={protectiveFactors.includes(pf)}
+                      onChange={() => setProtectiveFactors(toggleArrayItem(protectiveFactors, pf))}
+                      className="w-4 h-4 rounded border-input"
+                    />
+                    <span className="text-sm font-medium">{pf}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Additional Risk Notes (optional)</Label>
               <textarea
-                value={riskAssessment}
-                onChange={(e) => setRiskAssessment(e.target.value)}
-                placeholder="Initial risk assessment..."
+                value={riskNotes}
+                onChange={(e) => setRiskNotes(e.target.value)}
+                placeholder="Any additional observations about the risk..."
                 className="w-full min-h-[80px] rounded-xl border border-input bg-background px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 mt-1 resize-y"
               />
             </div>

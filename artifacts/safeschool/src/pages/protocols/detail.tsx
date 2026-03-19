@@ -4,6 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/u
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { ArrowLeft, Shield, FileText, AlertTriangle, Users, Calendar, CheckCircle } from "lucide-react";
 
+const RISK_LEVEL_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  low: { bg: "bg-green-100 dark:bg-green-950/30", text: "text-green-700 dark:text-green-400", label: "Low" },
+  medium: { bg: "bg-amber-100 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-400", label: "Medium" },
+  high: { bg: "bg-orange-100 dark:bg-orange-950/30", text: "text-orange-700 dark:text-orange-400", label: "High" },
+  critical: { bg: "bg-red-100 dark:bg-red-950/30", text: "text-red-700 dark:text-red-400", label: "Critical" },
+};
+
 export default function ProtocolDetail() {
   const [, params] = useRoute("/protocols/:id");
   const id = params?.id || "";
@@ -22,6 +29,7 @@ export default function ProtocolDetail() {
   );
 
   const prot = detail.protocol || detail;
+  const rlStyle = RISK_LEVEL_STYLES[prot.riskLevel || ""] || null;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -91,29 +99,6 @@ export default function ProtocolDetail() {
               </div>
             )}
 
-            {prot.riskAssessment && (
-              <div>
-                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Risk Assessment</h4>
-                <p className="bg-muted/30 p-4 rounded-xl text-foreground leading-relaxed whitespace-pre-wrap">
-                  {prot.riskAssessment}
-                </p>
-              </div>
-            )}
-
-            {prot.protectiveMeasures && prot.protectiveMeasures.length > 0 && (
-              <div>
-                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Protective Measures</h4>
-                <ul className="space-y-2">
-                  {prot.protectiveMeasures.map((m: string, i: number) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <CheckCircle size={14} className="text-primary shrink-0" />
-                      {m}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
             {prot.resolutionNotes && (
               <div>
                 <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Resolution Notes</h4>
@@ -174,6 +159,73 @@ export default function ProtocolDetail() {
           )}
         </div>
       </div>
+
+      {(rlStyle || (prot.riskFactors && prot.riskFactors.length > 0) || (prot.protectiveFactors && prot.protectiveFactors.length > 0) || prot.riskAssessment) && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10">
+            <CardTitle className="text-lg">Risk Assessment</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            {rlStyle && (
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm ${rlStyle.bg} ${rlStyle.text}`}>
+                <Shield size={16} />
+                Risk Level: {rlStyle.label}
+              </div>
+            )}
+
+            {prot.riskFactors && prot.riskFactors.length > 0 && (
+              <div>
+                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-3">Risk Factors</h4>
+                <div className="flex flex-wrap gap-2">
+                  {prot.riskFactors.map((rf: string, i: number) => (
+                    <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 text-sm font-medium dark:bg-orange-950/20 dark:border-orange-800 dark:text-orange-400">
+                      <AlertTriangle size={12} />
+                      {rf}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {prot.protectiveFactors && prot.protectiveFactors.length > 0 && (
+              <div>
+                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-3">Protective Factors</h4>
+                <div className="flex flex-wrap gap-2">
+                  {prot.protectiveFactors.map((pf: string, i: number) => (
+                    <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm font-medium dark:bg-green-950/20 dark:border-green-800 dark:text-green-400">
+                      <CheckCircle size={12} />
+                      {pf}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {prot.riskAssessment && (
+              <div>
+                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Additional Risk Notes</h4>
+                <p className="bg-muted/30 p-4 rounded-xl text-foreground leading-relaxed whitespace-pre-wrap">
+                  {prot.riskAssessment}
+                </p>
+              </div>
+            )}
+
+            {prot.protectiveMeasures && prot.protectiveMeasures.length > 0 && (
+              <div>
+                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Protective Measures</h4>
+                <ul className="space-y-2">
+                  {prot.protectiveMeasures.map((m: string, i: number) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <CheckCircle size={14} className="text-primary shrink-0" />
+                      {m}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -24,7 +24,11 @@ export interface Protocol {
   parentNotificationSent: boolean;
   interviewsRequired: boolean;
   /** @nullable */
+  riskLevel?: string | null;
+  /** @nullable */
   riskAssessment?: string | null;
+  riskFactors?: string[];
+  protectiveFactors?: string[];
   protectiveMeasures?: string[];
   externalReferralRequired: boolean;
   /** @nullable */

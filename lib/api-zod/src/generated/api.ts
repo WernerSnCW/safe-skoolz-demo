@@ -286,6 +286,7 @@ export const CreateIncidentBody = zod.object({
   description: zod.string().nullish(),
   victimIds: zod.array(zod.string()).optional(),
   perpetratorIds: zod.array(zod.string()).optional(),
+  unknownPersonDescriptions: zod.array(zod.any()).optional(),
   witnessIds: zod.array(zod.string()).optional(),
   emotionalState: zod.string().nullish(),
   emotionalFreetext: zod.string().nullish(),
@@ -469,7 +470,10 @@ export const CreateProtocolBody = zod.object({
   linkedIncidentIds: zod.array(zod.string()).optional(),
   victimId: zod.string(),
   allegedPerpetratorIds: zod.array(zod.string()).optional(),
+  riskLevel: zod.string().nullish(),
   riskAssessment: zod.string().nullish(),
+  riskFactors: zod.array(zod.string()).optional(),
+  protectiveFactors: zod.array(zod.string()).optional(),
   protectiveMeasures: zod.array(zod.string()).optional(),
   externalReferralRequired: zod
     .boolean()

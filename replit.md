@@ -96,10 +96,13 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Role-based login (pupil selector, staff/parent email login)
 - **Quick Demo Login** panel on login page with instant one-click access for every role
 - Incident reporting with emotional state tracking (multi-select), safeguarding checks (staff)
+- **Person identification**: Pupil search-as-you-type for victims/perpetrators/witnesses + "I don't know their name" toggle showing structured description builder (gender, year, age relation, staff/pupil, physical description, friends, location seen, count). Descriptions tagged with roleInIncident (victim/perpetrator)
+- **Unknown person descriptions** stored as JSONB on incidents (`unknownPersonDescriptions`), displayed on incident detail page with role badges
 - Escalation tiers: sexual/coercive→tier3, physical/psychological/online→tier2, others→tier1
 - **Incident filtering**: by child, year group, class, category, status
 - Victim/perpetrator names shown on incident cards
 - Pattern detection alerts (async, post-incident)
+- **Protocol risk assessment**: Structured risk level (low/medium/high/critical) selector, fixed-category risk factor checkboxes (8 options), protective factor checkboxes (4 options), additional risk notes. All displayed on protocol detail page with color-coded badges
 - Safeguarding protocols management
 - Notifications with acknowledgment
 - Audit logging
@@ -138,6 +141,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `GET /schools/:id/pupils` - List pupils for login (public, last names truncated)
 - `GET /schools/:id/staff` - List staff (coordinator/head_teacher only)
 - `GET /my-pupils` - Role-scoped pupil list (teacher→class, head_of_year→year, head_teacher→school, support_staff→customised)
+- `GET /pupils/search?q=name` - Search pupils by name (staff + pupil roles only, returns first/last name, yearGroup, className)
 - `PATCH /auth/profile` - Update profile (name, email, avatar)
 - CRUD for incidents, protocols, alerts, notifications, dashboard
 - `GET /delegated-roles` - Governance appointments (coordinator/head_teacher)

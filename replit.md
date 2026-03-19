@@ -121,6 +121,9 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Run: `pnpm --filter @workspace/scripts run seed-demo`
 - Historical: 44 incidents spanning 6 months (Boy A→Boy B pattern: 8 incidents, Girl A: 4 incidents, plus random incidents across all pupils, many shared with parents)
 - Run: `pnpm --filter @workspace/scripts run seed-history`
+- Full platform seed (protocols, alerts, notifications, tasks, interviews, messages, audit log — all linked to demo incidents):
+- Run: `pnpm --filter @workspace/scripts run seed-full` (requires seed-demo to be run first)
+- Creates: 2 protocols (Convivèxit + LOPIVI), 3 pattern alerts, 17 notifications, 7 case tasks, 4 interviews, 13 messages, 5 audit log entries, parent-visible assessed incidents
 
 ### Frontend Pages
 - `/login` - Multi-tab login (pupil/staff/parent) + Quick Demo Login panel

@@ -886,6 +886,18 @@ function TeacherDashboard({ user }: { user: any }) {
   const { data: incidentsData } = useListIncidents({ limit: 5 });
   const incidents = incidentsData?.data || [];
 
+  const { data: analyticsData } = useQuery<any>({
+    queryKey: ["/api/dashboard/teacher-analytics"],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/dashboard/teacher-analytics", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+  });
+
   const totalPupils = pupilData ? Object.values(pupilData.classes as Record<string, any[]>).reduce((sum: number, arr: any[]) => sum + arr.length, 0) : 0;
   const scopeLabel = pupilData?.scopeLabel || "";
   const isHoY = user.role === "head_of_year";
@@ -963,6 +975,99 @@ function TeacherDashboard({ user }: { user: any }) {
           </div>
         </CardContent>
       </Card>
+
+      {analyticsData && analyticsData.totalIncidents > 0 && (
+        <>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-display font-bold">Incident Analytics</h2>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">
+              {analyticsData.totalIncidents} incidents · {analyticsData.scopeLabel}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {analyticsData.byLocation?.length > 0 && (
+              <Card>
+                <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <MapPin size={16} /> Where Incidents Happen
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">Top locations for your {isHoY ? "year group" : "class"}</p>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <ResponsiveContainer width="100%" height={Math.max(180, analyticsData.byLocation.length * 32)}>
+                    <BarChart data={analyticsData.byLocation} layout="vertical" margin={{ left: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                      <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={95} />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#ef4444" radius={[0, 6, 6, 0]} name="Incidents" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+
+            {analyticsData.byCategory?.length > 0 && (
+              <Card>
+                <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BarChart3 size={16} /> Types of Incidents
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">Breakdown by category</p>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <ResponsiveContainer width="100%" height={Math.max(180, analyticsData.byCategory.length * 32)}>
+                    <BarChart data={analyticsData.byCategory} layout="vertical" margin={{ left: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                      <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} width={95} />
+                      <Tooltip />
+                      <Bar dataKey="count" fill="#6366f1" radius={[0, 6, 6, 0]} name="Incidents" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {analyticsData.monthlyTrend?.length > 1 && (
+            <Card>
+              <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <TrendingUp size={16} /> Monthly Trend
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">How incident volume is changing over time</p>
+              </CardHeader>
+              <CardContent className="p-4">
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={analyticsData.monthlyTrend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 10 }}
+                      tickFormatter={(m: string) => {
+                        const [, mo] = m.split("-");
+                        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                        return months[parseInt(mo) - 1];
+                      }}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                    <Tooltip
+                      labelFormatter={(m: string) => {
+                        const [y, mo] = m.split("-");
+                        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                        return `${months[parseInt(mo) - 1]} ${y}`;
+                      }}
+                    />
+                    <Line type="monotone" dataKey="count" stroke="#0d9488" strokeWidth={2} dot={{ r: 3 }} name="Incidents" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
     </div>
   );
 }

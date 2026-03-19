@@ -223,6 +223,88 @@ router.get("/dashboard/analytics", authMiddleware, requireRole("coordinator", "h
   });
 });
 
+router.get("/dashboard/teacher-analytics", authMiddleware, requireRole("teacher", "head_of_year", "support_staff"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+
+  const [me] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+  if (!me) { res.json({ byLocation: [], byCategory: [], monthlyTrend: [], totalIncidents: 0 }); return; }
+
+  let pupilConditions: any[] = [eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil")];
+  if (user.role === "head_of_year" && me.yearGroup) {
+    pupilConditions.push(eq(usersTable.yearGroup, me.yearGroup));
+  } else if (me.className) {
+    pupilConditions.push(eq(usersTable.className, me.className));
+  }
+
+  const myPupils = await db.select({ id: usersTable.id }).from(usersTable).where(and(...pupilConditions));
+  const pupilIds = myPupils.map(p => p.id);
+
+  if (pupilIds.length === 0) {
+    res.json({ byLocation: [], byCategory: [], monthlyTrend: [], totalIncidents: 0, scopeLabel: me.className || me.yearGroup || "" });
+    return;
+  }
+
+  const allIncidents = await db.select({
+    id: incidentsTable.id,
+    category: incidentsTable.category,
+    location: incidentsTable.location,
+    incidentDate: incidentsTable.incidentDate,
+    victimIds: incidentsTable.victimIds,
+    perpetratorIds: incidentsTable.perpetratorIds,
+    reporterId: incidentsTable.reporterId,
+    status: incidentsTable.status,
+  }).from(incidentsTable).where(eq(incidentsTable.schoolId, user.schoolId));
+
+  const relevant = allIncidents.filter(inc => {
+    const vids = inc.victimIds || [];
+    const pids = inc.perpetratorIds || [];
+    return vids.some((v: string) => pupilIds.includes(v)) ||
+           pids.some((p: string) => pupilIds.includes(p)) ||
+           (inc.reporterId && pupilIds.includes(inc.reporterId));
+  });
+
+  const byLocation: Record<string, number> = {};
+  const byCategory: Record<string, number> = {};
+  const byMonth: Record<string, number> = {};
+
+  const locationLabels: Record<string, string> = {
+    playground: "Playground", classroom: "Classroom", corridor: "Corridor",
+    forest: "Forest", stage_amphitheatre: "Stage", tires: "Tires area",
+    play_park: "Play park", cafeteria_buffet: "Cafeteria", picnic_area: "Picnic area",
+    eating_caravan: "Eating caravan", basketball_court: "Basketball court",
+    football_pitch: "Football pitch", library: "Library", entrance_gate: "Entrance",
+    toilets: "Toilets", cloakroom: "Cloakroom", online: "Online",
+  };
+
+  const categoryLabels: Record<string, string> = {
+    verbal: "Verbal", physical: "Physical", psychological: "Psychological",
+    online: "Online", sexual: "Sexual", exclusion: "Exclusion",
+    neglect: "Neglect", coercive: "Coercive control",
+  };
+
+  for (const inc of relevant) {
+    if (inc.location) {
+      const label = locationLabels[inc.location] || inc.location;
+      byLocation[label] = (byLocation[label] || 0) + 1;
+    }
+    const cats = (inc.category || "").split(",").map(c => c.trim()).filter(Boolean);
+    for (const cat of cats) {
+      const label = categoryLabels[cat] || cat;
+      byCategory[label] = (byCategory[label] || 0) + 1;
+    }
+    const month = inc.incidentDate ? inc.incidentDate.substring(0, 7) : "Unknown";
+    byMonth[month] = (byMonth[month] || 0) + 1;
+  }
+
+  res.json({
+    totalIncidents: relevant.length,
+    scopeLabel: user.role === "head_of_year" ? `Year ${me.yearGroup}` : `Class ${me.className}`,
+    byLocation: Object.entries(byLocation).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
+    byCategory: Object.entries(byCategory).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count })),
+    monthlyTrend: Object.entries(byMonth).sort((a, b) => a[0].localeCompare(b[0])).map(([month, count]) => ({ month, count })),
+  });
+});
+
 router.get("/dashboard/parent", authMiddleware, requireRole("parent"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
 

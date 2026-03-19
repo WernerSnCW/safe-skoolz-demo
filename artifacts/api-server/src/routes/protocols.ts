@@ -49,28 +49,47 @@ router.post("/protocols", authMiddleware, requireRole("coordinator", "head_teach
   }
 
   const data = parsed.data;
-  const referenceNumber = await generateProtocolRef();
 
-  const [protocol] = await db
-    .insert(protocolsTable)
-    .values({
-      referenceNumber,
-      schoolId: user.schoolId,
-      openedBy: user.userId,
-      protocolType: data.protocolType,
-      protocolSource: data.protocolSource || null,
-      genderBasedViolence: data.genderBasedViolence ?? false,
-      context: data.context || null,
-      linkedIncidentIds: data.linkedIncidentIds || [],
-      victimId: data.victimId,
-      allegedPerpetratorIds: data.allegedPerpetratorIds || [],
-      riskAssessment: data.riskAssessment || null,
-      protectiveMeasures: data.protectiveMeasures || [],
-      externalReferralRequired: data.externalReferralRequired ?? false,
-      externalReferralBody: data.externalReferralBody || null,
-      status: "open",
-    })
-    .returning();
+  let protocol: any;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const referenceNumber = await generateProtocolRef();
+      const [result] = await db
+        .insert(protocolsTable)
+        .values({
+          referenceNumber,
+          schoolId: user.schoolId,
+          openedBy: user.userId,
+          protocolType: data.protocolType,
+          protocolSource: data.protocolSource || null,
+          genderBasedViolence: data.genderBasedViolence ?? false,
+          context: data.context || null,
+          linkedIncidentIds: data.linkedIncidentIds || [],
+          victimId: data.victimId,
+          allegedPerpetratorIds: data.allegedPerpetratorIds || [],
+          riskAssessment: data.riskAssessment || null,
+          protectiveMeasures: data.protectiveMeasures || [],
+          externalReferralRequired: data.externalReferralRequired ?? false,
+          externalReferralBody: data.externalReferralBody || null,
+          status: "open",
+        })
+        .returning();
+      protocol = result;
+      break;
+    } catch (err: any) {
+      if (err.message?.includes("unique") || err.message?.includes("duplicate") || err.code === "23505") {
+        if (attempt === 2) {
+          console.error("Failed to generate unique protocol reference after 3 attempts", err);
+          res.status(500).json({ error: "Failed to create protocol — please try again" });
+          return;
+        }
+        continue;
+      }
+      console.error("Error creating protocol:", err);
+      res.status(500).json({ error: "Failed to create protocol" });
+      return;
+    }
+  }
 
   if (data.linkedIncidentIds && data.linkedIncidentIds.length > 0) {
     for (const incId of data.linkedIncidentIds) {
@@ -87,7 +106,7 @@ router.post("/protocols", authMiddleware, requireRole("coordinator", "head_teach
     actor: { userId: user.userId, schoolId: user.schoolId, role: user.role },
     targetType: "protocol",
     targetId: protocol.id,
-    details: { referenceNumber, protocolType: data.protocolType },
+    details: { referenceNumber: protocol.referenceNumber, protocolType: data.protocolType },
     req,
   });
 

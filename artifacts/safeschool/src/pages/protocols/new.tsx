@@ -105,7 +105,8 @@ export default function NewProtocol() {
       queryClient.invalidateQueries({ queryKey: ["/api/incidents"] });
       setLocation(`/protocols/${result.id}`);
     } catch (err: any) {
-      setError(err?.data?.error || "Failed to create protocol.");
+      const msg = err?.response?.data?.error || err?.data?.error || err?.message || "Failed to create protocol. Please try again.";
+      setError(msg);
     }
   };
 

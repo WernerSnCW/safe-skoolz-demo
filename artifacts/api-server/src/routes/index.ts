@@ -11,6 +11,7 @@ import delegatedRolesRouter from "./delegatedRoles";
 import annexTemplatesRouter from "./annexTemplates";
 import referralBodiesRouter from "./referralBodies";
 import caseTasksRouter from "./caseTasks";
+import messagesRouter from "./messages";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(delegatedRolesRouter);
 router.use(annexTemplatesRouter);
 router.use(referralBodiesRouter);
 router.use(caseTasksRouter);
+router.use(messagesRouter);
 
 export default router;

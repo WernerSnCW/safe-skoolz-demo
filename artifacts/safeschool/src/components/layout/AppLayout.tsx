@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { 
   ShieldCheck, Home, AlertTriangle, FileText, Shield,
-  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen
+  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle
 } from "lucide-react";
 import { useListNotifications } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,6 +51,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         ...base,
         { name: "Report Incident", href: "/report", icon: AlertTriangle },
         { name: user.role === "head_of_year" ? "My Year Group" : "My Class", href: "/class", icon: Users },
+        { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Incidents", href: "/incidents", icon: FileText },
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Learn", href: "/education", icon: BookOpen },
@@ -64,6 +65,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         ...base,
         { name: "Report Incident", href: "/report", icon: AlertTriangle },
         { name: "My Pupils", href: "/class", icon: Users },
+        { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Learn", href: "/education", icon: BookOpen },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
@@ -76,6 +78,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       { name: "Report Incident", href: "/report", icon: AlertTriangle },
       { name: "Incidents", href: "/incidents", icon: FileText },
       { name: "All Pupils", href: "/class", icon: Users },
+      { name: "Messages", href: "/messages", icon: MessageCircle },
       { name: "Protocols", href: "/protocols", icon: Shield },
       { name: "Alerts", href: "/alerts", icon: Activity },
       { name: "Learn", href: "/education", icon: BookOpen },

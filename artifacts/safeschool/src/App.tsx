@@ -21,6 +21,7 @@ import NotificationsList from "@/pages/notifications";
 import Settings from "@/pages/settings";
 import MyClass from "@/pages/my-class";
 import Education from "@/pages/education";
+import MessagesPage from "@/pages/messages";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,9 @@ function Router() {
       </Route>
       <Route path="/education">
         {() => <ProtectedRoute component={Education} />}
+      </Route>
+      <Route path="/messages">
+        {() => <ProtectedRoute component={MessagesPage} />}
       </Route>
       <Route path="/settings">
         {() => <ProtectedRoute component={Settings} />}

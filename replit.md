@@ -58,7 +58,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - API server mounts all routes at `/api` prefix
 
 ### Database Schema
-- Core: schools, users, incidents, protocols, interviews, notifications, patternAlerts, auditLog
+- Core: schools, users, incidents, protocols, interviews, notifications, patternAlerts, auditLog, messages
 - Compliance: delegatedRoles, annexTemplates, referralBodies, caseTasks
 - Protocols extended with: riskFactors (jsonb), protectiveFactors (jsonb), familyContext (jsonb), externalReferralBodyId
 - All in `lib/db/src/schema/index.ts`
@@ -108,6 +108,8 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Notifications with acknowledgment
 - Audit logging
 - Coordinator dashboard with stats
+- **Pupil messaging system**: Dynamic safe contacts (form tutor first, then staff), send messages with priority flags (green/amber/red), request a chat, quick phrases, urgent help button with location, message confirmation. Staff inbox at `/messages` with conversation threads and reply capability
+- Messages table: id, schoolId, senderId, recipientId, senderRole, priority (normal/important/urgent), type (message/chat_request/urgent_help), body, location, readAt, parentMessageId
 
 ### Demo Incidents (seed-demo)
 - 11 pre-seeded incidents across all categories and escalation tiers (child-friendly language throughout)
@@ -132,6 +134,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `/protocols/:id` - Protocol detail view
 - `/alerts` - Pattern alerts
 - `/notifications` - Notifications
+- `/messages` - Staff messages inbox (conversation list + threaded replies, auto-marks as read)
 - `/settings` - Edit profile (name, email for staff, avatar for pupils)
 
 ### API Routes (all under /api)
@@ -161,6 +164,11 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `POST /case-tasks` - Create task
 - `PATCH /case-tasks/:id` - Update/complete task
 - `GET /dashboard/analytics` - Analytics data: incidents by type, year group, status, location, escalation tier, monthly trend, top victims/perpetrators (coordinator, head_teacher, senco)
+- `GET /safe-contacts` - Pupil safe contacts (pupil only; returns staff sorted by form tutor first, includes displayRole, isFormTutor)
+- `POST /messages` - Send message (auth required; recipientId, body, priority, type, location)
+- `GET /messages` - List messages (auth; optional contactId filter)
+- `PATCH /messages/:id/read` - Mark message read (recipient only)
+- `GET /messages/conversations` - Staff conversations summary (staff only; groups by contact, unread counts)
 
 ## TypeScript & Composite Projects
 

@@ -10,3 +10,4 @@ export * from "./delegatedRoles";
 export * from "./annexTemplates";
 export * from "./referralBodies";
 export * from "./caseTasks";
+export * from "./messages";

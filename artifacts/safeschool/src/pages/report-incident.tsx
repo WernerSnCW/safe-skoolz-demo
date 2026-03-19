@@ -69,6 +69,27 @@ const CATEGORIES: { id: string; label: string; pupilLabel: string; hint: string 
   }
 ];
 
+const SCHOOL_LOCATIONS = [
+  "Playground",
+  "Forest",
+  "Stage / Amphitheatre",
+  "Tires",
+  "Play Park",
+  "Year 6 Block",
+  "Cafeteria / Buffet",
+  "Picnic Area",
+  "Eating Caravan",
+  "Classroom",
+  "Corridor",
+  "Toilets",
+  "Sports Hall / Gym",
+  "Library",
+  "Reception Area",
+  "Car Park / Drop-off",
+  "Online",
+  "Outside School",
+];
+
 const YEAR_GROUPS = ["Reception", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6"];
 
 interface UnknownPersonDesc {
@@ -413,6 +434,8 @@ export default function ReportIncident() {
   const [showDescribePerp, setShowDescribePerp] = useState(false);
   const [unknownVictimDescs, setUnknownVictimDescs] = useState<UnknownPersonDesc[]>([emptyDesc()]);
   const [unknownPerpDescs, setUnknownPerpDescs] = useState<UnknownPersonDesc[]>([emptyDesc()]);
+  const [locationChoice, setLocationChoice] = useState("");
+  const [customLocation, setCustomLocation] = useState("");
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -590,7 +613,38 @@ export default function ReportIncident() {
                 </div>
                 <div>
                   <Label htmlFor="location">Where did it happen? (optional)</Label>
-                  <Input id="location" placeholder="e.g. Playground, Online..." {...register("location")} />
+                  <select
+                    value={locationChoice}
+                    onChange={(e) => {
+                      setLocationChoice(e.target.value);
+                      if (e.target.value && e.target.value !== "__other__") {
+                        setValue("location", e.target.value);
+                        setCustomLocation("");
+                      } else if (e.target.value === "__other__") {
+                        setValue("location", customLocation);
+                      } else {
+                        setValue("location", "");
+                      }
+                    }}
+                    className="w-full h-12 rounded-xl border border-input bg-background px-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 mt-1"
+                  >
+                    <option value="">{isPupil ? "Pick a place..." : "Select location..."}</option>
+                    {SCHOOL_LOCATIONS.map(loc => (
+                      <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                    <option value="__other__">{isPupil ? "Somewhere else..." : "Other (type below)"}</option>
+                  </select>
+                  {locationChoice === "__other__" && (
+                    <Input
+                      className="mt-2"
+                      placeholder={isPupil ? "Tell us where it happened..." : "Describe the location..."}
+                      value={customLocation}
+                      onChange={(e) => {
+                        setCustomLocation(e.target.value);
+                        setValue("location", e.target.value);
+                      }}
+                    />
+                  )}
                 </div>
               </div>
 

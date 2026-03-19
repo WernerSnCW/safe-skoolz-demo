@@ -654,7 +654,7 @@ function ParentView() {
       });
       if (!res.ok) throw new Error("Failed");
       const data = await res.json();
-      return data.user;
+      return data;
     },
   });
 

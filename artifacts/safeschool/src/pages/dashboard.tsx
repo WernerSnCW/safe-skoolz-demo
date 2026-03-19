@@ -13,7 +13,7 @@ import {
   AlertTriangle, ShieldAlert, HeartHandshake, Bell,
   ArrowRight, FileText, Activity, TrendingUp, Users, BarChart3, PieChart as PieChartIcon, Eye,
   MapPin, Clock, Calendar, UserCheck, ChevronDown, ChevronUp, Shield,
-  MessageCircle, Send, Zap, X, CheckCircle2
+  MessageCircle, Send, Zap, X, CheckCircle2, Gauge
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1303,6 +1303,25 @@ function ParentDashboard({ user }: { user: any }) {
     },
   });
 
+  const childIds = parentData?.children?.map((c: any) => c.id) || [];
+  const { data: childBehaviourData } = useQuery({
+    queryKey: ["parent-children-behaviour", childIds],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const results: any[] = [];
+      for (const id of childIds) {
+        try {
+          const res = await fetch(`/api/behaviour/pupil/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) results.push(await res.json());
+        } catch {}
+      }
+      return results;
+    },
+    enabled: childIds.length > 0,
+  });
+
   const [showSchoolOverview, setShowSchoolOverview] = useState(false);
   const { data: schoolData } = useQuery({
     queryKey: ["/api/dashboard/school-overview"],
@@ -1446,6 +1465,70 @@ function ParentDashboard({ user }: { user: any }) {
           </Card>
         ))}
       </div>
+
+      {childBehaviourData && childBehaviourData.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-display font-bold flex items-center gap-2">
+            <Gauge size={20} className="text-primary" />
+            Behaviour Standing
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {childBehaviourData.map((child: any) => {
+              const levelColors: Record<string, string> = {
+                green: "from-green-500 to-emerald-600",
+                yellow: "from-yellow-400 to-amber-500",
+                orange: "from-orange-500 to-amber-600",
+                red: "from-red-500 to-rose-600",
+                darkred: "from-red-700 to-red-900",
+                purple: "from-purple-600 to-violet-800",
+                black: "from-gray-800 to-gray-950",
+              };
+              const bgGradient = levelColors[child.level.color] || levelColors.green;
+              return (
+                <Link key={child.pupil.id} href="/behaviour">
+                  <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    <div className={`bg-gradient-to-r ${bgGradient} p-4 text-white`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-sm">
+                            {child.pupil.firstName.charAt(0)}{child.pupil.lastName.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold">{child.pupil.firstName} {child.pupil.lastName}</p>
+                            <p className="text-sm opacity-80">{child.level.name}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">{child.totalPoints}</p>
+                          <p className="text-xs opacity-80">points</p>
+                        </div>
+                      </div>
+                    </div>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{child.level.description}</span>
+                        {child.pointsToNextLevel !== null && (
+                          <span className="text-muted-foreground font-medium">
+                            {child.pointsToNextLevel} to next level
+                          </span>
+                        )}
+                      </div>
+                      {child.nextLevel && child.pointsToNextLevel !== null && (
+                        <div className="w-full h-2 bg-muted rounded-full mt-2 overflow-hidden">
+                          <div
+                            className={`h-full bg-gradient-to-r ${bgGradient} rounded-full transition-all`}
+                            style={{ width: `${Math.min(((child.totalPoints - (child.level.minPoints || 0)) / ((child.nextLevel.minPoints || 1) - (child.level.minPoints || 0))) * 100, 100)}%` }}
+                          />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {filteredMonthly.length > 1 && (
         <Card>

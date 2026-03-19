@@ -1,20 +1,38 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
-import { useGetIncident, useUpdateIncidentStatus } from "@workspace/api-client-react";
+import { useGetIncident, useUpdateIncidentStatus, useAssessIncident } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { formatDateTime, formatDate } from "@/lib/utils";
-import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users, FileText, Eye, EyeOff, Save, ClipboardList } from "lucide-react";
+
+const STAFF_ROLES = ["teacher", "head_of_year", "coordinator", "head_teacher", "senco", "support_staff"];
 
 export default function IncidentDetail() {
   const [, params] = useRoute("/incidents/:id");
   const id = params?.id || "";
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userRole = user?.role || "";
+  const isStaff = STAFF_ROLES.includes(userRole);
+  const canAssess = ["teacher", "head_of_year", "coordinator", "head_teacher", "senco"].includes(userRole);
+  const canChangeStatus = ["coordinator", "head_teacher", "senco"].includes(userRole);
   
   const { data: inc, isLoading } = useGetIncident(id);
   const updateStatus = useUpdateIncidentStatus();
+  const assessMutation = useAssessIncident();
   
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [assessForm, setAssessForm] = useState({
+    addedToFile: false,
+    parentVisible: false,
+    staffNotes: "",
+    witnessStatements: "",
+    parentSummary: "",
+  });
+  const [assessmentSaved, setAssessmentSaved] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
     try {
@@ -30,10 +48,40 @@ export default function IncidentDetail() {
     }
   };
 
+  const openAssessmentPanel = () => {
+    const i = inc as any;
+    setAssessForm({
+      addedToFile: i?.addedToFile || false,
+      parentVisible: i?.parentVisible || false,
+      staffNotes: i?.staffNotes || "",
+      witnessStatements: i?.witnessStatements || "",
+      parentSummary: i?.parentSummary || "",
+    });
+    setAssessmentSaved(false);
+    setShowAssessment(true);
+  };
+
+  const handleSaveAssessment = async () => {
+    try {
+      setIsUpdating(true);
+      await assessMutation.mutateAsync({
+        id,
+        data: assessForm,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/incidents'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/incidents/${id}`] });
+      setAssessmentSaved(true);
+      setTimeout(() => setAssessmentSaved(false), 3000);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (isLoading) return <div className="animate-pulse h-96 bg-muted rounded-2xl m-8"></div>;
   if (!inc) return <div className="p-8 text-center text-destructive">Incident not found</div>;
 
   const unknownDescs: any[] = (inc as any).unknownPersonDescriptions || [];
+  const incAny = inc as any;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -53,9 +101,19 @@ export default function IncidentDetail() {
             }`}>
               {inc.status.replace('_', ' ')}
             </span>
+            {incAny.addedToFile && (
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                On File
+              </span>
+            )}
           </div>
           <p className="text-muted-foreground text-sm mt-1">
             Reported on {formatDateTime(inc.createdAt)}
+            {incAny.assessedByName && (
+              <span className="ml-2 text-xs">
+                — Assessed by {incAny.assessedByName} on {formatDate(incAny.assessedAt)}
+              </span>
+            )}
           </p>
         </div>
       </div>
@@ -97,74 +155,197 @@ export default function IncidentDetail() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border border-border p-4 rounded-xl">
-                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Reporter</h4>
-                <div className="flex items-center gap-2 font-semibold">
-                  <User size={16} className="text-muted-foreground"/>
-                  {inc.anonymous ? 'Anonymous' : (inc.reporterName || 'Unknown')}
-                  <span className="text-xs font-normal text-muted-foreground">({inc.reporterRole})</span>
+            {isStaff && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border border-border p-4 rounded-xl">
+                  <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Reporter</h4>
+                  <div className="flex items-center gap-2 font-semibold">
+                    <User size={16} className="text-muted-foreground"/>
+                    {inc.anonymous ? 'Anonymous' : ((inc as any).reporterName || 'Unknown')}
+                    <span className="text-xs font-normal text-muted-foreground">({(inc as any).reporterRole})</span>
+                  </div>
+                </div>
+                <div className="border border-border p-4 rounded-xl">
+                  <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Victims</h4>
+                  <div className="font-semibold">
+                    {inc.victimNames && inc.victimNames.length > 0 ? inc.victimNames.join(', ') : 'Not specified'}
+                  </div>
                 </div>
               </div>
+            )}
+
+            {userRole === "parent" && inc.victimNames && inc.victimNames.length > 0 && (
               <div className="border border-border p-4 rounded-xl">
-                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Victims</h4>
-                <div className="font-semibold">
-                  {inc.victimNames && inc.victimNames.length > 0 ? inc.victimNames.join(', ') : 'Not specified'}
-                </div>
+                <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Involved</h4>
+                <div className="font-semibold">{inc.victimNames.join(', ')}</div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         <div className="space-y-6">
-          <Card>
-            <CardHeader className="border-b border-border/50 bg-muted/10">
-              <CardTitle className="text-lg">Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-3">
-              <Button 
-                className="w-full justify-start" 
-                variant={inc.status === 'open' ? 'default' : 'outline'}
-                disabled={isUpdating || inc.status === 'open'}
-                onClick={() => handleStatusChange('open')}
-              >
-                <AlertTriangle className="mr-2" size={18}/> Mark as Open
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant={inc.status === 'under_review' ? 'default' : 'outline'}
-                disabled={isUpdating || inc.status === 'under_review'}
-                onClick={() => handleStatusChange('under_review')}
-              >
-                <Clock className="mr-2" size={18}/> Mark Under Review
-              </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant={inc.status === 'closed' ? 'secondary' : 'outline'}
-                disabled={isUpdating || inc.status === 'closed'}
-                onClick={() => handleStatusChange('closed')}
-              >
-                <CheckCircle className="mr-2" size={18}/> Close Incident
-              </Button>
+          {canChangeStatus && (
+            <Card>
+              <CardHeader className="border-b border-border/50 bg-muted/10">
+                <CardTitle className="text-lg">Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-3">
+                <Button 
+                  className="w-full justify-start" 
+                  variant={inc.status === 'open' ? 'default' : 'outline'}
+                  disabled={isUpdating || inc.status === 'open'}
+                  onClick={() => handleStatusChange('open')}
+                >
+                  <AlertTriangle className="mr-2" size={18}/> Mark as Open
+                </Button>
+                <Button 
+                  className="w-full justify-start" 
+                  variant={inc.status === 'under_review' ? 'default' : 'outline'}
+                  disabled={isUpdating || inc.status === 'under_review'}
+                  onClick={() => handleStatusChange('under_review')}
+                >
+                  <Clock className="mr-2" size={18}/> Mark Under Review
+                </Button>
+                <Button 
+                  className="w-full justify-start" 
+                  variant={inc.status === 'closed' ? 'secondary' : 'outline'}
+                  disabled={isUpdating || inc.status === 'closed'}
+                  onClick={() => handleStatusChange('closed')}
+                >
+                  <CheckCircle className="mr-2" size={18}/> Close Incident
+                </Button>
 
-              <hr className="my-4 border-border" />
-              
-              {!inc.protocolId && (
-                <Link href={`/protocols/new?incidentId=${inc.id}`}>
-                  <Button className="w-full bg-slate-900 text-white hover:bg-slate-800">
-                    Open Formal Protocol
+                <hr className="my-4 border-border" />
+                
+                {!inc.protocolId && (
+                  <Link href={`/protocols/new?incidentId=${inc.id}`}>
+                    <Button className="w-full bg-slate-900 text-white hover:bg-slate-800">
+                      Open Formal Protocol
+                    </Button>
+                  </Link>
+                )}
+                {inc.protocolId && (
+                  <Link href={`/protocols/${inc.protocolId}`}>
+                    <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/5">
+                      View Linked Protocol
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {canAssess && (
+            <Card className="border-primary/30">
+              <CardHeader className="border-b border-border/50 bg-primary/5">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ClipboardList size={18} /> Teacher Assessment
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {!showAssessment ? (
+                  <Button onClick={openAssessmentPanel} className="w-full" variant="outline">
+                    <FileText className="mr-2" size={16} />
+                    {incAny.assessedAt ? 'Edit Assessment' : 'Start Assessment'}
                   </Button>
-                </Link>
-              )}
-              {inc.protocolId && (
-                <Link href={`/protocols/${inc.protocolId}`}>
-                  <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/5">
-                    View Linked Protocol
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={assessForm.addedToFile}
+                          onChange={(e) => setAssessForm(f => ({ ...f, addedToFile: e.target.checked }))}
+                          className="rounded border-border"
+                        />
+                        <FileText size={14} />
+                        Added to pupil file
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={assessForm.parentVisible}
+                          onChange={(e) => setAssessForm(f => ({ ...f, parentVisible: e.target.checked }))}
+                          className="rounded border-border"
+                        />
+                        {assessForm.parentVisible ? <Eye size={14} /> : <EyeOff size={14} />}
+                        Share with parents
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                        Staff Notes
+                      </label>
+                      <textarea
+                        value={assessForm.staffNotes}
+                        onChange={(e) => setAssessForm(f => ({ ...f, staffNotes: e.target.value }))}
+                        rows={3}
+                        placeholder="Internal notes for staff only..."
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                        Witness Statements
+                      </label>
+                      <textarea
+                        value={assessForm.witnessStatements}
+                        onChange={(e) => setAssessForm(f => ({ ...f, witnessStatements: e.target.value }))}
+                        rows={3}
+                        placeholder="Record what witnesses said..."
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                        Summary for Parents
+                      </label>
+                      <textarea
+                        value={assessForm.parentSummary}
+                        onChange={(e) => setAssessForm(f => ({ ...f, parentSummary: e.target.value }))}
+                        rows={3}
+                        placeholder="What parents will see (no other children's names)..."
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        This summary is what parents see. Never include other children's names.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={handleSaveAssessment} 
+                        disabled={isUpdating}
+                        className="flex-1"
+                      >
+                        <Save className="mr-2" size={14} />
+                        {isUpdating ? "Saving..." : "Save Assessment"}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setShowAssessment(false)}
+                        className="text-muted-foreground"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+
+                    {assessmentSaved && (
+                      <p className="text-xs text-green-600 dark:text-green-400 font-medium text-center">
+                        Assessment saved successfully
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="bg-destructive/5 border-destructive/20">
             <CardContent className="p-4">
@@ -182,6 +363,49 @@ export default function IncidentDetail() {
           </Card>
         </div>
       </div>
+
+      {isStaff && incAny.staffNotes && !showAssessment && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileText size={18} /> Staff Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="whitespace-pre-wrap text-sm">{incAny.staffNotes}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {isStaff && incAny.witnessStatements && !showAssessment && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users size={18} /> Witness Statements
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="whitespace-pre-wrap text-sm">{incAny.witnessStatements}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {isStaff && incAny.parentSummary && !showAssessment && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10">
+            <CardTitle className="text-lg flex items-center gap-2">
+              {incAny.parentVisible ? <Eye size={18} /> : <EyeOff size={18} />}
+              Parent Summary
+              {incAny.parentVisible && (
+                <span className="text-xs font-normal text-green-600 dark:text-green-400">(Shared with parents)</span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <p className="whitespace-pre-wrap text-sm">{incAny.parentSummary}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {unknownDescs.length > 0 && (
         <Card>

@@ -41,6 +41,13 @@ export const incidentsTable = pgTable("incidents", {
   confidentialFlag: boolean("confidential_flag").default(false).notNull(),
   status: varchar("status", { length: 30 }).default("submitted").notNull(),
   protocolId: uuid("protocol_id"),
+  addedToFile: boolean("added_to_file").default(false).notNull(),
+  parentVisible: boolean("parent_visible").default(false).notNull(),
+  staffNotes: text("staff_notes"),
+  witnessStatements: text("witness_statements"),
+  parentSummary: text("parent_summary"),
+  assessedBy: uuid("assessed_by").references(() => usersTable.id),
+  assessedAt: timestamp("assessed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

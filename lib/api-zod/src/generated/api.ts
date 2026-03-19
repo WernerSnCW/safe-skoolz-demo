@@ -368,6 +368,15 @@ export const UpdateIncidentStatusBody = zod.object({
   note: zod.string().nullish(),
 });
 
+export const AssessIncidentBody = zod.object({
+  addedToFile: zod.boolean().optional(),
+  parentVisible: zod.boolean().optional(),
+  staffNotes: zod.string().nullish(),
+  witnessStatements: zod.string().nullish(),
+  parentSummary: zod.string().nullish(),
+  status: zod.string().optional(),
+});
+
 export const UpdateIncidentStatusResponse = zod.object({
   id: zod.string(),
   referenceNumber: zod.string(),

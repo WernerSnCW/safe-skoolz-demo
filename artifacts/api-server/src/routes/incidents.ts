@@ -5,6 +5,7 @@ import {
   CreateIncidentBody,
   ListIncidentsQueryParams,
   UpdateIncidentStatusBody,
+  AssessIncidentBody,
 } from "@workspace/api-zod";
 import { authMiddleware, requireRole, type JwtPayload } from "../lib/auth";
 import { determineEscalationTier, isSafeguardingTrigger } from "../lib/escalation";
@@ -103,7 +104,7 @@ router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teache
     db.select({ count: sql<number>`count(*)` }).from(incidentsTable).where(whereClause),
   ]);
 
-  const enriched = await enrichIncidents(incidents);
+  const enriched = await enrichIncidents(incidents, user.role);
 
   res.json({
     data: enriched,
@@ -216,7 +217,7 @@ router.post("/incidents", authMiddleware, async (req, res): Promise<void> => {
 
   runPatternDetection(incident).catch(console.error);
 
-  const enriched = await enrichIncidents([incident]);
+  const enriched = await enrichIncidents([incident], user.role);
   res.status(201).json(enriched[0]);
 });
 
@@ -264,7 +265,7 @@ router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => 
     }
   }
 
-  const enriched = await enrichIncidents([incident]);
+  const enriched = await enrichIncidents([incident], user.role);
   res.json(enriched[0]);
 });
 
@@ -299,11 +300,125 @@ router.patch("/incidents/:id/status", authMiddleware, requireRole("coordinator",
     req,
   });
 
-  const enriched = await enrichIncidents([incident]);
+  const enriched = await enrichIncidents([incident], user.role);
   res.json(enriched[0]);
 });
 
-async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]) {
+router.patch("/incidents/:id/assess", authMiddleware, requireRole("coordinator", "head_teacher", "senco", "teacher", "head_of_year"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+  const parsed = AssessIncidentBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(incidentsTable)
+    .where(and(eq(incidentsTable.id, id), eq(incidentsTable.schoolId, user.schoolId)));
+
+  if (!existing) {
+    res.status(404).json({ error: "Incident not found" });
+    return;
+  }
+
+  if (user.role === "teacher" || user.role === "head_of_year") {
+    const [me] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    if (me) {
+      let visiblePupilIds: string[] = [];
+      if (me.role === "teacher" && me.className) {
+        const classPupils = await db.select({ id: usersTable.id }).from(usersTable)
+          .where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil"), eq(usersTable.className, me.className)));
+        visiblePupilIds = classPupils.map(p => p.id);
+      } else if (me.role === "head_of_year" && me.yearGroup) {
+        const yearPupils = await db.select({ id: usersTable.id }).from(usersTable)
+          .where(and(eq(usersTable.schoolId, user.schoolId), eq(usersTable.role, "pupil"), eq(usersTable.yearGroup, me.yearGroup)));
+        visiblePupilIds = yearPupils.map(p => p.id);
+      }
+      const isOwnReport = existing.reporterId === user.userId;
+      const involvesVisiblePupil = visiblePupilIds.length > 0 && (
+        (existing.victimIds || []).some((vid: string) => visiblePupilIds.includes(vid)) ||
+        (existing.perpetratorIds || []).some((vid: string) => visiblePupilIds.includes(vid))
+      );
+      if (!isOwnReport && !involvesVisiblePupil && visiblePupilIds.length > 0) {
+        res.status(403).json({ error: "You can only assess incidents involving your pupils" });
+        return;
+      }
+    }
+  }
+
+  const updates: any = {
+    assessedBy: user.userId,
+    assessedAt: new Date(),
+  };
+  if (parsed.data.addedToFile !== undefined) updates.addedToFile = parsed.data.addedToFile;
+  if (parsed.data.parentVisible !== undefined) updates.parentVisible = parsed.data.parentVisible;
+  if (parsed.data.staffNotes !== undefined) updates.staffNotes = parsed.data.staffNotes;
+  if (parsed.data.witnessStatements !== undefined) updates.witnessStatements = parsed.data.witnessStatements;
+  if (parsed.data.parentSummary !== undefined) updates.parentSummary = parsed.data.parentSummary;
+  if (parsed.data.status) updates.status = parsed.data.status;
+
+  const [incident] = await db
+    .update(incidentsTable)
+    .set(updates)
+    .where(and(eq(incidentsTable.id, id), eq(incidentsTable.schoolId, user.schoolId)))
+    .returning();
+
+  if (!incident) {
+    res.status(404).json({ error: "Incident not found" });
+    return;
+  }
+
+  await writeAudit({
+    schoolId: user.schoolId,
+    eventType: "incident_assessed",
+    actor: { userId: user.userId, schoolId: user.schoolId, role: user.role },
+    targetType: "incident",
+    targetId: incident.id,
+    details: { addedToFile: incident.addedToFile, parentVisible: incident.parentVisible, status: incident.status },
+    req,
+  });
+
+  if (parsed.data.parentVisible && parsed.data.parentSummary) {
+    const victimIds = incident.victimIds || [];
+    if (victimIds.length > 0) {
+      const parents = await db
+        .select()
+        .from(usersTable)
+        .where(
+          and(
+            eq(usersTable.schoolId, user.schoolId),
+            eq(usersTable.role, "parent"),
+            eq(usersTable.active, true)
+          )
+        );
+
+      for (const parent of parents) {
+        const parentChildIds = (parent as any).childIds || [];
+        const isLinked = victimIds.some((vid: string) => parentChildIds.includes(vid));
+        if (isLinked) {
+          await db.insert(notificationsTable).values({
+            schoolId: user.schoolId,
+            recipientId: parent.id,
+            trigger: "incident_shared",
+            channel: "in_app",
+            subject: `Incident Report: ${incident.referenceNumber}`,
+            body: `A report involving your child has been reviewed. Please check your dashboard for details.`,
+            reference: incident.referenceNumber,
+            delivered: true,
+          });
+        }
+      }
+    }
+  }
+
+  const enriched = await enrichIncidents([incident], user.role);
+  res.json(enriched[0]);
+});
+
+async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[], viewerRole?: string) {
   if (incidents.length === 0) return [];
 
   const userIds = new Set<string>();
@@ -311,6 +426,7 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
     if (inc.reporterId) userIds.add(inc.reporterId);
     if (inc.victimIds) inc.victimIds.forEach((id) => userIds.add(id));
     if (inc.perpetratorIds) inc.perpetratorIds.forEach((id) => userIds.add(id));
+    if (inc.assessedBy) userIds.add(inc.assessedBy);
   }
 
   let userMap: Record<string, string> = {};
@@ -324,47 +440,88 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
     }
   }
 
-  return incidents.map((inc) => ({
-    id: inc.id,
-    referenceNumber: inc.referenceNumber,
-    schoolId: inc.schoolId,
-    reporterId: inc.reporterId,
-    reporterRole: inc.reporterRole,
-    anonymous: inc.anonymous,
-    category: inc.category,
-    escalationTier: inc.escalationTier,
-    safeguardingTrigger: inc.safeguardingTrigger,
-    incidentDate: inc.incidentDate,
-    incidentTime: inc.incidentTime,
-    location: inc.location,
-    description: inc.description,
-    victimIds: inc.victimIds || [],
-    perpetratorIds: inc.perpetratorIds || [],
-    personInvolvedText: inc.personInvolvedText,
-    unknownPersonDescriptions: inc.unknownPersonDescriptions as any[] || [],
-    witnessIds: inc.witnessIds || [],
-    witnessText: inc.witnessText,
-    emotionalState: inc.emotionalState,
-    emotionalFreetext: inc.emotionalFreetext,
-    happeningToMe: inc.happeningToMe,
-    happeningToSomeoneElse: inc.happeningToSomeoneElse,
-    iSawIt: inc.iSawIt,
-    childrenSeparated: inc.childrenSeparated,
-    coordinatorNotified: inc.coordinatorNotified,
-    immediateActionTaken: inc.immediateActionTaken,
-    partOfKnownPattern: inc.partOfKnownPattern,
-    toldByChild: inc.toldByChild,
-    childConsentToShare: inc.childConsentToShare,
-    formalResponseRequested: inc.formalResponseRequested,
-    requestExternalReferral: inc.requestExternalReferral,
-    confidentialFlag: inc.confidentialFlag,
-    status: inc.status,
-    protocolId: inc.protocolId,
-    createdAt: inc.createdAt.toISOString(),
-    reporterName: inc.reporterId ? (userMap[inc.reporterId] || null) : null,
-    victimNames: (inc.victimIds || []).map((id) => userMap[id] || "Unknown"),
-    perpetratorNames: (inc.perpetratorIds || []).map((id) => userMap[id] || "Unknown"),
-  }));
+  const isParent = viewerRole === "parent";
+  const isPupil = viewerRole === "pupil";
+  const isFullAccess = ["coordinator", "head_teacher", "senco"].includes(viewerRole || "");
+
+  return incidents.map((inc) => {
+    const base: any = {
+      id: inc.id,
+      referenceNumber: inc.referenceNumber,
+      schoolId: inc.schoolId,
+      category: inc.category,
+      escalationTier: inc.escalationTier,
+      safeguardingTrigger: inc.safeguardingTrigger,
+      incidentDate: inc.incidentDate,
+      location: inc.location,
+      status: inc.status,
+      protocolId: inc.protocolId,
+      createdAt: inc.createdAt.toISOString(),
+      addedToFile: inc.addedToFile,
+      parentVisible: inc.parentVisible,
+    };
+
+    if (isParent) {
+      base.description = inc.parentSummary || null;
+      base.reporterRole = inc.reporterRole;
+      base.anonymous = inc.anonymous;
+      base.victimNames = ["Your child"];
+      base.perpetratorNames = [];
+      base.reporterName = null;
+      base.victimIds = [];
+      base.perpetratorIds = [];
+    } else if (isPupil) {
+      base.reporterId = inc.reporterId;
+      base.reporterRole = inc.reporterRole;
+      base.anonymous = inc.anonymous;
+      base.description = inc.description;
+      base.emotionalState = inc.emotionalState;
+      base.reporterName = inc.reporterId ? (userMap[inc.reporterId] || null) : null;
+      base.victimNames = (inc.victimIds || []).map((id) => userMap[id] || "Unknown");
+      base.perpetratorNames = [];
+      base.victimIds = inc.victimIds || [];
+      base.perpetratorIds = [];
+    } else {
+      base.reporterId = inc.reporterId;
+      base.reporterRole = inc.reporterRole;
+      base.anonymous = inc.anonymous;
+      base.incidentTime = inc.incidentTime;
+      base.description = inc.description;
+      base.victimIds = inc.victimIds || [];
+      base.perpetratorIds = inc.perpetratorIds || [];
+      base.personInvolvedText = inc.personInvolvedText;
+      base.unknownPersonDescriptions = inc.unknownPersonDescriptions as any[] || [];
+      base.witnessIds = inc.witnessIds || [];
+      base.witnessText = inc.witnessText;
+      base.emotionalState = inc.emotionalState;
+      base.emotionalFreetext = inc.emotionalFreetext;
+      base.happeningToMe = inc.happeningToMe;
+      base.happeningToSomeoneElse = inc.happeningToSomeoneElse;
+      base.iSawIt = inc.iSawIt;
+      base.childrenSeparated = inc.childrenSeparated;
+      base.coordinatorNotified = inc.coordinatorNotified;
+      base.immediateActionTaken = inc.immediateActionTaken;
+      base.partOfKnownPattern = inc.partOfKnownPattern;
+      base.toldByChild = inc.toldByChild;
+      base.childConsentToShare = inc.childConsentToShare;
+      base.formalResponseRequested = inc.formalResponseRequested;
+      base.requestExternalReferral = inc.requestExternalReferral;
+      base.confidentialFlag = inc.confidentialFlag;
+      base.staffNotes = inc.staffNotes;
+      base.witnessStatements = inc.witnessStatements;
+      base.parentSummary = inc.parentSummary;
+      base.assessedBy = inc.assessedBy;
+      base.assessedAt = inc.assessedAt ? inc.assessedAt.toISOString() : null;
+      base.reporterName = inc.reporterId ? (userMap[inc.reporterId] || null) : null;
+      base.victimNames = (inc.victimIds || []).map((id) => userMap[id] || "Unknown");
+      base.perpetratorNames = (inc.perpetratorIds || []).map((id) => userMap[id] || "Unknown");
+      if (inc.assessedBy && userMap[inc.assessedBy]) {
+        base.assessedByName = userMap[inc.assessedBy];
+      }
+    }
+
+    return base;
+  });
 }
 
 export default router;

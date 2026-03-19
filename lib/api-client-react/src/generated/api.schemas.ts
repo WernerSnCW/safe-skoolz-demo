@@ -205,6 +205,18 @@ export interface UpdateIncidentStatusBody {
   note?: string | null;
 }
 
+export interface AssessIncidentBody {
+  addedToFile?: boolean;
+  parentVisible?: boolean;
+  /** @nullable */
+  staffNotes?: string | null;
+  /** @nullable */
+  witnessStatements?: string | null;
+  /** @nullable */
+  parentSummary?: string | null;
+  status?: string;
+}
+
 export interface CreateProtocolBody {
   protocolType: string;
   /** @nullable */

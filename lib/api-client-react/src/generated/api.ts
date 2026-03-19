@@ -45,6 +45,7 @@ import type {
   StaffLoginBody,
   UpdateAlertBody,
   UpdateAvatarBody,
+  AssessIncidentBody,
   UpdateIncidentStatusBody,
   UpdateProtocolBody,
   User,
@@ -1187,6 +1188,86 @@ export const useUpdateIncidentStatus = <
   TContext
 > => {
   return useMutation(getUpdateIncidentStatusMutationOptions(options));
+};
+
+export const getAssessIncidentUrl = (id: string) => {
+  return `/api/incidents/${id}/assess`;
+};
+
+export const assessIncident = async (
+  id: string,
+  assessIncidentBody: AssessIncidentBody,
+  options?: RequestInit,
+): Promise<Incident> => {
+  return customFetch<Incident>(getAssessIncidentUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(assessIncidentBody),
+  });
+};
+
+export const getAssessIncidentMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof assessIncident>>,
+    TError,
+    { id: string; data: BodyType<AssessIncidentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof assessIncident>>,
+  TError,
+  { id: string; data: BodyType<AssessIncidentBody> },
+  TContext
+> => {
+  const mutationKey = ["assessIncident"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof assessIncident>>,
+    { id: string; data: BodyType<AssessIncidentBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+    return assessIncident(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AssessIncidentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof assessIncident>>
+>;
+export type AssessIncidentMutationBody = BodyType<AssessIncidentBody>;
+export type AssessIncidentMutationError = ErrorType<unknown>;
+
+export const useAssessIncident = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof assessIncident>>,
+    TError,
+    { id: string; data: BodyType<AssessIncidentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof assessIncident>>,
+  TError,
+  { id: string; data: BodyType<AssessIncidentBody> },
+  TContext
+> => {
+  return useMutation(getAssessIncidentMutationOptions(options));
 };
 
 /**

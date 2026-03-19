@@ -103,6 +103,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Victim/perpetrator names shown on incident cards
 - Pattern detection alerts (async, post-incident)
 - **Protocol risk assessment**: Structured risk level (low/medium/high/critical) selector, fixed-category risk factor checkboxes (8 options), protective factor checkboxes (4 options), additional risk notes. All displayed on protocol detail page with color-coded badges
+- **Teacher assessment workflow**: Staff can assess incidents (add to pupil file, write staff notes, witness statements, parent summary). Toggle to share with parents. Role-based response filtering: parents see only curated parent summary (no other children's names/details); pupils see basic info; staff see full details. Authorization: teachers can only assess incidents involving their class pupils
 - Safeguarding protocols management
 - Notifications with acknowledgment
 - Audit logging
@@ -123,7 +124,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `/report` - Report incident form
 - `/class` - My Class / My Year Group / All Pupils (role-scoped, with "View incidents" per pupil)
 - `/incidents` - Incidents list with filters (category, status, year, class, pupil) — accessible to coordinator, head_teacher, senco, head_of_year, teacher
-- `/incidents/:id` - Incident detail (role-scoped access, actions: status change, open protocol)
+- `/incidents/:id` - Incident detail (role-scoped access, actions: status change, open protocol, teacher assessment panel)
 - `/protocols` - Protocols list (coordinator, head_teacher, senco)
 - `/protocols/new` - Open formal protocol form (pre-fills from linked incident)
 - `/protocols/:id` - Protocol detail view
@@ -143,6 +144,7 @@ Multi-role safeguarding and incident reporting platform for schools.
 - `GET /my-pupils` - Role-scoped pupil list (teacher→class, head_of_year→year, head_teacher→school, support_staff→customised)
 - `GET /pupils/search?q=name` - Search pupils by name (staff + pupil roles only, returns first/last name, yearGroup, className)
 - `PATCH /auth/profile` - Update profile (name, email, avatar)
+- `PATCH /incidents/:id/assess` - Teacher assessment (teacher, head_of_year, coordinator, head_teacher, senco; sets staffNotes, witnessStatements, parentSummary, addedToFile, parentVisible, assessedBy/At)
 - CRUD for incidents, protocols, alerts, notifications, dashboard
 - `GET /delegated-roles` - Governance appointments (coordinator/head_teacher)
 - `POST /delegated-roles` - Create appointment

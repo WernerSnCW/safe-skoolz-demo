@@ -189,12 +189,23 @@ router.post("/users/:id/avatar", authMiddleware, async (req, res): Promise<void>
 router.get("/pupils/search", authMiddleware, requireRole(...ALL_STAFF_ROLES, "pupil"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const q = (req.query.q as string || "").trim();
-  if (q.length < 1) {
-    res.json([]);
-    return;
+
+  const conditions = [
+    eq(usersTable.schoolId, user.schoolId),
+    eq(usersTable.role, "pupil"),
+  ];
+
+  if (q.length >= 1) {
+    const searchPattern = `%${q}%`;
+    conditions.push(
+      or(
+        ilike(usersTable.firstName, searchPattern),
+        ilike(usersTable.lastName, searchPattern),
+        sql`concat(${usersTable.firstName}, ' ', ${usersTable.lastName}) ILIKE ${searchPattern}`
+      )! 
+    );
   }
 
-  const searchPattern = `%${q}%`;
   const pupils = await db
     .select({
       id: usersTable.id,
@@ -204,18 +215,9 @@ router.get("/pupils/search", authMiddleware, requireRole(...ALL_STAFF_ROLES, "pu
       className: usersTable.className,
     })
     .from(usersTable)
-    .where(
-      and(
-        eq(usersTable.schoolId, user.schoolId),
-        eq(usersTable.role, "pupil"),
-        or(
-          ilike(usersTable.firstName, searchPattern),
-          ilike(usersTable.lastName, searchPattern),
-          sql`concat(${usersTable.firstName}, ' ', ${usersTable.lastName}) ILIKE ${searchPattern}`
-        )
-      )
-    )
-    .limit(10);
+    .where(and(...conditions))
+    .orderBy(usersTable.firstName)
+    .limit(15);
 
   res.json(pupils);
 });

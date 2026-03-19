@@ -147,27 +147,27 @@ function PupilSearchPicker({
   const [showResults, setShowResults] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const containerRef = useRef<HTMLDivElement>(null);
+  const fetchIdRef = useRef(0);
+
+  const fetchPupils = async (searchQuery: string) => {
+    const fetchId = ++fetchIdRef.current;
+    setIsSearching(true);
+    try {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch(`/api/pupils/search?q=${encodeURIComponent(searchQuery)}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok && fetchId === fetchIdRef.current) {
+        const data = await res.json();
+        setResults(data.filter((p: PupilResult) => !selectedIds.some(s => s.id === p.id)));
+      }
+    } catch {}
+    if (fetchId === fetchIdRef.current) setIsSearching(false);
+  };
 
   useEffect(() => {
-    if (query.length < 1) {
-      setResults([]);
-      return;
-    }
-    setIsSearching(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const token = localStorage.getItem("safeschool_token");
-        const res = await fetch(`/api/pupils/search?q=${encodeURIComponent(query)}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setResults(data.filter((p: PupilResult) => !selectedIds.some(s => s.id === p.id)));
-        }
-      } catch {}
-      setIsSearching(false);
-    }, 250);
+    debounceRef.current = setTimeout(() => fetchPupils(query), query.length > 0 ? 250 : 0);
   }, [query, selectedIds]);
 
   useEffect(() => {
@@ -202,12 +202,12 @@ function PupilSearchPicker({
           type="text"
           value={query}
           onChange={(e) => { setQuery(e.target.value); setShowResults(true); }}
-          onFocus={() => setShowResults(true)}
-          placeholder={isPupil ? "Start typing their name..." : "Search for a pupil by name..."}
+          onFocus={() => { setShowResults(true); if (results.length === 0 && !isSearching) fetchPupils(query); }}
+          placeholder={isPupil ? "Tap here to pick a name..." : "Search for a pupil by name..."}
           className="w-full h-10 rounded-xl border border-input bg-background pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
         <AnimatePresence>
-          {showResults && query.length >= 1 && (
+          {showResults && (
             <motion.div
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}

@@ -79,51 +79,46 @@ async function seedHistory() {
   const pupils = [boyA, boyB, boyC, boyD, girlA, girlB, girlC, girlD];
   const staff = [teacherA, teacherB, teacherC, coordinator];
 
-  const PUPIL_DESCRIPTIONS: Record<string, { categories: string[]; emotions: string[]; descriptions: string[] }> = {
+  const PUPIL_DESCRIPTIONS: Record<string, { items: { category: string; emotion: string; description: string }[] }> = {
     [boyA.id]: {
-      categories: ["verbal", "physical", "verbal,physical", "psychological"],
-      emotions: ["sad,scared", "scared,angry", "sad", "worried"],
-      descriptions: [
-        "Someone keeps saying unkind things to me at break time. It happens a lot and I feel really upset about it.",
-        "I got pushed in the corridor today. The same person has done it before and it hurts.",
-        "People keep leaving me out of things and whispering about me. I feel really sad.",
-        "Someone took my things and wouldn't give them back. When I asked nicely they laughed at me.",
-        "I don't want to go outside at break because the same person is always being unkind to me.",
+      items: [
+        { category: "verbal", emotion: "sad,scared", description: "Someone keeps saying unkind things to me at break time. It happens a lot and I feel really upset about it." },
+        { category: "physical", emotion: "scared,angry", description: "I got pushed in the corridor today. The same person has done it before and it hurts." },
+        { category: "verbal,physical", emotion: "sad", description: "Someone pushed me and called me names today. I tried to walk away but they followed me." },
+        { category: "psychological", emotion: "worried", description: "People keep leaving me out of things and whispering about me. I feel really sad." },
+        { category: "verbal", emotion: "sad,scared", description: "Someone took my things and wouldn't give them back. When I asked nicely they laughed at me." },
+        { category: "psychological", emotion: "worried", description: "I don't want to go outside at break because the same person is always being unkind to me." },
       ],
     },
     [girlA.id]: {
-      categories: ["physical", "exclusion", "online", "verbal"],
-      emotions: ["scared,angry", "lonely", "worried,confused", "sad"],
-      descriptions: [
-        "Someone bumped into me on purpose and I fell over. They said it was an accident but it wasn't.",
-        "The other children won't let me play with them. They run away when I come over.",
-        "Someone is saying unkind things about me in a group chat. I feel really worried about it.",
-        "I heard someone calling me names behind my back. It made me feel really upset.",
-        "Some children keep whispering and looking at me. I feel left out and confused.",
+      items: [
+        { category: "physical", emotion: "scared,angry", description: "Someone bumped into me on purpose and I fell over. They said it was an accident but it wasn't." },
+        { category: "exclusion", emotion: "lonely", description: "The other children won't let me play with them. They run away when I come over." },
+        { category: "online", emotion: "worried,confused", description: "Someone is saying unkind things about me in a group chat. I feel really worried about it." },
+        { category: "verbal", emotion: "sad", description: "I heard someone calling me names behind my back. It made me feel really upset." },
+        { category: "exclusion", emotion: "lonely", description: "Some children keep whispering and looking at me. I feel left out and confused." },
       ],
     },
     [girlB.id]: {
-      categories: ["exclusion", "psychological", "verbal"],
-      emotions: ["sad,lonely", "sad", "embarrassed,sad"],
-      descriptions: [
-        "Nobody wants to sit with me at lunch. I always have to sit alone and it makes me sad.",
-        "Someone keeps copying what I say in a mean way. Everyone laughs and I feel embarrassed.",
-        "I feel like nobody at school likes me. I try to be friendly but people ignore me.",
+      items: [
+        { category: "exclusion", emotion: "sad,lonely", description: "Nobody wants to sit with me at lunch. I always have to sit alone and it makes me sad." },
+        { category: "psychological", emotion: "embarrassed,sad", description: "Someone keeps copying what I say in a mean way. Everyone laughs and I feel embarrassed." },
+        { category: "verbal", emotion: "sad", description: "I feel like nobody at school likes me. I try to be friendly but people ignore me." },
       ],
     },
   };
 
-  const STAFF_DESCRIPTIONS = [
-    "Observed an incident between two pupils during break time. One pupil appeared upset. Both spoken to individually.",
-    "A pupil reported feeling unsafe at school. Spoke with them to understand the situation and offered support.",
-    "Noticed a pattern of behaviour between two pupils. This appears to be an ongoing situation. Logged for monitoring.",
-    "A pupil came to me saying they were being picked on. We talked about it and I reassured them.",
-    "Witnessed unkind behaviour in the playground. Intervened immediately and spoke with all children involved.",
-    "A pupil seemed withdrawn today. After talking to them, they shared that something has been bothering them at school.",
-    "Following up on a previous incident. Checked in with the pupil and they say things have improved.",
-    "Observed exclusion behaviour during group activity. Reminded all pupils about our school values.",
-    "A pupil reported online behaviour that made them uncomfortable. Documented and reported to coordinator.",
-    "Noticed a pupil arriving without proper clothing/lunch on multiple occasions. Flagging as a welfare concern.",
+  const STAFF_DESCRIPTIONS: { category: string; description: string }[] = [
+    { category: "physical", description: "Observed a physical incident between two pupils during break time. One pupil appeared upset. Both spoken to individually." },
+    { category: "psychological", description: "A pupil reported feeling unsafe at school. Spoke with them to understand the situation and offered support." },
+    { category: "verbal,physical", description: "Noticed a pattern of verbal and physical behaviour between two pupils. This appears to be an ongoing situation. Logged for monitoring." },
+    { category: "verbal", description: "A pupil came to me saying they were being picked on verbally. We talked about it and I reassured them." },
+    { category: "verbal", description: "Witnessed unkind verbal behaviour in the playground. Intervened immediately and spoke with all children involved." },
+    { category: "psychological", description: "A pupil seemed withdrawn today. After talking to them, they shared that something has been bothering them at school." },
+    { category: "verbal", description: "Following up on a previous verbal incident. Checked in with the pupil and they say things have improved." },
+    { category: "exclusion", description: "Observed exclusion behaviour during group activity. Reminded all pupils about our school values." },
+    { category: "online", description: "A pupil reported online behaviour that made them uncomfortable. Documented and reported to coordinator." },
+    { category: "neglect", description: "Noticed a pupil arriving without proper clothing/lunch on multiple occasions. Flagging as a welfare concern." },
   ];
 
   const PARENT_SUMMARIES = [
@@ -158,8 +153,9 @@ async function seedHistory() {
         reporterRole = reporter.role || "teacher";
         victim = pick(pupils);
         perpetrator = pick(pupils.filter((p) => p.id !== victim.id));
-        description = pick(STAFF_DESCRIPTIONS);
-        category = pick(CATEGORIES);
+        const staffItem = pick(STAFF_DESCRIPTIONS);
+        description = staffItem.description;
+        category = staffItem.category;
       } else {
         const pupilsWithDescs = pupils.filter((p) => PUPIL_DESCRIPTIONS[p.id]);
         victim = pick(pupilsWithDescs.length > 0 ? pupilsWithDescs : pupils);
@@ -169,9 +165,10 @@ async function seedHistory() {
 
         const defs = PUPIL_DESCRIPTIONS[victim.id];
         if (defs) {
-          description = pick(defs.descriptions);
-          category = pick(defs.categories);
-          emotion = pick(defs.emotions);
+          const item = pick(defs.items);
+          description = item.description;
+          category = item.category;
+          emotion = item.emotion;
         } else {
           description = "Something happened at school that made me feel upset. I wanted to tell someone about it.";
           category = pick(CATEGORIES);

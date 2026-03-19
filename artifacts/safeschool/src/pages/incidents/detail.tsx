@@ -5,9 +5,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users, FileText, Eye, EyeOff, Save, ClipboardList, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, User, ShieldAlert, CheckCircle, Clock, AlertTriangle, Users, FileText, Eye, EyeOff, Save, ClipboardList, Plus, Trash2, Heart, Shield, Info } from "lucide-react";
 
 const STAFF_ROLES = ["teacher", "head_of_year", "coordinator", "head_teacher", "senco", "support_staff"];
+
+const EMOTIONAL_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
+  happy: { label: "Happy", emoji: "😊", color: "text-green-600" },
+  okay: { label: "Okay", emoji: "🙂", color: "text-blue-600" },
+  sad: { label: "Sad", emoji: "😢", color: "text-blue-500" },
+  scared: { label: "Scared", emoji: "😨", color: "text-amber-600" },
+  angry: { label: "Angry", emoji: "😠", color: "text-red-500" },
+  confused: { label: "Confused", emoji: "😕", color: "text-purple-500" },
+  worried: { label: "Worried", emoji: "😟", color: "text-amber-500" },
+  hurt: { label: "Hurt", emoji: "💔", color: "text-red-600" },
+};
 
 export default function IncidentDetail() {
   const [, params] = useRoute("/incidents/:id");
@@ -89,6 +100,10 @@ export default function IncidentDetail() {
 
   const unknownDescs: any[] = (inc as any).unknownPersonDescriptions || [];
   const incAny = inc as any;
+
+  if (userRole === "parent") {
+    return <ParentIncidentReport inc={inc} />;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -566,6 +581,227 @@ export default function IncidentDetail() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function ParentIncidentReport({ inc }: { inc: any }) {
+  const statusConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+    submitted: { label: "Submitted", color: "text-blue-700", bg: "bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800", icon: FileText },
+    open: { label: "Being Looked Into", color: "text-amber-700", bg: "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800", icon: AlertTriangle },
+    under_review: { label: "Under Review", color: "text-primary", bg: "bg-primary/5 border-primary/20", icon: Clock },
+    investigating: { label: "Being Investigated", color: "text-purple-700", bg: "bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-800", icon: Shield },
+    escalated: { label: "Escalated — Extra Support", color: "text-red-700", bg: "bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-800", icon: ShieldAlert },
+    resolved: { label: "Resolved", color: "text-green-700", bg: "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800", icon: CheckCircle },
+    closed: { label: "Closed", color: "text-gray-600", bg: "bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700", icon: CheckCircle },
+  };
+  const status = statusConfig[inc.status] || statusConfig.open;
+  const StatusIcon = status.icon;
+  const emotional = inc.emotionalState ? EMOTIONAL_LABELS[inc.emotionalState] : null;
+
+  return (
+    <div className="space-y-6 max-w-3xl mx-auto">
+      <div className="flex items-center gap-4">
+        <Link href="/incidents">
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <ArrowLeft size={20} />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-display font-bold">Incident Report</h1>
+          <p className="text-sm text-muted-foreground">Reference: {inc.referenceNumber}</p>
+        </div>
+      </div>
+
+      <Card className={`border ${status.bg}`}>
+        <CardContent className="p-5">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${status.bg}`}>
+              <StatusIcon size={22} className={status.color} />
+            </div>
+            <div>
+              <p className={`font-bold text-lg ${status.color}`}>{status.label}</p>
+              <p className="text-sm text-muted-foreground">
+                {inc.status === "closed" || inc.status === "resolved"
+                  ? "This incident has been reviewed and closed by the school."
+                  : "The school is aware and taking appropriate action."}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b border-border/50 bg-muted/10">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Info size={18} /> Incident Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-background border border-border p-3 rounded-xl flex items-center gap-3">
+              <ShieldAlert className="text-primary shrink-0" size={20} />
+              <div>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Type</p>
+                <p className="font-semibold capitalize">{inc.category.split(",").map((c: string) => c.trim()).join(", ")}</p>
+              </div>
+            </div>
+            <div className="bg-background border border-border p-3 rounded-xl flex items-center gap-3">
+              <Calendar className="text-primary shrink-0" size={20} />
+              <div>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">When</p>
+                <p className="font-semibold">
+                  {formatDate(inc.incidentDate)}
+                  {inc.incidentTime && <span className="text-muted-foreground font-normal"> at {inc.incidentTime}</span>}
+                </p>
+              </div>
+            </div>
+            <div className="bg-background border border-border p-3 rounded-xl flex items-center gap-3">
+              <MapPin className="text-primary shrink-0" size={20} />
+              <div>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Where</p>
+                <p className="font-semibold capitalize">{inc.location || "Not specified"}</p>
+              </div>
+            </div>
+          </div>
+
+          {inc.victimNames && inc.victimNames.length > 0 && (
+            <div className="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/30 p-4 rounded-xl">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Your Child</p>
+              <p className="font-semibold">{inc.victimNames.join(", ")}</p>
+            </div>
+          )}
+
+          {inc.perpetratorNames && inc.perpetratorNames.filter((n: string) => n !== "Another pupil").length === 0 && inc.perpetratorNames.length > 0 && (
+            <div className="bg-muted/30 p-4 rounded-xl">
+              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Other People Involved</p>
+              <p className="text-sm text-muted-foreground">Other pupils were involved. Names are kept confidential to protect all children.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="border-b border-border/50 bg-muted/10">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FileText size={18} /> What Happened
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-4">
+          <p className="bg-muted/30 p-4 rounded-xl text-foreground leading-relaxed whitespace-pre-wrap">
+            {inc.description || "The school is reviewing this incident. A detailed summary will be shared once the review is complete."}
+          </p>
+
+          {(inc.happeningToMe || inc.happeningToSomeoneElse || inc.iSawIt) && (
+            <div className="flex flex-wrap gap-2">
+              {inc.happeningToMe && (
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                  Happened to your child
+                </span>
+              )}
+              {inc.happeningToSomeoneElse && (
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400">
+                  Happened to someone else
+                </span>
+              )}
+              {inc.iSawIt && (
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                  Witnessed by a child
+                </span>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {emotional && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Heart size={18} /> How Your Child Was Feeling
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{emotional.emoji}</span>
+              <div>
+                <p className={`font-bold text-lg ${emotional.color}`}>{emotional.label}</p>
+                {inc.emotionalFreetext && (
+                  <p className="text-sm text-muted-foreground mt-1">"{inc.emotionalFreetext}"</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader className="border-b border-border/50 bg-muted/10">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield size={18} /> School Response
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {inc.childrenSeparated !== undefined && inc.childrenSeparated !== null && (
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle size={16} className={inc.childrenSeparated ? "text-green-600" : "text-muted-foreground"} />
+                <span>{inc.childrenSeparated ? "Children were separated" : "Children were not separated"}</span>
+              </div>
+            )}
+            {inc.immediateActionTaken && (
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle size={16} className="text-green-600" />
+                <span>Immediate action was taken</span>
+              </div>
+            )}
+            {inc.addedToFile && (
+              <div className="flex items-center gap-2 text-sm">
+                <FileText size={16} className="text-blue-600" />
+                <span>Added to your child's file</span>
+              </div>
+            )}
+          </div>
+
+          {inc.assessedByName && (
+            <div className="bg-muted/30 p-4 rounded-xl">
+              <p className="text-sm">
+                <span className="font-semibold">Reviewed by:</span> {inc.assessedByName}
+                {inc.assessedAt && <span className="text-muted-foreground"> on {formatDate(inc.assessedAt)}</span>}
+              </p>
+            </div>
+          )}
+
+          {!inc.assessedByName && inc.status !== "closed" && inc.status !== "resolved" && (
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 p-4 rounded-xl">
+              <p className="text-sm text-amber-800 dark:text-amber-300">
+                This incident is still being reviewed. You will be notified when there are updates.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-muted/20">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-3">
+            <Info size={18} className="text-muted-foreground mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground">Need to know more?</p>
+              <p>If you have concerns or questions about this incident, please contact the school's safeguarding coordinator directly. Other children's names are kept confidential to protect everyone involved.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="text-center pb-4">
+        <p className="text-xs text-muted-foreground">
+          Report filed: {formatDateTime(inc.createdAt)}
+          {inc.updatedAt && inc.updatedAt !== inc.createdAt && (
+            <span> · Last updated: {formatDateTime(inc.updatedAt)}</span>
+          )}
+        </p>
+      </div>
     </div>
   );
 }

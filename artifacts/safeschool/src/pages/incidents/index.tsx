@@ -33,6 +33,7 @@ interface Incident {
 
 export default function IncidentsList() {
   const { user } = useAuth();
+  const isParent = user?.role === "parent";
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
 
@@ -43,7 +44,7 @@ export default function IncidentsList() {
   const [filterClass, setFilterClass] = useState(urlParams.get("className") || "");
   const [filterPupilId, setFilterPupilId] = useState(urlParams.get("pupilId") || "");
   const [filterPupilName, setFilterPupilName] = useState(urlParams.get("pupilName") || "");
-  const [showFilters, setShowFilters] = useState(!!filterCategory || !!filterStatus || !!filterYearGroup || !!filterClass || !!filterPupilId);
+  const [showFilters, setShowFilters] = useState(!isParent && (!!filterCategory || !!filterStatus || !!filterYearGroup || !!filterClass || !!filterPupilId));
 
   const queryParams = new URLSearchParams();
   queryParams.set("limit", "100");
@@ -87,7 +88,9 @@ export default function IncidentsList() {
     setFilterPupilName("");
   };
 
-  const pageTitle = filterPupilName
+  const pageTitle = isParent
+    ? "Your Child's Incident Reports"
+    : filterPupilName
     ? `Incidents involving ${filterPupilName}`
     : filterYearGroup
     ? `Incidents — Year ${filterYearGroup}`
@@ -101,11 +104,13 @@ export default function IncidentsList() {
         <div>
           <h1 className="text-3xl font-display font-bold">{pageTitle}</h1>
           <p className="text-muted-foreground mt-1">
-            {data ? `${data.total} incident${data.total !== 1 ? "s" : ""} found` : "Loading..."}
+            {isParent
+              ? data ? `${data.total} report${data.total !== 1 ? "s" : ""} shared with you` : "Loading..."
+              : data ? `${data.total} incident${data.total !== 1 ? "s" : ""} found` : "Loading..."}
           </p>
         </div>
         <Link href="/report">
-          <Button>File New Report</Button>
+          <Button>{isParent ? "Report a Concern" : "File New Report"}</Button>
         </Link>
       </div>
 
@@ -113,25 +118,27 @@ export default function IncidentsList() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <Input
-            placeholder="Search by ref, category, child name..."
+            placeholder={isParent ? "Search reports..." : "Search by ref, category, child name..."}
             className="pl-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button
-          variant={showFilters ? "default" : "outline"}
-          className="shrink-0 relative"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <Filter size={18} className="mr-2" />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-white text-[10px] font-bold flex items-center justify-center">
-              {activeFilterCount}
-            </span>
-          )}
-        </Button>
+        {!isParent && (
+          <Button
+            variant={showFilters ? "default" : "outline"}
+            className="shrink-0 relative"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter size={18} className="mr-2" />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-white text-[10px] font-bold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </Button>
+        )}
       </div>
 
       {showFilters && (

@@ -15,12 +15,37 @@ import { runPatternDetection } from "../lib/patternDetection";
 
 const router: IRouter = Router();
 
-router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teacher", "senco", "head_of_year", "teacher"), async (req, res): Promise<void> => {
+router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teacher", "senco", "head_of_year", "teacher", "parent"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const query = ListIncidentsQueryParams.safeParse(req.query);
   const page = query.success ? (query.data.page ?? 1) : 1;
   const limit = query.success ? (query.data.limit ?? 20) : 20;
   const offset = (page - 1) * limit;
+
+  if (user.role === "parent") {
+    const [parentRecord] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    const childIds: string[] = parentRecord?.parentOf || [];
+    if (childIds.length === 0) {
+      res.json({ data: [], total: 0, page, limit });
+      return;
+    }
+    const parentConditions: any[] = [
+      eq(incidentsTable.schoolId, user.schoolId),
+      eq(incidentsTable.parentVisible, true),
+    ];
+    if (query.success && query.data.status) {
+      parentConditions.push(eq(incidentsTable.status, query.data.status));
+    }
+    parentConditions.push(
+      sql`(${incidentsTable.victimIds} && ARRAY[${sql.join(childIds.map(id => sql`${id}::uuid`), sql`, `)}] OR ${incidentsTable.perpetratorIds} && ARRAY[${sql.join(childIds.map(id => sql`${id}::uuid`), sql`, `)}])`
+    );
+    const [{ count: totalCount }] = await db.select({ count: sql<number>`count(*)::int` }).from(incidentsTable).where(and(...parentConditions));
+    const incidents = await db.select().from(incidentsTable).where(and(...parentConditions))
+      .orderBy(desc(incidentsTable.createdAt)).limit(limit).offset(offset);
+    const enriched = await enrichIncidents(incidents, user.role, childIds);
+    res.json({ data: enriched, total: totalCount, page, limit });
+    return;
+  }
 
   let conditions: any[] = [eq(incidentsTable.schoolId, user.schoolId)];
 
@@ -235,8 +260,20 @@ router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => 
     return;
   }
 
-  if (user.role === "pupil" || user.role === "parent") {
+  if (user.role === "pupil") {
     if (incident.reporterId !== user.userId) {
+      res.status(403).json({ error: "Insufficient permissions" });
+      return;
+    }
+  } else if (user.role === "parent") {
+    const [parentRecord] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    const childIds: string[] = parentRecord?.parentOf || [];
+    const isOwnReport = incident.reporterId === user.userId;
+    const involvesChild = childIds.length > 0 && (
+      (incident.victimIds || []).some((vid: string) => childIds.includes(vid)) ||
+      (incident.perpetratorIds || []).some((pid: string) => childIds.includes(pid))
+    );
+    if (!isOwnReport && (!involvesChild || !incident.parentVisible)) {
       res.status(403).json({ error: "Insufficient permissions" });
       return;
     }
@@ -273,7 +310,12 @@ router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => 
     }
   }
 
-  const enriched = await enrichIncidents([incident], user.role);
+  let parentChildIds: string[] | undefined;
+  if (user.role === "parent") {
+    const [pr] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+    parentChildIds = pr?.parentOf || [];
+  }
+  const enriched = await enrichIncidents([incident], user.role, parentChildIds);
   res.json(enriched[0]);
 });
 
@@ -426,7 +468,7 @@ router.patch("/incidents/:id/assess", authMiddleware, requireRole("coordinator",
   res.json(enriched[0]);
 });
 
-async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[], viewerRole?: string) {
+async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[], viewerRole?: string, parentChildIds?: string[]) {
   if (incidents.length === 0) return [];
 
   const userIds = new Set<string>();
@@ -473,11 +515,32 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
       base.description = inc.parentSummary || null;
       base.reporterRole = inc.reporterRole;
       base.anonymous = inc.anonymous;
-      base.victimNames = ["Your child"];
-      base.perpetratorNames = [];
-      base.reporterName = null;
+      base.emotionalState = inc.emotionalState;
+      base.emotionalFreetext = inc.emotionalFreetext;
+      base.incidentTime = inc.incidentTime;
+      base.happeningToMe = inc.happeningToMe;
+      base.happeningToSomeoneElse = inc.happeningToSomeoneElse;
+      base.iSawIt = inc.iSawIt;
+      base.childrenSeparated = inc.childrenSeparated;
+      base.immediateActionTaken = inc.immediateActionTaken;
+      base.staffNotes = null;
+      base.assessedBy = inc.assessedBy;
+      base.assessedAt = inc.assessedAt ? inc.assessedAt.toISOString() : null;
+      if (inc.assessedBy && userMap[inc.assessedBy]) {
+        base.assessedByName = userMap[inc.assessedBy];
+      }
+      const childIdsSet = new Set(parentChildIds || []);
+      base.victimNames = (inc.victimIds || []).map((id) =>
+        childIdsSet.has(id) ? (userMap[id] || "Your child") : "Another pupil"
+      );
+      base.perpetratorNames = (inc.perpetratorIds || []).map((id) =>
+        childIdsSet.has(id) ? (userMap[id] || "Your child") : "Another pupil"
+      );
       base.victimIds = [];
       base.perpetratorIds = [];
+      base.reporterName = null;
+      base.parentSummary = inc.parentSummary || null;
+      base.updatedAt = inc.updatedAt ? inc.updatedAt.toISOString() : null;
     } else if (isPupil) {
       base.reporterId = inc.reporterId;
       base.reporterRole = inc.reporterRole;

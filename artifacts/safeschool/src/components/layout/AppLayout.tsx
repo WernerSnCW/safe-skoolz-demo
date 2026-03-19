@@ -41,6 +41,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       return [
         ...base,
         { name: "Report Incident", href: "/report", icon: AlertTriangle },
+        { name: "Incidents", href: "/incidents", icon: FileText },
         { name: "Behaviour", href: "/behaviour", icon: Gauge },
         { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Learn", href: "/education", icon: BookOpen },

@@ -117,10 +117,12 @@ Multi-role safeguarding and incident reporting platform for schools.
 - Girl D: feeling left out (exclusion)
 - Boy D: being made fun of in class (anonymous report)
 - Run: `pnpm --filter @workspace/scripts run seed-demo`
+- Historical: 44 incidents spanning 6 months (Boy A→Boy B pattern: 8 incidents, Girl A: 4 incidents, plus random incidents across all pupils, many shared with parents)
+- Run: `pnpm --filter @workspace/scripts run seed-history`
 
 ### Frontend Pages
 - `/login` - Multi-tab login (pupil/staff/parent) + Quick Demo Login panel
-- `/` - Dashboard (role-specific: pupil→speak up, teacher→action cards + recent incidents, parent→concerns + notifications, coordinator→stats overview)
+- `/` - Dashboard (role-specific: pupil→speak up, teacher→action cards + recent incidents, parent→child reports/analytics/history with time filters, coordinator→stats overview)
 - `/report` - Report incident form
 - `/class` - My Class / My Year Group / All Pupils (role-scoped, with "View incidents" per pupil)
 - `/incidents` - Incidents list with filters (category, status, year, class, pupil) — accessible to coordinator, head_teacher, senco, head_of_year, teacher

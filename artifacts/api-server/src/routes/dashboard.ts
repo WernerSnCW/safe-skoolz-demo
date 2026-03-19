@@ -223,6 +223,102 @@ router.get("/dashboard/analytics", authMiddleware, requireRole("coordinator", "h
   });
 });
 
+router.get("/dashboard/parent", authMiddleware, requireRole("parent"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+
+  const [parentRecord] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+  const childIds: string[] = parentRecord?.parentOf || [];
+
+  if (childIds.length === 0) {
+    res.json({ children: [], incidents: [], monthlyTrend: [], byCategoryTrend: [], totalReports: 0, openReports: 0, closedReports: 0 });
+    return;
+  }
+
+  const children = await db.select().from(usersTable).where(
+    and(eq(usersTable.schoolId, user.schoolId), inArray(usersTable.id, childIds))
+  );
+
+  const allIncidents = await db.select().from(incidentsTable).where(
+    and(eq(incidentsTable.schoolId, user.schoolId), eq(incidentsTable.parentVisible, true))
+  ).orderBy(desc(incidentsTable.createdAt));
+
+  const childIncidents = allIncidents.filter((inc) => {
+    const vids = inc.victimIds || [];
+    return vids.some((vid: string) => childIds.includes(vid));
+  });
+
+  const byMonth: Record<string, number> = {};
+  const byCategory: Record<string, number> = {};
+  const byStatus: Record<string, number> = {};
+  const emotionalTimeline: { date: string; state: string; childName: string }[] = [];
+
+  for (const inc of childIncidents) {
+    const month = inc.incidentDate ? inc.incidentDate.substring(0, 7) : "Unknown";
+    byMonth[month] = (byMonth[month] || 0) + 1;
+
+    const cats = (inc.category || "").split(",").map(c => c.trim()).filter(Boolean);
+    for (const cat of cats) {
+      byCategory[cat] = (byCategory[cat] || 0) + 1;
+    }
+
+    byStatus[inc.status] = (byStatus[inc.status] || 0) + 1;
+
+    if (inc.emotionalState) {
+      const childMatch = children.find(c => (inc.victimIds || []).includes(c.id));
+      emotionalTimeline.push({
+        date: inc.incidentDate,
+        state: inc.emotionalState,
+        childName: childMatch ? childMatch.firstName : "Your child",
+      });
+    }
+  }
+
+  const monthlyTrend = Object.entries(byMonth)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([month, count]) => ({ month, count }));
+
+  const byCategoryList = Object.entries(byCategory)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count }));
+
+  const byStatusList = Object.entries(byStatus)
+    .map(([name, count]) => ({ name, count }));
+
+  const parentIncidents = childIncidents.map((inc) => {
+    const childMatch = children.find(c => (inc.victimIds || []).includes(c.id));
+    return {
+      id: inc.id,
+      referenceNumber: inc.referenceNumber,
+      category: inc.category,
+      incidentDate: inc.incidentDate,
+      location: inc.location,
+      status: inc.status,
+      description: inc.parentSummary || null,
+      childName: childMatch ? childMatch.firstName : "Your child",
+      createdAt: inc.createdAt.toISOString(),
+      assessedAt: inc.assessedAt ? inc.assessedAt.toISOString() : null,
+    };
+  });
+
+  res.json({
+    children: children.map(c => ({
+      id: c.id,
+      firstName: c.firstName,
+      lastName: c.lastName,
+      yearGroup: c.yearGroup,
+      className: c.className,
+    })),
+    incidents: parentIncidents,
+    totalReports: childIncidents.length,
+    openReports: childIncidents.filter(i => i.status === "open" || i.status === "submitted" || i.status === "investigating").length,
+    closedReports: childIncidents.filter(i => i.status === "closed").length,
+    monthlyTrend,
+    byCategory: byCategoryList,
+    byStatus: byStatusList,
+    emotionalTimeline: emotionalTimeline.sort((a, b) => a.date.localeCompare(b.date)),
+  });
+});
+
 router.get("/dashboard/child/:id", authMiddleware, requireRole("coordinator", "senco"), async (req, res): Promise<void> => {
   const user = (req as any).user as JwtPayload;
   const childId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;

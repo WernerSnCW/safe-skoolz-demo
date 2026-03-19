@@ -565,59 +565,313 @@ function TeacherDashboard({ user }: { user: any }) {
 }
 
 // --- Parent Dashboard ---
+const PERIOD_OPTIONS = [
+  { label: "Last 30 days", days: 30 },
+  { label: "Last 3 months", days: 90 },
+  { label: "Last 6 months", days: 180 },
+  { label: "All time", days: 9999 },
+];
+
+const CHART_COLORS_PARENT = ["#0d9488", "#6366f1", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#10b981"];
+
+const PARENT_STATUS_LABELS: Record<string, string> = {
+  open: "Open",
+  submitted: "Submitted",
+  investigating: "Being looked into",
+  closed: "Resolved",
+  escalated: "Escalated",
+};
+
+const PARENT_CATEGORY_LABELS: Record<string, string> = {
+  verbal: "Unkind words",
+  physical: "Physical",
+  psychological: "Emotional",
+  exclusion: "Left out",
+  online: "Online",
+  neglect: "Welfare",
+  safeguarding: "Safeguarding",
+  "verbal,physical": "Unkind words & physical",
+  "verbal,psychological": "Unkind words & emotional",
+};
+
 function ParentDashboard({ user }: { user: any }) {
+  const [periodDays, setPeriodDays] = useState(180);
   const { data: notificationsData } = useListNotifications();
   const notifications = notificationsData?.data || [];
   const unread = notifications.filter((n: any) => !n.acknowledgedAt);
 
+  const { data: parentData, isLoading } = useQuery({
+    queryKey: ["/api/dashboard/parent"],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/dashboard/parent", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to load dashboard");
+      return res.json();
+    },
+  });
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - periodDays);
+  const cutoffStr = cutoff.toISOString().split("T")[0];
+
+  const filteredIncidents = (parentData?.incidents || []).filter(
+    (inc: any) => periodDays >= 9999 || inc.incidentDate >= cutoffStr
+  );
+  const filteredMonthly = (parentData?.monthlyTrend || []).filter(
+    (m: any) => periodDays >= 9999 || m.month >= cutoffStr.substring(0, 7)
+  );
+
+  const filteredByCategory: Record<string, number> = {};
+  const filteredByStatus: Record<string, number> = {};
+  for (const inc of filteredIncidents) {
+    const cats = (inc.category || "").split(",").map((c: string) => c.trim()).filter(Boolean);
+    for (const cat of cats) {
+      filteredByCategory[cat] = (filteredByCategory[cat] || 0) + 1;
+    }
+    filteredByStatus[inc.status] = (filteredByStatus[inc.status] || 0) + 1;
+  }
+  const categoryData = Object.entries(filteredByCategory)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name: PARENT_CATEGORY_LABELS[name] || name, count }));
+  const statusData = Object.entries(filteredByStatus)
+    .map(([name, count]) => ({ name: PARENT_STATUS_LABELS[name] || name, count }));
+
+  const childName = parentData?.children?.[0]?.firstName || "your child";
+
+  if (isLoading) {
+    return <div className="animate-pulse h-96 bg-muted rounded-2xl m-8"></div>;
+  }
+
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-display font-bold">Welcome, {user.firstName}</h1>
-        <p className="text-muted-foreground mt-1">Stay informed about your child's wellbeing at school.</p>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-bold">Welcome, {user.firstName}</h1>
+          <p className="text-muted-foreground mt-1">
+            Stay informed about {childName}'s wellbeing at school.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {PERIOD_OPTIONS.map((opt) => (
+            <button
+              key={opt.days}
+              onClick={() => setPeriodDays(opt.days)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                periodDays === opt.days
+                  ? "bg-primary text-white"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link href="/report">
-          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                <AlertTriangle size={32} />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Report a Concern</h2>
-              <p className="text-muted-foreground">If you are worried about something, let the school know.</p>
-            </CardContent>
-          </Card>
-        </Link>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-5 text-center">
+            <FileText className="mx-auto text-primary mb-2" size={28} />
+            <p className="text-3xl font-bold">{filteredIncidents.length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Total Reports</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5 text-center">
+            <AlertTriangle className="mx-auto text-warning mb-2" size={28} />
+            <p className="text-3xl font-bold">{filteredIncidents.filter((i: any) => i.status !== "closed").length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Active</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5 text-center">
+            <Activity className="mx-auto text-green-600 mb-2" size={28} />
+            <p className="text-3xl font-bold">{filteredIncidents.filter((i: any) => i.status === "closed").length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Resolved</p>
+          </CardContent>
+        </Card>
         <Link href="/notifications">
-          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full relative">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary mb-4 group-hover:bg-secondary group-hover:text-white transition-colors">
-                <Bell size={32} />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Notifications</h2>
-              <p className="text-muted-foreground">
-                {unread.length > 0
-                  ? `You have ${unread.length} unread notification${unread.length !== 1 ? "s" : ""}.`
-                  : "No new notifications at the moment."}
-              </p>
+          <Card className="hover:border-primary/30 transition-all cursor-pointer relative h-full">
+            <CardContent className="p-5 text-center">
+              <Bell className="mx-auto text-secondary mb-2" size={28} />
+              <p className="text-3xl font-bold">{unread.length}</p>
+              <p className="text-xs text-muted-foreground font-medium mt-1">Unread Updates</p>
             </CardContent>
             {unread.length > 0 && (
-              <span className="absolute top-4 right-4 w-6 h-6 rounded-full bg-destructive text-white text-xs font-bold flex items-center justify-center">
-                {unread.length}
-              </span>
+              <span className="absolute top-2 right-2 w-3 h-3 rounded-full bg-destructive animate-pulse"></span>
             )}
           </Card>
         </Link>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/report">
+          <Card className="hover:border-primary/50 transition-all cursor-pointer group h-full">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
+                <AlertTriangle size={28} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Report a Concern</h2>
+                <p className="text-sm text-muted-foreground">If you are worried about something, let the school know.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        {parentData?.children?.map((child: any) => (
+          <Card key={child.id}>
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-14 h-14 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary flex-shrink-0">
+                <Users size={28} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">{child.firstName} {child.lastName}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {child.yearGroup && `Year ${child.yearGroup}`}{child.className && ` · ${child.className}`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {filteredMonthly.length > 1 && (
+        <Card>
+          <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp size={18} /> Reports Over Time
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={filteredMonthly}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(m: string) => {
+                    const [y, mo] = m.split("-");
+                    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                    return `${months[parseInt(mo) - 1]} ${y.slice(2)}`;
+                  }}
+                />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <Tooltip
+                  labelFormatter={(m: string) => {
+                    const [y, mo] = m.split("-");
+                    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                    return `${months[parseInt(mo) - 1]} ${y}`;
+                  }}
+                />
+                <Line type="monotone" dataKey="count" stroke="#0d9488" strokeWidth={2} dot={{ r: 4 }} name="Reports" />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {categoryData.length > 0 && (
+          <Card>
+            <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 size={18} /> Types of Reports
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={categoryData} layout="vertical" margin={{ left: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#0d9488" radius={[0, 6, 6, 0]} name="Reports" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+
+        {statusData.length > 0 && (
+          <Card>
+            <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <PieChartIcon size={18} /> Report Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={statusData} cx="50%" cy="50%" outerRadius={75} innerRadius={40} dataKey="count" nameKey="name" label={({ name, count }) => `${name} (${count})`} labelLine={false}>
+                    {statusData.map((_: any, idx: number) => (
+                      <Cell key={idx} fill={CHART_COLORS_PARENT[idx % CHART_COLORS_PARENT.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <Card>
+        <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <FileText size={18} /> Report History
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {filteredIncidents.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <p className="text-sm">No reports found for this time period.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {filteredIncidents.map((inc: any) => (
+                <div key={inc.id} className="p-4 hover:bg-muted/20 transition-colors">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-xs text-muted-foreground">{inc.referenceNumber}</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                          inc.status === "closed" ? "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400" :
+                          inc.status === "investigating" ? "bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400" :
+                          "bg-warning/20 text-warning"
+                        }`}>
+                          {PARENT_STATUS_LABELS[inc.status] || inc.status}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-muted text-muted-foreground">
+                          {PARENT_CATEGORY_LABELS[inc.category] || inc.category}
+                        </span>
+                      </div>
+                      {inc.description && (
+                        <p className="text-sm text-foreground mt-2 line-clamp-2">{inc.description}</p>
+                      )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                        <span>{formatDate(inc.incidentDate)}</span>
+                        {inc.location && <span className="capitalize">{inc.location.replace(/_/g, " ")}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {unread.length > 0 && (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle>Recent Updates</CardTitle>
+          <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Bell size={18} /> Recent Updates
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3 mt-2">
+          <CardContent className="p-4">
+            <div className="space-y-3">
               {unread.slice(0, 5).map((n: any) => (
                 <div key={n.id} className="p-4 rounded-xl border border-border bg-primary/5">
                   <p className="font-bold text-sm">{n.title || "School Notification"}</p>

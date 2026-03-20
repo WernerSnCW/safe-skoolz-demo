@@ -512,7 +512,7 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
     };
 
     if (isParent) {
-      base.description = inc.parentSummary || null;
+      base.description = inc.description || null;
       base.reporterRole = inc.reporterRole;
       base.anonymous = inc.anonymous;
       base.emotionalState = inc.emotionalState;

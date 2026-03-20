@@ -7,6 +7,7 @@ import {
   ChevronRight, CheckCircle2, Monitor
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { StartDemoButton } from "@/components/demo/DemoWalkthrough";
 
 function Step({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
   return (
@@ -384,6 +385,9 @@ export default function TrainingPage() {
           {isParent && "Everything you need to know about using SafeSchool as a parent"}
           {isStaff && "Step-by-step training guide for all SafeSchool features"}
         </p>
+        <div className="mt-4">
+          <StartDemoButton />
+        </div>
       </div>
 
       <QuickStart role={user.role} />

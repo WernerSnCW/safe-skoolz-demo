@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // Hooks & Lib
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { DemoProvider, DemoOverlay } from "@/components/demo/DemoWalkthrough";
 
 // Pages
 import Login from "@/pages/login";
@@ -118,7 +119,10 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
+            <DemoProvider>
+              <Router />
+              <DemoOverlay />
+            </DemoProvider>
           </WouterRouter>
           <Toaster />
         </AuthProvider>

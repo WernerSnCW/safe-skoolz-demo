@@ -90,7 +90,14 @@ export default function Login() {
       setToken(res.token);
       setLocation("/");
     } catch (err: any) {
-      setError(err?.data?.error || "Login failed. Please check your credentials.");
+      const data = err?.data || err?.response?.data;
+      if (data?.locked) {
+        setError(data.message || "Account locked. Ask your teacher to reset your PIN.");
+      } else if (data?.message) {
+        setError(data.message);
+      } else {
+        setError(data?.error || "Login failed. Please check your credentials.");
+      }
     }
   };
 

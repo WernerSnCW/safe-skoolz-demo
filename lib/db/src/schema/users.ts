@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, boolean, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { schoolsTable } from "./schools";
@@ -18,6 +18,8 @@ export const usersTable = pgTable("users", {
   avatarValue: text("avatar_value"),
   avatarImageUrl: text("avatar_image_url"),
   parentOf: uuid("parent_of").array(),
+  failedLoginAttempts: integer("failed_login_attempts").default(0).notNull(),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
   active: boolean("active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastLogin: timestamp("last_login", { withTimezone: true }),

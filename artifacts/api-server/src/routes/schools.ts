@@ -258,7 +258,7 @@ router.post("/pupils/reset-pin/:pupilId", authMiddleware, requireRole("teacher",
   const newPin = generateRandomPin();
   const pinHash = await bcrypt.hash(newPin, BCRYPT_ROUNDS);
 
-  await db.update(usersTable).set({ pinHash }).where(eq(usersTable.id, pupilId));
+  await db.update(usersTable).set({ pinHash, failedLoginAttempts: 0, lockedUntil: null }).where(eq(usersTable.id, pupilId));
 
   res.json({
     pupilId: pupil.id,
@@ -312,7 +312,7 @@ router.post("/pupils/bulk-reset-pins", authMiddleware, requireRole("teacher", "h
   for (const pupil of pupils) {
     const newPin = generateRandomPin();
     const pinHash = await bcrypt.hash(newPin, BCRYPT_ROUNDS);
-    await db.update(usersTable).set({ pinHash }).where(eq(usersTable.id, pupil.id));
+    await db.update(usersTable).set({ pinHash, failedLoginAttempts: 0, lockedUntil: null }).where(eq(usersTable.id, pupil.id));
     results.push({
       pupilId: pupil.id,
       firstName: pupil.firstName,

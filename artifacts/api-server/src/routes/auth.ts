@@ -8,6 +8,8 @@ import { writeAudit } from "../lib/auditHelper";
 
 const router: IRouter = Router();
 
+const MAX_LOGIN_ATTEMPTS = 3;
+
 router.post("/auth/pupil/login", async (req, res): Promise<void> => {
   const parsed = PupilLoginBody.safeParse(req.body);
   if (!parsed.success) {
@@ -26,15 +28,46 @@ router.post("/auth/pupil/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const pinValid = await bcrypt.compare(pin, user.pinHash);
-  if (!pinValid) {
-    res.status(401).json({ error: "Invalid credentials" });
+  if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+    res.status(423).json({
+      error: "Account locked",
+      message: "Too many wrong attempts. Ask your teacher to reset your PIN.",
+      locked: true,
+    });
     return;
   }
 
-  const firstLogin = !user.lastLogin;
-  await db.update(usersTable).set({ lastLogin: new Date() }).where(eq(usersTable.id, user.id));
+  const pinValid = await bcrypt.compare(pin, user.pinHash);
+  if (!pinValid) {
+    const newAttempts = (user.failedLoginAttempts || 0) + 1;
+    const updates: any = { failedLoginAttempts: newAttempts };
+    const remaining = MAX_LOGIN_ATTEMPTS - newAttempts;
 
+    if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+      updates.lockedUntil = new Date("2099-12-31");
+    }
+
+    await db.update(usersTable).set(updates).where(eq(usersTable.id, user.id));
+
+    if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+      res.status(423).json({
+        error: "Account locked",
+        message: "Too many wrong attempts. Ask your teacher to reset your PIN.",
+        locked: true,
+      });
+    } else {
+      res.status(401).json({
+        error: "Wrong PIN",
+        message: `That PIN wasn't right. You have ${remaining} ${remaining === 1 ? "try" : "tries"} left.`,
+        attemptsRemaining: remaining,
+      });
+    }
+    return;
+  }
+
+  await db.update(usersTable).set({ lastLogin: new Date(), failedLoginAttempts: 0, lockedUntil: null }).where(eq(usersTable.id, user.id));
+
+  const firstLogin = !user.lastLogin;
   const token = signToken({ userId: user.id, schoolId: user.schoolId, role: user.role });
 
   await writeAudit({

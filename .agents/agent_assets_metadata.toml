@@ -12,3 +12,9 @@ id = "ILz7rYSUShn5NQbUW703l"
 uri = "file://safeschool-features.json"
 type = "unspecified"
 title = "SafeSchool v0.2.0 — Complete Feature Review JSON"
+
+[[outputs]]
+id = "p29P0QmjYJPtJT0q3GwIb"
+uri = "file://safeschool_review_report.md"
+type = "text"
+title = "SafeSchool v0.3 — Full Application Review Report"

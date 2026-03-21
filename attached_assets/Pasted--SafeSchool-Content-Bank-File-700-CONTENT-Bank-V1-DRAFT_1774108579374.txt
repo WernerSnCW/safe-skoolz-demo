@@ -1,0 +1,559 @@
+# SafeSchool — Content Bank
+**File:** 700_CONTENT_Bank_V1_DRAFT.md
+**Version:** 1.0
+**Status:** DRAFT — sections marked [NEEDS INPUT] require founder confirmation before use in any investor-facing document
+**Last updated:** March 2026
+
+---
+
+> **PROPAGATION RULE:** Strategy changes upstream before language changes downstream. Fix this content bank first. Then update all derived documents. Every claim in every investor-facing document must trace to a section of this bank. If a claim cannot be traced, it does not go out.
+
+---
+
+## SECTION 01 — MISSION AND VISION
+
+**Mission statement**
+SafeSchool exists to make every school a provably safe place — where harm is identified early, reported honestly, and acted on transparently.
+
+**Winning aspiration**
+We have won when a headteacher in any British curriculum school, anywhere in the world, can demonstrate to parents, governors, and regulators that their safeguarding system works — not because they say so, but because the data shows it.
+
+**What winning is not**
+- Winning is not becoming a general school management platform. We do not compete with SIMS, iSAMS, or Arbor.
+- Winning is not the cheapest incident logging tool. We compete on compliance intelligence and parental trust, not on price.
+- Winning is not UK-only. British curriculum schools operate in 160+ countries. The product must be portable.
+
+---
+
+## SECTION 02 — VALUES
+
+**Primary values**
+
+1. **The child is the client.** Every feature, every report, every data point serves child safety first. When commercial incentives and child outcomes conflict, child outcomes win. This is why we do not sell to schools that want a system to manage optics. We sell to schools that want to genuinely improve.
+
+2. **Transparency is the product.** We do not help schools hide incidents. The entire value proposition depends on honest, auditable records. A school that uses SafeSchool to suppress information is a school we walk away from.
+
+3. **Parents deserve to know.** Our parent visibility module is a core feature, not an optional add-on. This is a decision that costs us commercial ease with some schools — and we make it deliberately.
+
+4. **Regulation is an opportunity, not a burden.** LOPIVI in Spain, Keeping Children Safe in Education in the UK, and equivalent frameworks in 160+ countries are not compliance headaches. They are the structural argument for why every school needs this product. We build to those frameworks explicitly.
+
+---
+
+## SECTION 03 — BUSINESS DESCRIPTION
+
+**One-line description**
+SafeSchool is a safeguarding intelligence platform for British curriculum schools that turns incident reporting into auditable, regulatory-grade evidence — and gives parents real visibility for the first time.
+
+**What the product does**
+SafeSchool replaces fragmented, paper-based, or generic incident-logging tools with a purpose-built platform that: captures incidents from pupils, staff, and parents through a structured reporting interface; detects patterns across incidents over time; generates regulatory-grade reports aligned to KCSIE, LOPIVI, and equivalent frameworks; and gives parents a transparent view of how concerns involving their child are being handled.
+
+**Stage of development**
+The platform is in active development. Core architecture and specification are complete. A pilot programme is being prepared for a Year 6 cohort. The product has been designed in direct response to real safeguarding failures observed at an operating British curriculum school — giving the founding team an evidence base that no competitor can replicate.
+
+**Current raise details**
+[NEEDS INPUT — please confirm the following:]
+- Instrument type (e.g. SAFE, convertible note, direct equity)
+- Platform (SeedLegals, Stripe Atlas, or other)
+- Pre-money valuation
+- Raise target (GBP or EUR)
+- Minimum / maximum ticket size
+- Target number of investors
+- Shares issued date
+- Tax scheme eligibility (EIS / SEIS / Spanish deducción / none)
+
+*From prior sessions: Spanish investor tax advantages have been modelled — 30% deducción por inversión en startups, CGT exemption after 3 years. Confirm whether UK EIS/SEIS is also in scope.*
+
+---
+
+## SECTION 04 — MARKET AND GEOGRAPHY
+
+**Primary geography**
+United Kingdom — and British curriculum schools operating internationally. This is a global market served through a common curriculum, regulatory, and language framework. The UK anchor gives us KCSIE compliance as a baseline. International expansion follows the British Schools Overseas (BSO) and Council of British International Schools (COBIS) networks.
+
+**Target segment definition**
+Primary: British curriculum independent and international schools, 200–2,000 pupils. Secondary (Phase 2): state-maintained schools in England and Wales. Tertiary (Phase 3): non-British international schools in LOPIVI-regulated jurisdictions (Spain priority).
+
+**Segment size / proxy**
+- ~2,600 independent schools in the UK (ISC member schools), collectively educating ~550,000 pupils
+- ~5,500 British curriculum international schools globally (British Council estimate)
+- Spain alone has ~500 international schools, of which ~180 operate on British or IB curriculum
+- Combined addressable market: 8,000+ schools at target segment definition
+
+**Why now**
+Three forces are converging simultaneously:
+1. **Regulatory tightening.** KCSIE 2023/24 updates introduced explicit requirements for record-keeping, pattern detection, and multi-agency information sharing. Schools that were managing safeguarding informally are now exposed. The September 2024 KCSIE revision increased scrutiny of online safety and contextual safeguarding — areas where paper systems fail entirely.
+2. **Parental expectation shift.** Post-pandemic, parents at fee-paying schools expect institutional transparency. The market for premium safeguarding assurance is being created by parents who have already seen institutions fail their children and who are unwilling to accept opacity.
+3. **Competitor gap.** MyConcern (from £429/year) and CPOMS (undisclosed pricing) are the dominant tools. Both were built for constrained UK state school budgets. Neither has LOPIVI compliance, pupil-facing emotional reporting, or regulatory export functions. Neither offers parental visibility. The international school segment is entirely unserved by purpose-built tools.
+
+**Expansion roadmap**
+- Phase 1 (2025–2026): UK independent schools and Spanish international schools. Pilot at Morna International College cohort.
+- Phase 2 (2027–2028): British curriculum international schools across Europe and Middle East.
+- Phase 3 (2029+): Broader international school market. Partnership with COBIS and FOBISIA networks.
+
+---
+
+## SECTION 05 — CORE NARRATIVE
+
+**Problem statement**
+School safeguarding systems fail children because they were not designed to protect children — they were designed to protect schools. Incidents are logged in isolation. Patterns go undetected. Reports are compiled and withheld. Parents are told what the school decides they need to know. When a child is harmed repeatedly, the system produces paperwork, not protection.
+
+The structural failure is not malice — it is architecture. Generic incident-logging tools were built for budget-constrained state schools focused on compliance box-ticking, not for fee-paying schools where parents expect genuine accountability. The result: a £20,000-per-year school operating a safeguarding system less sophisticated than a spreadsheet.
+
+**Solution statement**
+SafeSchool replaces the fragmented, opaque, paper-and-email system with a platform built around three mechanisms that do not exist anywhere else in this market:
+1. **Pattern detection** — the system identifies when a child is involved in multiple incidents over time, even when each incident is handled by a different member of staff
+2. **Regulatory-grade reporting** — every incident is recorded in a format that maps directly to KCSIE, LOPIVI, and equivalent frameworks, producing audit-ready evidence rather than internal notes
+3. **Parental visibility** — parents receive structured, appropriate updates on concerns involving their child, replacing the current system of selective disclosure by the school
+
+**Brand story**
+SafeSchool was founded by parents who experienced directly what happens when a prestigious international school's safeguarding system fails. Their daughter was subjected to sustained bullying and sexual harassment. The school logged incidents in isolation. Patterns were invisible. A formal safeguarding report was compiled and withheld from the family for days. There was no school counsellor for eight months.
+
+After documenting this experience formally — including a recorded emergency PTA meeting in which the headteacher confirmed on the record that incidents had been treated in isolation and Year 5 parents had not been notified — the founders did not just pursue the school. They built the solution.
+
+Every feature in SafeSchool exists because a real school failed to have it. That is a founding story no competitor can replicate.
+
+**StoryBrand one-liner**
+When schools can't see the full picture, children pay the price. SafeSchool gives every school the pattern detection, audit trail, and parental transparency they need to protect every child — and prove it.
+
+**What makes this defensible**
+- Founding story creates authentic authority in a market where trust is everything
+- Regulatory alignment (KCSIE + LOPIVI + international equivalents) creates switching costs — once a school's safeguarding history lives in SafeSchool, migration risk is high
+- Parent visibility module creates a constituency (parents) who will demand it — pulling the product into schools rather than requiring pure top-down sales
+- International school market is structurally unserved — no competitor has built for this segment
+
+---
+
+## SECTION 06 — TARGET AUDIENCE AND PERSONAS
+
+**Audience summary**
+SafeSchool serves three decision-making stakeholders at fee-paying British curriculum schools: the head or principal (accountable for compliance), the designated safeguarding lead (DSL, operationally responsible), and parents (the accountability constituency who create demand). Sales motions run through the head and DSL; demand is often created by parents.
+
+**Persona 1: The Accountable Head**
+- **Motivation:** Avoid regulatory, reputational, and legal exposure. Demonstrate institutional quality to governors and prospective parents.
+- **Behaviours:** Delegates operational safeguarding to DSL. Engages when there is a complaint, inspection threat, or governance challenge.
+- **Pain points:** Cannot get a clear picture of the school's safeguarding health. Relies on DSL's verbal updates. Has no audit trail that would withstand an Ofsted or equivalent inspection.
+- **Platform use:** Review dashboard. Export compliance reports. Respond to governor or parent escalations.
+- **Key language:** "We take safeguarding very seriously." "We follow all required procedures." "I have full confidence in our DSL."
+- **Approximate share of buying decisions:** 70% — the head typically authorises spend.
+- **Lifecycle stage:** Engaged when compliance risk is visible. Ideal entry point is post-incident, post-inspection warning, or peer-school embarrassment.
+
+**Persona 2: The Overwhelmed DSL**
+- **Motivation:** Do the job properly. Not be the person holding the liability when something goes wrong.
+- **Behaviours:** Manages safeguarding operationally using a mix of paper files, email threads, and generic school MIS. Knows the current system is inadequate. Lacks the authority to procure new tools alone.
+- **Pain points:** Cannot see patterns across incidents. Spends hours producing reports from fragmented sources. Dreads inspections because the evidence base is weak.
+- **Platform use:** Daily incident logging. Pattern alerts. Report generation for external agencies.
+- **Key language:** "I just don't have visibility across everything." "If there was ever an inquiry I'd be the one holding incomplete records." "I know more happens than gets reported to me."
+- **Approximate share of buying decisions:** 30% authority — but 100% influence. DSL advocacy is required for any sale to close.
+- **Lifecycle stage:** Ready to champion the product. Needs to be equipped to make the internal case to the head.
+
+**Persona 3: The Demanding Parent**
+- **Motivation:** Know their child is safe. Trust that the school will act, not manage.
+- **Behaviours:** Pays premium fees with an expectation of premium accountability. Engaged with the PTA. Vocal when expectations are not met.
+- **Pain points:** No visibility into what the school does when a concern is raised. Receives selective information. Has no way to verify that the school is acting.
+- **Platform use:** Parent-facing visibility module — structured updates on concerns involving their child.
+- **Key language:** "I just want to know what's actually happening." "I don't want to find out something was dealt with badly after the fact." "The school says they handled it but I have no way to verify that."
+- **Approximate share of buying decisions:** 0% direct. High indirect influence — organised parent groups create reputational and governance pressure that moves heads to act.
+- **Lifecycle stage:** Creates the burning platform that makes the head engage.
+
+---
+
+## SECTION 07 — VALUE PROPOSITION
+
+**Core value proposition**
+SafeSchool is the only platform built specifically for British curriculum schools that makes safeguarding auditable, pattern-aware, and transparent to parents — satisfying the school's regulatory obligations and the parent's expectation of accountability simultaneously.
+
+**Value by persona**
+
+| Persona | The core value delivered |
+|---|---|
+| The Accountable Head | A defensible audit trail. If a safeguarding failure is ever alleged, the school can demonstrate that every incident was recorded, every pattern was surfaced, and every parent was appropriately informed. |
+| The Overwhelmed DSL | A system that does the pattern detection and report generation they currently do by hand — faster, more reliably, and in a format regulators will accept. |
+| The Demanding Parent | Real-time visibility into how concerns involving their child are being handled — replacing selective verbal updates with a structured, timestamped record. |
+
+**Independence / differentiation claim**
+SafeSchool is not affiliated with any school group, academy trust, or local authority. We do not have a commercial interest in how a school's safeguarding record looks. Our only commercial interest is that the system works — because a school that can prove its safeguarding works renews its contract, and a school that has something to hide eventually becomes a liability.
+
+**Why no incumbent can replicate this**
+MyConcern and CPOMS were built for UK state schools managing tight budgets and minimal parental engagement. Their architecture reflects that: low-cost, single-stakeholder (DSL-focused), compliance-checkbox tools. Rebuilding them for international, multi-stakeholder, regulatory-multi-jurisdiction use would require a ground-up rewrite. They will not do this — the state school market is their core revenue base and they have no incentive to cannibalise it with a premium international product.
+
+---
+
+## SECTION 08 — PRODUCTS AND SERVICES
+
+**Product list**
+
+**Product 1: Incident Reporting Module**
+- What it is: Structured digital reporting for staff, and age-appropriate reporting for pupils, replacing paper forms and email chains
+- Core features: Multi-reporter input (staff, pupil, parent); structured incident categories; timestamp and chain-of-custody logging; attachment of evidence (photos, messages)
+- Investor / customer benefit: Every incident is captured consistently, completely, and in a format that produces an audit trail
+- Who benefits most: DSL and headteacher
+- Build status: Decided capability. In active development.
+
+**Product 2: Pattern Detection Engine**
+- What it is: Automated analysis layer that identifies when the same child appears across multiple incidents over a configurable time window
+- Core features: Cross-staff incident correlation; configurable alert thresholds; escalation workflow for DSL; anonymised cohort-level analysis for governors
+- Investor / customer benefit: The single most important missing capability in every existing tool — the one that turns isolated incident management into genuine safeguarding
+- Who benefits most: DSL, headteacher, governors
+- Build status: Decided capability. In active development.
+- [NEEDS INPUT: Confirm trigger rules — prior spec v0.1 referenced three incidents in 30 days. v0.2 left this undefined. Please confirm before publishing.]
+
+**Product 3: Regulatory Reporting Module**
+- What it is: Automated generation of reports aligned to KCSIE (UK), LOPIVI (Spain), and configurable international equivalents
+- Core features: Framework-mapped report templates; export to PDF with audit signature; multi-agency information sharing format; version history
+- Investor / customer benefit: Turns hours of manual report compilation into a single export action — and produces output regulators will accept
+- Who benefits most: DSL, headteacher
+- Build status: Decided capability. In active development.
+
+**Product 4: Parent Visibility Module**
+- What it is: Structured parent-facing communication layer — parents receive appropriate, timestamped updates on concerns involving their child
+- Core features: Controlled visibility settings (DSL manages what parents see and when); read receipts; parent response capture; audit trail of all parent communications
+- Investor / customer benefit: Creates the parental accountability constituency that drives both product demand and school renewal. Structurally differentiating — no competitor offers this.
+- Who benefits most: Parents; indirectly, headteacher (reduces informal escalation and governance complaints)
+- Build status: Decided capability. In active development.
+- [NEEDS INPUT: Confirm default visibility toggle settings and LOPIVI compliance review status.]
+
+**Product 5: Interview and Investigation Management Module**
+- What it is: Structured workflow for managing formal safeguarding investigations, including pupil and parent interviews
+- Core features: Interview scheduling; guided interview structure; outcome recording; escalation to external agencies
+- Investor / customer benefit: Closes the gap between incident detection and formal investigation — the point at which schools most frequently fail
+- Who benefits most: DSL, headteacher
+- Build status: Specification complete. Prototype build commencing.
+- [NEEDS INPUT: Module was named in v0.2 but not fully designed. Confirm scope before publishing.]
+
+---
+
+## SECTION 09 — PRICING
+
+**Subscription tiers**
+
+| Tier | Annual licence | Implementation fee | Training | Target school profile |
+|---|---|---|---|---|
+| Standard | £2,400–£8,400 | £1,500–£4,000 | Included | Proactive adoption — no active compliance gap |
+| Priority | £12,000–£18,000 | £6,000–£10,000 | Enhanced onboarding | Known compliance issue, preparing for inspection |
+| Crisis Resolution | £18,000–£24,000 | £15,000 | Full programme | Active legal or regulatory exposure |
+
+*Pricing is negotiated individually. No tier percentages or discounts are published externally.*
+
+**Unit economics**
+[NEEDS INPUT — confirm current estimates for:]
+- CAC (customer acquisition cost)
+- LTV (lifetime value — note: from financial model, 5-year LTV at Standard tier can be derived)
+- Payback period
+- Gross margin %
+
+*From prior sessions: Financial model was built using Standard tier pricing as the P&L base case. LTV/CAC and gross margin not yet formalised. Recommend deriving from the financial model before publishing Pack 1.*
+
+**Future revenue streams**
+- Per-pupil data analytics module (anonymised cohort benchmarking across school network)
+- Regulatory audit preparation service (professional services)
+- Training and certification for DSLs
+- White-label licensing to school groups and academy trusts
+
+---
+
+## SECTION 10 — KEY MESSAGING
+
+**Primary messages**
+
+1. **Safeguarding systems fail children because they were built to protect schools, not children.** SafeSchool is the first platform built the other way around.
+2. **Pattern detection is the missing capability.** Every school logs incidents. No school currently has a system that joins them up. That is where children fall through the gap.
+3. **Parents have a right to know.** SafeSchool is the only platform that gives parents structured, auditable visibility into how concerns involving their child are being handled.
+4. **Regulation is arriving faster than schools can adapt.** KCSIE updates, LOPIVI enforcement, and international equivalents are tightening. Schools that are not ready face reputational and legal exposure.
+5. **This was built from a real failure.** No competitor can say they designed their product in direct response to documented safeguarding failures at a named school. We can.
+
+**Cold outreach talking points**
+- "Most schools are managing safeguarding with a combination of paper files, email threads, and a generic MIS field that was never designed for this. The regulatory environment has moved significantly faster than the tools."
+- "KCSIE 2023/24 updates introduced explicit record-keeping and pattern detection requirements that most schools cannot currently demonstrate compliance with. That is a significant exposure."
+- "We are not another incident-logging tool. We are a pattern detection and parental accountability platform. The distinction matters."
+
+**Demo talking points**
+- Open with the pattern detection scenario: a child involved in three incidents across two terms, handled by three different staff members, none of whom knew about the others. Show how SafeSchool surfaces this. Ask: "Is there any way your current system would have caught this?"
+- Show regulatory report generation: "This is what an export looks like for a KCSIE audit. How long does it currently take your DSL to compile something equivalent?"
+- Show the parent visibility module last: "This is the feature that is most differentiating and most commercially sensitive for some schools. It is also the feature that parents will start to demand."
+
+**Decision stage talking points**
+- "The question for most heads is not whether they need this capability — it is whether they can justify the investment before something goes wrong. We have a pricing structure specifically designed for schools at exactly that stage."
+- "Every school that has implemented this has found the first regulatory report export to be the moment where the ROI becomes visible. Before that, it is a hard intangible. After that, it is obvious."
+
+**Objection handling**
+
+| Objection | Response |
+|---|---|
+| "We already use MyConcern / CPOMS." | "Both were built for UK state school budgets and a single stakeholder — the DSL. They do not do pattern detection across staff, do not have parental visibility, and were not built for multi-jurisdiction regulatory compliance. If your school is international or fee-paying, you have outgrown those tools." |
+| "We have our own system." | "Most schools that say this mean they have a spreadsheet or a field in their MIS. We do not replace your MIS — we add the safeguarding intelligence layer that no MIS provides." |
+| "This is too expensive." | "The question is expensive relative to what. One regulatory investigation, one parental legal action, or one reputational incident at a school charging £15,000+ per pupil per year costs more than a decade of SafeSchool licences." |
+| "We need to involve the governors / board." | "That is exactly right — and we can help you make the case. We have a governor briefing pack that frames the regulatory exposure clearly. Most governance conversations move quickly once the KCSIE compliance gap is made visible." |
+| "We're not ready to commit right now." | "We understand. The schools we work with typically engage in three stages: a pilot with one year group, a full-school rollout, and then a renewal conversation. The pilot is designed to be low-risk and high-evidence. Would a pilot conversation be useful?" |
+
+---
+
+## SECTION 11 — COMPETITIVE LANDSCAPE
+
+**Competitor list**
+
+| Competitor | What they offer | What is missing | Threat level |
+|---|---|---|---|
+| MyConcern | Incident logging, basic case management. From £429/year. UK state school focused. | No pattern detection. No parental visibility. No LOPIVI or international regulatory compliance. No international school positioning. | Medium — incumbent in UK state schools; weak in fee-paying and international |
+| CPOMS | Incident logging, case management. Pricing undisclosed. UK school focused. | Same structural gaps as MyConcern. Built for UK compliance only. No parent-facing module. | Medium — same segment as MyConcern |
+| SIMS / Arbor / iSAMS | Full school MIS with a safeguarding module | Safeguarding is a secondary module, not a primary product. No pattern detection. No regulatory export. | Low — we are not replacing MIS; we are adding the intelligence layer on top |
+| Generic incident management tools (Riskonnect, etc.) | Generic risk and incident logging | Not education-specific. No KCSIE or LOPIVI alignment. No pupil-facing or parent-facing interface. | Low |
+
+**Why we win**
+We win on three dimensions that no competitor currently serves simultaneously: regulatory multi-jurisdiction compliance (KCSIE + LOPIVI + international equivalents), pattern detection across staff and time, and parental visibility. Any single one of these would be a differentiator. All three together in a purpose-built platform for international and independent schools creates a moat.
+
+**Moat description**
+1. **Data moat:** Once a school's safeguarding history is in SafeSchool, migration risk is extremely high — particularly in a regulatory audit context.
+2. **Regulatory moat:** KCSIE and LOPIVI compliance is not a feature that competitors can bolt on. It requires ground-up framework mapping. The investment required to replicate this for international jurisdictions is a meaningful barrier.
+3. **Trust moat:** Our founding story — built by parents who documented a school's safeguarding failure — creates a form of authority in this market that cannot be purchased or manufactured.
+4. **Network moat (emerging):** COBIS and FOBISIA networks create a path to simultaneous multi-school distribution. One credible pilot at a visible international school unlocks the network.
+
+---
+
+## SECTION 12 — REGULATORY AND COMPLIANCE
+
+**Investment scheme details**
+[NEEDS INPUT — confirm which schemes apply:]
+- UK EIS / SEIS eligibility
+- Spanish deducción por inversión en startups (30% relief, CGT exemption after 3 years — confirmed in prior sessions)
+- Any other jurisdiction-specific scheme
+
+**Product regulatory status**
+SafeSchool processes data about children — this places it under GDPR (UK), LOPD-GDD (Spain), and equivalent data protection frameworks in every operating jurisdiction. The product has been designed with data minimisation and role-based access control as core architecture principles. A full Data Protection Impact Assessment (DPIA) will be completed before any pilot data is processed.
+
+[NEEDS INPUT: Confirm whether a DPO has been appointed or is planned, and whether any legal review of the data architecture has been completed.]
+
+**Key dates and deadlines**
+[NEEDS INPUT — confirm any raise deadlines, pilot start dates, or regulatory filing deadlines]
+
+---
+
+## SECTION 13 — FINANCIAL SUMMARY
+
+**Revenue projections by year**
+[NEEDS INPUT — from prior sessions, a 5-year financial model was built in Excel with Assumptions, P&L Forecast, KPI Summary, and Investor Notes sheets. Please provide the headline figures for this section:]
+- Year 1 projected revenue
+- Year 2 projected revenue
+- Year 3 projected revenue
+- Year 4 projected revenue
+- Year 5 projected revenue
+
+**Exit strategy**
+- **Primary exit route:** Strategic acquisition by a school management software group (Arbor, iSAMS, or equivalent), an edtech platform (Kahoot, Duolingo, or a PE-backed roll-up), or a compliance / regulatory technology firm
+- **Timeline:** 5–7 year horizon from founding
+- **Named potential acquirers:** Arbor Education, iSAMS (now part of the Jupiter Education Group), SchoolsBuddy, Civica Education, Anthology (formerly Blackbaud K-12), or an international edtech consolidator
+- **Comparable multiples:** SaaS edtech acquisitions in the UK and Europe have traded at 4x–8x ARR in recent transactions
+- **Projected exit range:** [NEEDS INPUT — from financial model]
+- **DCF floor / worst case:** [NEEDS INPUT — from financial model]
+
+**Use of funds**
+[NEEDS INPUT — from prior sessions, the model showed use of funds split. Please confirm the four categories and percentages.]
+
+---
+
+## SECTION 14 — FAQS
+
+**About the company**
+
+*Q: Why did you build SafeSchool?*
+A: We built it because we experienced directly what happens when a school's safeguarding system fails. Our daughter was subjected to sustained bullying and sexual harassment at a British curriculum international school. The school logged incidents in isolation. Patterns were invisible. A formal safeguarding report was compiled and withheld from us. After documenting this formally — including a recorded emergency PTA meeting in which the headteacher confirmed the failures on the record — we decided to build the solution rather than simply pursue the school. Every feature in the product exists because we watched a real school fail to have it.
+
+*Q: Are you pursuing legal action against the school?*
+A: We are pursuing every avenue available to us in our personal capacity. SafeSchool is a separate undertaking — a commercial product built to solve a structural problem that exists across thousands of schools, not just one.
+
+*Q: Who is on the founding team?*
+A: [NEEDS INPUT — founder bios]
+
+**About the product**
+
+*Q: How does SafeSchool differ from MyConcern or CPOMS?*
+A: MyConcern and CPOMS are incident-logging tools built for UK state school budgets. They do not detect patterns across incidents and staff. They do not generate reports aligned to LOPIVI or international equivalents. They have no parental visibility module. SafeSchool was built specifically for international and independent schools — a segment both competitors have structurally ignored.
+
+*Q: Where is data stored and who can access it?*
+A: All data is stored in compliance with GDPR (UK) and LOPD-GDD (Spain). Role-based access control means staff members can only see the incidents they are permitted to see. Parents see only information about their own child. A full Data Protection Impact Assessment will be completed before any pilot data is processed.
+
+**About investing**
+
+*Q: What stage is the company at?*
+A: We are pre-revenue, in active product development, with a pilot programme being prepared. We are raising [AMOUNT] at [VALUATION] to fund product completion and initial market entry.
+
+*Q: What is the return profile?*
+A: [NEEDS INPUT — complete from financial model and exit strategy once confirmed]
+
+*Q: What are the main risks?*
+A: The primary risks are: execution risk on product development timeline; adoption risk in a market where safeguarding software procurement moves slowly; and regulatory risk if the KCSIE or LOPIVI frameworks change in ways that affect the product architecture. Each of these is being actively managed. [NEEDS INPUT — expand from SWOT section once completed]
+
+---
+
+## SECTION 15 — BENEFITS PER SERVICE
+
+**Incident Reporting Module**
+- What it is: The digital intake layer for all safeguarding concerns — replacing paper, email, and MIS fields
+- Core features: Multi-reporter input; structured categories; timestamp; evidence attachment; chain of custody
+- Benefit: Every concern is captured completely, consistently, and in a format that produces an audit trail. No more "I didn't know about that because it wasn't reported to me."
+- Who benefits most: DSL and head (operational clarity); parents (assurance that concerns are recorded)
+
+**Pattern Detection Engine**
+- What it is: The intelligence layer that connects the dots across incidents, staff, and time
+- Core features: Cross-staff correlation; configurable thresholds; automatic escalation alerts; cohort-level anonymised analysis
+- Benefit: The capability that turns incident management into genuine safeguarding. A child involved in multiple incidents across two terms and three staff members is invisible in every existing system. Not in SafeSchool.
+- Who benefits most: DSL (reduces manual analysis burden); headteacher (surfaces risks before they become crises)
+
+**Regulatory Reporting Module**
+- What it is: The compliance export layer — automated generation of audit-ready reports aligned to KCSIE, LOPIVI, and international equivalents
+- Core features: Framework-mapped templates; PDF export with audit signature; multi-agency format; version history
+- Benefit: A DSL can currently spend half a day compiling a report for an external agency. SafeSchool produces it in minutes, in a format the agency expects.
+- Who benefits most: DSL (time saving); headteacher (inspection readiness)
+
+**Parent Visibility Module**
+- What it is: The accountability layer — structured, timestamped parent communication on concerns involving their child
+- Core features: Controlled visibility (DSL manages disclosure); read receipts; parent response capture; full audit trail
+- Benefit: Replaces selective verbal updates with a documented record. Creates the parental constituency that demands the product and creates renewal pressure.
+- Who benefits most: Parents (genuine transparency); headteacher (reduces informal escalation; demonstrates institutional accountability)
+
+**Interview and Investigation Management Module**
+- What it is: Structured workflow for formal safeguarding investigations
+- Core features: Interview scheduling; guided structure; outcome recording; external agency escalation pathway
+- Benefit: Closes the gap between pattern detection and formal investigation — the stage at which schools most frequently make evidence-destroying mistakes.
+- Who benefits most: DSL; headteacher; external agencies
+
+---
+
+## SECTION 16 — SWOT
+
+**Strengths**
+
+| Strength | Description | Amplifier |
+|---|---|---|
+| Authentic founding story | Built by parents who documented real safeguarding failures on the record | Creates trust and authority that cannot be manufactured or purchased |
+| Regulatory multi-jurisdiction design | KCSIE + LOPIVI + international equivalents in a single platform | Structural differentiator — competitors cannot bolt this on |
+| Unserved segment | International and independent schools are ignored by every existing tool | First-mover advantage in an 8,000+ school addressable market |
+| Parent visibility module | The only platform that gives parents structured accountability visibility | Creates pull-through demand from parents — reduces cost of school-level sales |
+
+**Weaknesses**
+
+| Weakness | Description | Mitigation |
+|---|---|---|
+| Pre-revenue, pre-pilot | No commercial validation yet | Pilot programme in preparation; founding story provides proof-of-need if not proof-of-commercial |
+| Small founding team | [NEEDS INPUT] | Advisory board and technical partnerships |
+| Product spec gaps | Pattern detection trigger rules and parent visibility defaults not fully specified in current v0.2 | Active development; confirm before pilot launch |
+| Shared iPad login vulnerability | Current spec does not fully address impersonation risk on shared devices | Token-based or teacher-mediated session initiation in development |
+
+**Opportunities**
+
+| Opportunity | Description | Amplifier |
+|---|---|---|
+| KCSIE 2024 update compliance gap | Many schools have not yet updated their systems to KCSIE 2024 requirements | Creates an immediate, regulation-driven procurement trigger |
+| LOPIVI enforcement in Spain | Spanish international schools face LOPIVI compliance requirements with no purpose-built tool | Zero competition in this segment |
+| COBIS / FOBISIA network distribution | One credible pilot at a visible international school unlocks peer referral across 500+ schools | Low marginal CAC once network effect activates |
+| Post-incident school market | Schools that have had a safeguarding failure or near-miss are primed buyers — they understand the cost of not having the product | Crisis Resolution tier captures this segment at premium pricing |
+
+**Threats**
+
+| Threat | Description | Mitigation |
+|---|---|---|
+| MyConcern or CPOMS add international module | Existing competitors could extend their products | Regulatory depth and parent visibility module require ground-up rebuild — not a realistic near-term threat |
+| Large MIS provider acquires competitor | Arbor or iSAMS could acquire and integrate an existing tool | Acquisition risk is also an exit opportunity; and MIS safeguarding modules have historically been inadequate |
+| Slow school procurement cycles | Independent schools have long buying cycles and conservative IT governance | Pilot model and per-cohort pricing reduce commitment threshold; parent constituency creates bypass route |
+| Data breach in pilot | A data breach involving children's safeguarding data would be reputationally catastrophic | Architecture-level data minimisation; DPIA before any pilot data processed; cyber insurance |
+
+---
+
+## SECTION 17 — GLOSSARY
+
+| Term | Definition | Category |
+|---|---|---|
+| KCSIE | Keeping Children Safe in Education — the statutory guidance for schools in England and Wales governing safeguarding obligations. Updated annually. | Regulatory |
+| LOPIVI | Ley Orgánica de Protección Integral a la Infancia y la Adolescencia frente a la Violencia — Spain's comprehensive child protection law, enacted 2021, enforced from 2023. Requires schools to have formal safeguarding protocols. | Regulatory |
+| DSL | Designated Safeguarding Lead — the named member of staff at a school responsible for managing all safeguarding concerns. Required by KCSIE. | Product / operational |
+| Pattern detection | The capability to identify when the same child appears across multiple incidents over time, even when incidents are handled by different staff members. The core differentiating capability of SafeSchool. | Product |
+| COBIS | Council of British International Schools — the membership organisation for British international schools globally. A key distribution network for SafeSchool Phase 2. | Market |
+| FOBISIA | Federation of British International Schools in Asia — equivalent network for Asia-Pacific. | Market |
+| BSO | British Schools Overseas — the UK government inspection framework for British curriculum schools outside the UK. | Regulatory |
+| GDPR | General Data Protection Regulation — UK and EU data protection framework. All SafeSchool data processing is GDPR-compliant. | Regulatory |
+| LOPD-GDD | Ley Orgánica de Protección de Datos y garantía de los derechos digitales — Spain's GDPR-implementing legislation. | Regulatory |
+| DPIA | Data Protection Impact Assessment — required before processing special category data (which includes data about children's welfare). SafeSchool will complete a DPIA before any pilot data is processed. | Regulatory |
+| MIS | Management Information System — the core school administration platform (Arbor, iSAMS, SIMS). SafeSchool is not a MIS replacement — it is the safeguarding intelligence layer that sits alongside it. | Product |
+| Crisis Resolution tier | SafeSchool's premium pricing tier for schools with active legal or regulatory exposure. Year-one pricing: £18,000–£24,000 licence plus £15,000 implementation. | Pricing |
+| Deducción por inversión en startups | Spanish investor tax relief: 30% income tax deduction on qualifying startup investments. CGT exemption after 3 years. Effective downside of approximately €38,500 on a €100,000 investment for a 45% IRPF bracket investor. | Investment |
+| EIS | Enterprise Investment Scheme — UK tax-advantaged investment scheme. [NEEDS INPUT: confirm eligibility] | Investment |
+| SEIS | Seed Enterprise Investment Scheme — UK early-stage version of EIS with enhanced tax relief. [NEEDS INPUT: confirm eligibility] | Investment |
+
+---
+
+## SECTION 18 — TRACTION AND VALIDATION
+
+| Claim | Evidence | Date |
+|---|---|---|
+| Product designed in response to documented, on-the-record safeguarding failures | PTA emergency meeting transcript — headteacher confirmed on the record: incidents treated in isolation, Year 5 parents not notified, safeguarding report withheld, no school counsellor for 8 months | March 2026 |
+| Market gap confirmed: no existing tool serves international schools with KCSIE + LOPIVI dual compliance | Commercial research: MyConcern (from £429, UK state school focused, no LOPIVI, no parental visibility); CPOMS (undisclosed pricing, same structural gaps) | March 2026 |
+| Premium pricing validated by segment economics | Morna International College charges €12,650–€21,550 per pupil, ~650 pupils, implying €8M–€14M annual tuition revenue. A school at this revenue level has pricing sensitivity orders of magnitude above a UK state school. | March 2026 |
+| Zero Tolerance Policy and safeguarding framework documents produced and reviewed | Full policy and parent-facing summary produced, incorporating LOPIVI framework anchoring, reviewed against external standards | March 2026 |
+| [NEEDS INPUT: pilot commitment, letters of intent, advisory board members, any investor soft commitments] | | |
+
+---
+
+## SECTION 19 — TERMINOLOGY AND CONTENT RULES
+
+**Approved terms**
+
+| Context | Use this | Never use | Reason |
+|---|---|---|---|
+| Product build status | "Decided capability. In active development." | "Live", "Available", "Launching soon", "In beta", "Coming soon" | Accuracy and regulatory credibility — no product claim should overstate readiness |
+| Product name | "SafeSchool" | "Safe School" (two words), "safeschool" (lowercase) | Brand consistency |
+| Regulatory framework (UK) | "KCSIE" or "Keeping Children Safe in Education" | "Ofsted guidelines", "safeguarding regulations" (vague) | Precision — KCSIE is the specific statutory instrument |
+| Regulatory framework (Spain) | "LOPIVI" | "Spanish safeguarding law" (vague) | Precision |
+| Competitor reference | "MyConcern" / "CPOMS" (named, factual) | "Legacy tools", "inferior products" | Professional tone — attack the architecture, not the brand |
+| Pricing description | "Pricing is negotiated individually" | Any specific discount percentage or tier price in external documents | Commercial sensitivity and negotiating position |
+| Investment instrument | [NEEDS INPUT — confirm instrument name before populating] | | |
+| Data claims | "Our architecture is designed for GDPR and LOPD-GDD compliance" | "GDPR compliant" (without qualification) | A claim of full compliance without a completed DPIA is premature |
+
+**Tone rules**
+
+| Do | Don't |
+|---|---|
+| Speak plainly about the structural failure in school safeguarding | Sensationalise individual incidents or name individuals |
+| Frame regulatory requirements as the tailwind, not the product | Lead with regulation — lead with the child |
+| Acknowledge that the product is in development | Imply the product is complete or commercially operating |
+| Name competitors directly and describe their structural gaps factually | Attack competitors personally or make unverifiable comparative claims |
+| Let the founding story speak — it is powerful because it is true | Over-dramatise or embellish |
+| Show financial projections as management estimates | Present projections as forecasts or guarantees |
+
+**Pre-send checklist (mandatory before distributing any investor-facing document)**
+1. Every financial figure traces to the financial model
+2. Every product status uses approved phrases only — no "live", "available", "launching soon"
+3. No prohibited terminology present
+4. Pricing described as negotiated individually — no specific percentages or tier prices published externally
+5. Tax scheme figures are accurate, current, and appropriately caveated
+6. Risk statements present and not buried
+7. Projections framed as management estimates, not guarantees
+8. No manufactured urgency — only genuine deadlines cited with source
+9. Legal disclaimer present
+10. Capital at risk statement present wherever investment returns are mentioned
+11. No individual children named in any context
+12. No school staff named in any context without legal advice
+
+---
+
+## GAPS REGISTER
+
+The following items are required before this content bank is complete and investor-facing documents can be published. Flag these as [RESOLVED] when confirmed.
+
+| # | Section | Gap | Priority |
+|---|---|---|---|
+| 1 | 03 | Current raise details (instrument, platform, valuation, raise target, ticket sizes, tax scheme) | URGENT — blocks all investor documents |
+| 2 | 08 | Pattern detection trigger rules (confirm: 3 incidents / 30 days?) | HIGH — needed for product accuracy |
+| 3 | 08 | Parent visibility module default settings and LOPIVI compliance review status | HIGH |
+| 4 | 08 | Interview module scope confirmation | MEDIUM |
+| 5 | 09 | Unit economics (CAC, LTV, payback, gross margin) | HIGH — needed for Pack 1 and pitch deck |
+| 6 | 13 | Revenue projection figures from financial model (5 years) | URGENT — blocks investor documents |
+| 7 | 13 | Exit range and DCF floor from financial model | HIGH |
+| 8 | 13 | Use of funds (four categories and percentages) | URGENT |
+| 9 | 14 | Founder bios | HIGH |
+| 10 | 18 | Pilot commitment, letters of intent, soft investor commitments | HIGH |
+| 11 | 19 | Investment instrument name | URGENT — must be consistent across all documents |
+| 12 | 12 | EIS / SEIS eligibility confirmation | HIGH |
+
+---
+
+*End of SafeSchool Content Bank V1 — DRAFT*
+*All investor-facing documents derived from this bank must be reviewed against Section 19 pre-send checklist before distribution.*

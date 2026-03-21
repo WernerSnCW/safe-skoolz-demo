@@ -47,6 +47,235 @@ function AccordionItem({ title, icon: Icon, children }: { title: string; icon: R
   );
 }
 
+type QuizQuestion = {
+  scenario: string;
+  options: { label: string; value: string; emoji: string }[];
+  correct: string;
+  explanation: string;
+  level: string;
+  levelColor: string;
+};
+
+const QUIZ_QUESTIONS: QuizQuestion[] = [
+  {
+    scenario: "Sam accidentally bumps into you in the corridor and says sorry.",
+    options: [
+      { label: "An accident — not bullying", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Bullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "accident",
+    explanation: "This was an accident. Sam didn't mean to and said sorry. Everyone bumps into people sometimes — it's not unkind or bullying.",
+    level: "Not bullying",
+    levelColor: "text-green-600",
+  },
+  {
+    scenario: "A group of children laugh at your drawing in art class and call it rubbish, but it only happens once.",
+    options: [
+      { label: "An accident — not bullying", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Bullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "unkind",
+    explanation: "This is unkind. It would hurt your feelings and it wasn't nice — but if it only happens once, it's an unkind moment rather than bullying. If it keeps happening, it could become bullying.",
+    level: "Unkind — but not bullying yet",
+    levelColor: "text-amber-600",
+  },
+  {
+    scenario: "Every day at lunch, the same person takes your seat on purpose and their friends block you from sitting down. It's been going on for two weeks.",
+    options: [
+      { label: "An accident — not bullying", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Bullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "bullying",
+    explanation: "This is bullying. It's deliberate, it keeps happening, and a group is involved. Being purposely excluded every day is a pattern of bullying behaviour — you should tell a trusted adult.",
+    level: "Bullying",
+    levelColor: "text-red-600",
+  },
+  {
+    scenario: "Your friend doesn't want to play the game you chose at break time. They want to play something else.",
+    options: [
+      { label: "A normal disagreement", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Bullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "accident",
+    explanation: "This is totally normal! Friends don't always agree on everything. Disagreeing about what to play is just part of friendship — not bullying.",
+    level: "Normal friendship",
+    levelColor: "text-green-600",
+  },
+  {
+    scenario: "Someone in your class keeps sending you mean messages on a group chat, calling you names. When you ask them to stop, they create a new group without you and share screenshots making fun of you.",
+    options: [
+      { label: "Just joking around", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Cyberbullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "bullying",
+    explanation: "This is cyberbullying. Repeated name-calling, excluding you, and sharing embarrassing things online is serious. Screenshot the messages and tell a trusted adult straight away.",
+    level: "Cyberbullying",
+    levelColor: "text-red-600",
+  },
+  {
+    scenario: "A classmate says something rude to you because they're having a really bad day. The next day they come and apologise.",
+    options: [
+      { label: "A bad moment — not bullying", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Bullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "unkind",
+    explanation: "This was unkind, and it's okay to feel hurt by it. But they recognised it was wrong and apologised. Everyone has bad days — what matters is that they took responsibility.",
+    level: "Unkind but resolved",
+    levelColor: "text-amber-600",
+  },
+  {
+    scenario: "An older pupil keeps pushing you in the corridor, takes your snack at break, and tells you not to say anything or 'it'll be worse'. This happens several times a week.",
+    options: [
+      { label: "Just messing around", value: "accident", emoji: "✅" },
+      { label: "Unkind behaviour", value: "unkind", emoji: "😕" },
+      { label: "Serious bullying", value: "bullying", emoji: "🚨" },
+    ],
+    correct: "bullying",
+    explanation: "This is serious bullying with physical intimidation and threats. The person is using their size/age to scare you. You must tell a trusted adult — threats like 'don't tell anyone' are a sign you definitely should tell someone.",
+    level: "Serious bullying — tell an adult now",
+    levelColor: "text-red-600",
+  },
+];
+
+function BullyingQuiz() {
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [answered, setAnswered] = useState(false);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const q = QUIZ_QUESTIONS[currentQ];
+
+  const handleSelect = (value: string) => {
+    if (answered) return;
+    setSelected(value);
+    setAnswered(true);
+    if (value === q.correct) setScore(s => s + 1);
+  };
+
+  const handleNext = () => {
+    if (currentQ + 1 >= QUIZ_QUESTIONS.length) {
+      setFinished(true);
+    } else {
+      setCurrentQ(c => c + 1);
+      setSelected(null);
+      setAnswered(false);
+    }
+  };
+
+  const handleRestart = () => {
+    setCurrentQ(0);
+    setSelected(null);
+    setAnswered(false);
+    setScore(0);
+    setFinished(false);
+  };
+
+  if (finished) {
+    const allCorrect = score === QUIZ_QUESTIONS.length;
+    const mostCorrect = score >= QUIZ_QUESTIONS.length - 1;
+    return (
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <CardContent className="p-6 text-center space-y-4">
+          <div className="text-4xl">{allCorrect ? "🌟" : mostCorrect ? "👏" : "💪"}</div>
+          <h3 className="text-lg font-display font-bold">
+            {allCorrect ? "Amazing! You got them all right!" : mostCorrect ? "Great job! Nearly perfect!" : `You scored ${score} out of ${QUIZ_QUESTIONS.length}`}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {allCorrect
+              ? "You really understand the difference between accidents, unkind moments, and bullying. That knowledge will help you look out for yourself and others."
+              : "Knowing the difference between an accident, something unkind, and bullying helps you decide what to do. Remember — if something keeps happening on purpose and it makes you feel bad, tell a trusted adult."}
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={handleRestart}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
+            >
+              <RefreshCw size={14} /> Try Again
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-primary/30">
+      <CardHeader className="border-b border-border/50 bg-primary/5 pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <HelpCircle size={18} className="text-primary" /> Can you tell the difference?
+          </CardTitle>
+          <span className="text-xs text-muted-foreground font-mono">{currentQ + 1} / {QUIZ_QUESTIONS.length}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="p-5 space-y-4">
+        <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+          <p className="text-sm font-medium leading-relaxed">{q.scenario}</p>
+        </div>
+
+        <div className="space-y-2">
+          {q.options.map(opt => {
+            const isSelected = selected === opt.value;
+            const isCorrect = opt.value === q.correct;
+            let borderClass = "border-border hover:border-primary/50 hover:bg-primary/5";
+            if (answered) {
+              if (isCorrect) borderClass = "border-green-400 bg-green-50 dark:bg-green-950/30";
+              else if (isSelected && !isCorrect) borderClass = "border-red-300 bg-red-50 dark:bg-red-950/30";
+              else borderClass = "border-border opacity-60";
+            }
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => handleSelect(opt.value)}
+                disabled={answered}
+                className={`w-full text-left p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${borderClass}`}
+              >
+                <span className="text-lg">{opt.emoji}</span>
+                <span className="text-sm font-medium">{opt.label}</span>
+                {answered && isCorrect && <CheckCircle2 size={16} className="ml-auto text-green-600" />}
+                {answered && isSelected && !isCorrect && <AlertTriangle size={16} className="ml-auto text-red-500" />}
+              </button>
+            );
+          })}
+        </div>
+
+        <AnimatePresence>
+          {answered && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-3"
+            >
+              <div className={`rounded-xl p-4 ${selected === q.correct ? "bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800" : "bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800"}`}>
+                <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${q.levelColor}`}>
+                  {q.level}
+                </p>
+                <p className="text-sm leading-relaxed">{q.explanation}</p>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
+                >
+                  {currentQ + 1 >= QUIZ_QUESTIONS.length ? "See my score" : "Next question →"}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PupilContent() {
   return (
     <div className="space-y-6">
@@ -86,6 +315,8 @@ function PupilContent() {
           </ul>
           <p>If any of these things keep happening on purpose, then it might become bullying — and you should still tell someone.</p>
         </AccordionItem>
+
+        <BullyingQuiz />
 
         <AccordionItem title="What should I do if I'm being bullied?" icon={Shield}>
           <div className="space-y-3">

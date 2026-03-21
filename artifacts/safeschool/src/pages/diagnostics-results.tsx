@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-polished";
+import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import {
-  BarChart3, Users, AlertTriangle, TrendingUp, CheckCircle2,
-  ArrowLeft, Lightbulb
+  BarChart3, Users, TrendingUp, CheckCircle2,
+  ArrowLeft, Sparkles, Target, Plus, Trash2, Send, Shield, Eye,
+  MessageSquare
 } from "lucide-react";
 import { Link } from "wouter";
 import {
@@ -25,10 +27,15 @@ const GROUP_LABELS: Record<string, string> = {
   parent: "Parents",
 };
 
-function fetchWithAuth(url: string) {
+function fetchWithAuth(url: string, opts: RequestInit = {}) {
   const token = localStorage.getItem("safeschool_token");
   return fetch(url, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    ...opts,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...opts.headers,
+    },
   });
 }
 
@@ -36,6 +43,7 @@ export default function DiagnosticsResults() {
   const { user } = useAuth();
   const [, params] = useRoute("/diagnostics/:id/results");
   const surveyId = params?.id;
+  const isLeadership = user && ["coordinator", "head_teacher"].includes(user.role);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["/api/diagnostics", surveyId, "results"],
@@ -44,17 +52,13 @@ export default function DiagnosticsResults() {
       if (!res.ok) throw new Error("Failed to load results");
       return res.json();
     },
-    enabled: !!surveyId,
+    enabled: !!surveyId && !!isLeadership,
   });
 
-  if (!user || !["coordinator", "head_teacher", "senco"].includes(user.role)) {
-    return (
-      <div className="max-w-4xl mx-auto py-12 text-center">
-        <AlertTriangle size={48} className="mx-auto text-destructive mb-4" />
-        <h2 className="text-xl font-bold">Access Restricted</h2>
-        <p className="text-muted-foreground mt-2">Only coordinators and head teachers can view diagnostic results.</p>
-      </div>
-    );
+  if (!user) return null;
+
+  if (!isLeadership) {
+    return <PublicActionsView surveyId={surveyId} />;
   }
 
   if (isLoading) {
@@ -72,13 +76,14 @@ export default function DiagnosticsResults() {
   if (isError || !data) {
     return (
       <div className="max-w-4xl mx-auto py-12 text-center">
-        <AlertTriangle size={48} className="mx-auto text-destructive mb-4" />
+        <Shield size={48} className="mx-auto text-muted-foreground mb-4" />
         <h2 className="text-xl font-bold">Unable to load results</h2>
+        <p className="text-muted-foreground mt-2">Please try again later.</p>
       </div>
     );
   }
 
-  const { survey, participation, categories, insights, totalResponses } = data;
+  const { survey, participation, categories, strengths, growthAreas, alignmentNotes, actions, totalResponses } = data;
 
   const radarData = categories
     .filter((c: any) => c.category !== "System Readiness")
@@ -108,6 +113,10 @@ export default function DiagnosticsResults() {
           <p className="text-muted-foreground mt-1">
             {survey.status === "active" ? "Live results — responses are still coming in" : `Closed ${survey.closedAt ? new Date(survey.closedAt).toLocaleDateString() : ""}`}
           </p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-bold">
+          <Eye size={14} />
+          Confidential — coordinator view only
         </div>
       </div>
 
@@ -152,6 +161,78 @@ export default function DiagnosticsResults() {
         </Card>
       ) : (
         <>
+          {strengths && strengths.length > 0 && (
+            <Card className="border-green-200 dark:border-green-900/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles size={20} className="text-green-500" />
+                  Strengths
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Areas where the school community is well aligned and scoring well.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {strengths.map((s: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-900/30">
+                      <CheckCircle2 size={16} className="text-green-500 mt-0.5 shrink-0" />
+                      <span className="text-sm">{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {growthAreas && growthAreas.length > 0 && (
+            <Card className="border-blue-200 dark:border-blue-900/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target size={20} className="text-blue-500" />
+                  Growth Areas
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Categories with the most potential for positive development.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {growthAreas.map((g: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-900/30">
+                      <TrendingUp size={16} className="text-blue-500 mt-0.5 shrink-0" />
+                      <span className="text-sm">{g}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {alignmentNotes && alignmentNotes.length > 0 && (
+            <Card className="border-amber-200 dark:border-amber-900/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare size={20} className="text-amber-500" />
+                  Alignment Notes
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Where different groups see things differently — opportunities for dialogue.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {alignmentNotes.map((n: string, i: number) => (
+                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30">
+                      <MessageSquare size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                      <span className="text-sm">{n}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
           {radarData.length > 0 && radarData.some((d: any) => d.pupil || d.staff || d.parent) && (
             <Card>
               <CardHeader>
@@ -160,11 +241,11 @@ export default function DiagnosticsResults() {
                   Alignment Overview
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  How do pupils, staff, and parents compare across safeguarding areas? Larger shapes = higher scores (1-5 scale).
+                  How pupils, staff, and parents compare across safeguarding areas (1-5 scale).
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="h-80" role="img" aria-label="Radar chart comparing pupil, staff, and parent scores across safeguarding categories">
+                <div className="h-80" role="img" aria-label="Radar chart comparing pupil, staff, and parent scores">
                   <ResponsiveContainer>
                     <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
                       <PolarGrid stroke="hsl(var(--border))" />
@@ -222,34 +303,266 @@ export default function DiagnosticsResults() {
             </CardContent>
           </Card>
 
-          {insights && insights.length > 0 && (
-            <Card className="border-amber-200 dark:border-amber-900/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb size={20} className="text-amber-500" />
-                  Key Insights
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Auto-generated observations based on the data. Use these as starting points for discussion.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {insights.map((insight: string, i: number) => (
-                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30">
-                      <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
-                      <span className="text-sm">{insight}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="text-center text-sm text-muted-foreground py-4">
+          <div className="text-center text-sm text-muted-foreground py-2">
             Total responses recorded: {totalResponses}
           </div>
         </>
+      )}
+
+      <AgreedActionsPanel surveyId={surveyId!} existingActions={actions || []} categories={categories?.map((c: any) => c.category) || []} />
+    </div>
+  );
+}
+
+function AgreedActionsPanel({ surveyId, existingActions, categories }: {
+  surveyId: string;
+  existingActions: any[];
+  categories: string[];
+}) {
+  const queryClient = useQueryClient();
+  const [newAction, setNewAction] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [newOwner, setNewOwner] = useState("");
+
+  const addMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetchWithAuth(`/api/diagnostics/${surveyId}/actions`, {
+        method: "POST",
+        body: JSON.stringify({
+          action: newAction,
+          category: newCategory || null,
+          owner: newOwner || null,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to add action");
+      return res.json();
+    },
+    onSuccess: () => {
+      setNewAction("");
+      setNewCategory("");
+      setNewOwner("");
+      queryClient.invalidateQueries({ queryKey: ["/api/diagnostics", surveyId, "results"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (actionId: string) => {
+      const res = await fetchWithAuth(`/api/diagnostics/${surveyId}/actions/${actionId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/diagnostics", surveyId, "results"] });
+    },
+  });
+
+  const publishMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetchWithAuth(`/api/diagnostics/${surveyId}/actions/publish`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to publish");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/diagnostics", surveyId, "results"] });
+    },
+  });
+
+  const isPublished = existingActions.some(a => a.publishedAt);
+
+  return (
+    <Card className="border-primary/30">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Target size={20} className="text-primary" />
+          Agreed Actions
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Create the action plan here. Only published actions are shared with the wider school community — raw scores and charts stay confidential.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {existingActions.length > 0 && (
+          <div className="space-y-2">
+            {existingActions.map((a: any) => (
+              <div key={a.id} className="flex items-start gap-3 p-3 rounded-xl border border-border bg-card">
+                <CheckCircle2 size={16} className="text-primary mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{a.action}</p>
+                  <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                    {a.category && <span>{a.category}</span>}
+                    {a.owner && <span>Owner: {a.owner}</span>}
+                    {a.publishedAt && (
+                      <span className="text-green-600 dark:text-green-400 font-bold">Published</span>
+                    )}
+                  </div>
+                </div>
+                {!a.publishedAt && (
+                  <button
+                    onClick={() => deleteMutation.mutate(a.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                    aria-label="Remove action"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isPublished && (
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <div>
+              <label className="text-xs font-bold text-muted-foreground block mb-1">Action</label>
+              <input
+                type="text"
+                value={newAction}
+                onChange={e => setNewAction(e.target.value)}
+                placeholder="e.g. Run assembly on reporting channels for all year groups"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1">Category (optional)</label>
+                <select
+                  value={newCategory}
+                  onChange={e => setNewCategory(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                >
+                  <option value="">General</option>
+                  {categories.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-muted-foreground block mb-1">Owner (optional)</label>
+                <input
+                  type="text"
+                  value={newOwner}
+                  onChange={e => setNewOwner(e.target.value)}
+                  placeholder="e.g. DSL, SENCO, Head of Year"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            </div>
+            <Button
+              onClick={() => addMutation.mutate()}
+              disabled={!newAction.trim() || addMutation.isPending}
+              size="sm"
+            >
+              <Plus size={14} className="mr-1" />
+              {addMutation.isPending ? "Adding..." : "Add Action"}
+            </Button>
+          </div>
+        )}
+
+        {existingActions.length > 0 && !isPublished && (
+          <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
+            <div>
+              <p className="text-sm font-bold">Ready to share with the school?</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Publishing shares these actions with all staff, parents, and PTA. Raw scores and charts remain confidential.
+              </p>
+            </div>
+            <Button
+              onClick={() => publishMutation.mutate()}
+              disabled={publishMutation.isPending}
+              size="sm"
+            >
+              <Send size={14} className="mr-1" />
+              {publishMutation.isPending ? "Publishing..." : "Publish Actions"}
+            </Button>
+          </div>
+        )}
+
+        {isPublished && (
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm font-medium p-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-900/30">
+            <CheckCircle2 size={16} />
+            Actions published — the wider school community can now see these agreed actions.
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PublicActionsView({ surveyId }: { surveyId: string | undefined }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["/api/diagnostics", surveyId, "actions"],
+    queryFn: async () => {
+      const res = await fetchWithAuth(`/api/diagnostics/${surveyId}/actions`);
+      if (!res.ok) throw new Error("Failed to load");
+      return res.json();
+    },
+    enabled: !!surveyId,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
+        <div className="h-10 bg-muted rounded-lg w-64" />
+        <div className="h-48 bg-muted rounded-2xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+      <div>
+        <Link href="/diagnostics" className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1 mb-2">
+          <ArrowLeft size={14} /> Back to Diagnostics
+        </Link>
+        <h1 className="text-3xl font-display font-bold">Diagnostic Actions</h1>
+        <p className="text-muted-foreground mt-1">
+          {data?.surveyTitle || "School Onboarding Diagnostic"}
+        </p>
+      </div>
+
+      {!data?.isPublished || !data?.actions?.length ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Shield size={48} className="mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-xl font-bold mb-2">Actions not yet available</h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              The school leadership is reviewing the diagnostic results and developing an action plan. You'll be able to see the agreed actions once they're published.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target size={20} className="text-primary" />
+              Agreed Actions
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Based on the school diagnostic, these are the actions the school has committed to.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {data.actions.map((a: any) => (
+                <li key={a.id} className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium">{a.action}</p>
+                    {a.category && (
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
+                        {a.category}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

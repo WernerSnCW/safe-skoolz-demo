@@ -29,5 +29,21 @@ export const diagnosticResponsesTable = pgTable("diagnostic_responses", {
   index("idx_diagnostic_responses_question").on(t.surveyId, t.questionKey),
 ]);
 
+export const diagnosticActionsTable = pgTable("diagnostic_actions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  surveyId: uuid("survey_id").notNull().references(() => diagnosticSurveysTable.id),
+  schoolId: uuid("school_id").notNull().references(() => schoolsTable.id),
+  action: text("action").notNull(),
+  category: varchar("category", { length: 100 }),
+  owner: varchar("owner", { length: 255 }),
+  status: varchar("status", { length: 20 }).notNull().default("planned"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+}, (t) => [
+  index("idx_diagnostic_actions_survey").on(t.surveyId),
+  index("idx_diagnostic_actions_school").on(t.schoolId),
+]);
+
 export type DiagnosticSurvey = typeof diagnosticSurveysTable.$inferSelect;
 export type DiagnosticResponse = typeof diagnosticResponsesTable.$inferSelect;
+export type DiagnosticAction = typeof diagnosticActionsTable.$inferSelect;

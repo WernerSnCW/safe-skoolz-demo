@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { db } from "@workspace/db";
-import { diagnosticSurveysTable, diagnosticResponsesTable, usersTable } from "@workspace/db/schema";
+import { diagnosticSurveysTable, diagnosticResponsesTable, diagnosticActionsTable, usersTable } from "@workspace/db/schema";
 import { eq, and, count, avg, sql } from "drizzle-orm";
 import { authMiddleware } from "../lib/auth";
 
@@ -449,42 +449,59 @@ router.get("/diagnostics/:id/results", authMiddleware, async (req: Request, res:
     return { category: cat, averages: groupAverages };
   });
 
-  const insights: string[] = [];
+  const strengths: string[] = [];
+  const growthAreas: string[] = [];
+  const alignmentNotes: string[] = [];
+
   for (const c of categories) {
     const groups = Object.keys(c.averages);
+    const allAvgs = Object.values(c.averages);
+    const overallAvg = allAvgs.reduce((a, b) => a + b, 0) / allAvgs.length;
+
+    if (overallAvg >= 3.8) {
+      strengths.push(`"${c.category}" is a clear strength across the school community (avg: ${overallAvg.toFixed(1)}/5).`);
+    } else if (overallAvg <= 2.5) {
+      growthAreas.push(`"${c.category}" is an area where focused development could make a real difference (avg: ${overallAvg.toFixed(1)}/5).`);
+    }
+
     if (groups.includes("pupil") && groups.includes("staff")) {
       const gap = Math.abs(c.averages.pupil - c.averages.staff);
       if (gap >= 1.5) {
-        const who = c.averages.pupil < c.averages.staff ? "Pupils" : "Staff";
-        insights.push(`${who} rate "${c.category}" significantly lower than ${c.averages.pupil < c.averages.staff ? "staff" : "pupils"} (gap: ${gap.toFixed(1)} points). This suggests a perception mismatch worth investigating.`);
+        const lower = c.averages.pupil < c.averages.staff ? "pupils" : "staff";
+        const higher = c.averages.pupil < c.averages.staff ? "staff" : "pupils";
+        alignmentNotes.push(`In "${c.category}", ${lower} and ${higher} see things differently (${gap.toFixed(1)} point gap). Exploring this together could strengthen shared understanding.`);
       }
     }
     if (groups.includes("parent") && groups.includes("staff")) {
       const gap = Math.abs(c.averages.parent - c.averages.staff);
       if (gap >= 1.5) {
-        const who = c.averages.parent < c.averages.staff ? "Parents" : "Staff";
-        insights.push(`${who} rate "${c.category}" significantly lower than ${c.averages.parent < c.averages.staff ? "staff" : "parents"} (gap: ${gap.toFixed(1)} points). Better communication may help bridge this gap.`);
-      }
-    }
-    for (const [g, avg] of Object.entries(c.averages)) {
-      if (avg <= 2.5) {
-        insights.push(`"${c.category}" scores low among ${g}s (avg: ${avg.toFixed(1)}/5). This area needs attention.`);
+        const lower = c.averages.parent < c.averages.staff ? "parents" : "staff";
+        const higher = c.averages.parent < c.averages.staff ? "staff" : "parents";
+        alignmentNotes.push(`In "${c.category}", ${lower} and ${higher} have different perspectives (${gap.toFixed(1)} point gap). This is an opportunity to strengthen communication.`);
       }
     }
   }
 
   if (participation.pupil.responded === 0) {
-    insights.push("No pupils have completed the diagnostic yet. Pupil voice is essential for an accurate picture.");
+    alignmentNotes.push("Pupil voices haven't been heard yet — their perspective will complete the picture.");
   }
   if (participation.parent.responded === 0) {
-    insights.push("No parents have completed the diagnostic yet. Parent perspectives help identify blind spots.");
+    alignmentNotes.push("Parent perspectives are still needed — their input will help round out the school view.");
   }
+
+  const actions = await db.select()
+    .from(diagnosticActionsTable)
+    .where(eq(diagnosticActionsTable.surveyId, surveyId))
+    .orderBy(diagnosticActionsTable.createdAt);
 
   res.json({
     survey,
     participation,
     categories,
-    insights,
+    strengths,
+    growthAreas,
+    alignmentNotes,
+    actions,
     totalResponses: responses.length,
     questionBank: QUESTION_BANK.map(q => ({ key: q.key, category: q.category })),
   });
@@ -520,6 +537,151 @@ router.patch("/diagnostics/:id", authMiddleware, async (req: Request, res: Respo
   }
 
   res.json(updated);
+});
+
+router.post("/diagnostics/:id/actions", authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  if (!["coordinator", "head_teacher"].includes(user.role)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const surveyId = req.params.id;
+  const { action, category, owner } = req.body;
+
+  if (!action || typeof action !== "string" || action.trim().length === 0) {
+    res.status(400).json({ error: "Action text is required" });
+    return;
+  }
+
+  const [survey] = await db.select()
+    .from(diagnosticSurveysTable)
+    .where(and(
+      eq(diagnosticSurveysTable.id, surveyId),
+      eq(diagnosticSurveysTable.schoolId, user.schoolId),
+    ));
+
+  if (!survey) {
+    res.status(404).json({ error: "Survey not found" });
+    return;
+  }
+
+  const [newAction] = await db.insert(diagnosticActionsTable).values({
+    surveyId,
+    schoolId: user.schoolId,
+    action: action.trim(),
+    category: category || null,
+    owner: owner || null,
+    status: "planned",
+  }).returning();
+
+  res.status(201).json(newAction);
+});
+
+router.patch("/diagnostics/:id/actions/:actionId", authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  if (!["coordinator", "head_teacher"].includes(user.role)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const { action, category, owner, status } = req.body;
+  const updates: any = {};
+  if (action !== undefined) updates.action = action;
+  if (category !== undefined) updates.category = category;
+  if (owner !== undefined) updates.owner = owner;
+  if (status !== undefined) updates.status = status;
+
+  const [updated] = await db.update(diagnosticActionsTable)
+    .set(updates)
+    .where(and(
+      eq(diagnosticActionsTable.id, req.params.actionId),
+      eq(diagnosticActionsTable.surveyId, req.params.id),
+      eq(diagnosticActionsTable.schoolId, user.schoolId),
+    ))
+    .returning();
+
+  if (!updated) {
+    res.status(404).json({ error: "Action not found" });
+    return;
+  }
+
+  res.json(updated);
+});
+
+router.delete("/diagnostics/:id/actions/:actionId", authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  if (!["coordinator", "head_teacher"].includes(user.role)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const deleted = await db.delete(diagnosticActionsTable)
+    .where(and(
+      eq(diagnosticActionsTable.id, req.params.actionId),
+      eq(diagnosticActionsTable.surveyId, req.params.id),
+      eq(diagnosticActionsTable.schoolId, user.schoolId),
+    ))
+    .returning();
+
+  if (deleted.length === 0) {
+    res.status(404).json({ error: "Action not found" });
+    return;
+  }
+
+  res.json({ success: true });
+});
+
+router.post("/diagnostics/:id/actions/publish", authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  if (!["coordinator", "head_teacher"].includes(user.role)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const surveyId = req.params.id;
+  const now = new Date();
+
+  const updated = await db.update(diagnosticActionsTable)
+    .set({ publishedAt: now })
+    .where(and(
+      eq(diagnosticActionsTable.surveyId, surveyId),
+      eq(diagnosticActionsTable.schoolId, user.schoolId),
+    ))
+    .returning();
+
+  res.json({ published: updated.length });
+});
+
+router.get("/diagnostics/:id/actions", authMiddleware, async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const surveyId = req.params.id;
+
+  const [survey] = await db.select()
+    .from(diagnosticSurveysTable)
+    .where(and(
+      eq(diagnosticSurveysTable.id, surveyId),
+      eq(diagnosticSurveysTable.schoolId, user.schoolId),
+    ));
+
+  if (!survey) {
+    res.status(404).json({ error: "Survey not found" });
+    return;
+  }
+
+  const allActions = await db.select()
+    .from(diagnosticActionsTable)
+    .where(eq(diagnosticActionsTable.surveyId, surveyId))
+    .orderBy(diagnosticActionsTable.createdAt);
+
+  const isLeadership = ["coordinator", "head_teacher"].includes(user.role);
+  const publishedActions = allActions.filter(a => a.publishedAt !== null);
+
+  res.json({
+    actions: isLeadership ? allActions : publishedActions,
+    isPublished: publishedActions.length > 0,
+    surveyTitle: survey.title,
+  });
 });
 
 export default router;

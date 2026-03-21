@@ -1,18 +1,8 @@
 # Overview
 
-This is a pnpm workspace monorepo using TypeScript, designed for a multi-role safeguarding and incident reporting platform for schools called SafeSchool. The project aims to provide a comprehensive solution for managing incidents, ensuring compliance with various safeguarding frameworks (LOPIVI, Convivèxit 2024, Machista Violence), and facilitating communication among pupils, parents, and staff.
+This project, SafeSchool, is a pnpm workspace monorepo using TypeScript, designed as a multi-role safeguarding and incident reporting platform for schools. Its core purpose is to provide a comprehensive solution for managing incidents, ensuring compliance with safeguarding frameworks (LOPIVI, Convivèxit 2024, Machista Violence), and facilitating secure communication among all school community members.
 
-Key capabilities include:
-- Role-based authentication and access control.
-- Incident reporting with detailed tracking and escalation tiers.
-- Compliance framework integration with delegated roles and annex templates.
-- Pattern detection alerts for recurring issues.
-- Structured risk assessment for safeguarding protocols.
-- Pupil and parent messaging systems.
-- SENCO caseload management.
-- Comprehensive analytics dashboards for staff.
-
-The project emphasizes a secure, privacy-conscious, and user-friendly experience to enhance child protection and school safety.
+Key capabilities include role-based access, detailed incident tracking with escalation, compliance framework integration, pattern detection for early alerts, structured risk assessment, and dedicated messaging systems for pupils, parents, and staff. The platform also offers SENCO caseload management and comprehensive analytics. SafeSchool aims to enhance child protection and school safety through a secure, privacy-conscious, and user-friendly experience.
 
 # User Preferences
 
@@ -25,49 +15,49 @@ The project emphasizes a secure, privacy-conscious, and user-friendly experience
 
 # System Architecture
 
-The project is structured as a pnpm workspace monorepo, separating deployable applications from shared libraries and utility scripts.
+The project is a pnpm workspace monorepo, separating deployable applications from shared libraries.
 
 **Monorepo Structure:**
-- `artifacts/`: Contains deployable applications like `api-server` (Express API) and `safeschool` (React+Vite frontend).
-- `lib/`: Houses shared libraries including `api-spec` (OpenAPI), `api-client-react` (generated React Query hooks), `api-zod` (generated Zod schemas), and `db` (Drizzle ORM schema).
-- `scripts/`: Holds various utility scripts.
+- `artifacts/`: Contains deployable applications (`api-server`, `safeschool`).
+- `lib/`: Houses shared libraries (`api-spec`, `api-client-react`, `api-zod`, `db`).
 
 **Technical Stack:**
-- **Backend:** Node.js 24, Express 5, PostgreSQL with Drizzle ORM, Zod for validation, Orval for API codegen.
-- **Frontend:** React, Vite, TailwindCSS for styling, Framer Motion for animations.
-- **Authentication:** Custom JWT-based authentication with bcrypt for password hashing. Tokens are stored in `localStorage`.
-- **Build System:** esbuild for CJS bundles.
+- **Backend:** Node.js 24, Express 5, PostgreSQL with Drizzle ORM, Zod, Orval.
+- **Frontend:** React, Vite, TailwindCSS, Framer Motion.
+- **Authentication:** Custom JWT-based authentication with bcrypt.
+- **Build System:** esbuild.
 
 **UI/UX Decisions:**
-- The SafeSchool frontend is a React+Vite application.
-- Role-specific dashboards and interfaces are provided for pupils, parents, teachers, and coordinators.
-- Quick Demo Login panel on the login page facilitates easy access for demonstrations.
-- Incident reporting forms adapt language based on the user's role (child-friendly for pupils, professional for staff).
-- Data visualization for analytics includes monthly trend line charts and bar charts.
-- Color-coded badges are used for protocol risk assessments.
-- Pupil search functionality includes truncated last names for privacy.
+- React+Vite frontend with role-specific dashboards.
+- Adaptive incident reporting forms (child-friendly vs. professional).
+- Data visualization with charts and color-coded badges.
+- Privacy-conscious pupil search.
+- Dark mode toggle with system preference support.
+- Smart mobile bottom navigation with role-specific priority items.
+- Skeleton loaders and accessible error states.
+- Enhanced form accessibility with `autoComplete` attributes.
 
 **Feature Specifications & System Design:**
-- **Auth & Roles:** JWT-based custom authentication with bcrypt. Supports various roles (pupil, parent, teacher, head_of_year, coordinator, head_teacher, senco, support_staff, pta) with a defined visibility hierarchy. Pupil PINs are unique random 4-digit numbers (not shared). Staff can reset PINs individually or in bulk from the My Class page, with printable PIN slips. PTA login uses staff login endpoint with role=pta.
-- **API Proxy:** Vite development server proxies `/api/*` requests to the Express API server running on port 8080.
-- **Database Schema:** Core entities include schools, users, incidents, protocols, interviews, notifications, pattern alerts, audit logs, messages, SENCO caseload, and tracking. Compliance-related tables manage delegated roles, annex templates, and referral bodies. Protocols can include JSONB fields for risk/protective factors and family context.
-- **Compliance Frameworks:** Supports LOPIVI, Convivèxit 2024, and Machista Violence protocols, with dedicated tables for delegated roles, annex templates, and referral bodies.
-- **Incident Management:**
-    - Incident reporting captures emotional state and incorporates safeguarding checks.
-    - Person identification supports searching by name and structured descriptions for unknown individuals, stored as JSONB.
-    - Escalation tiers (tier1, tier2, tier3) categorize incidents based on severity.
-    - Robust incident filtering by various criteria (child, year group, class, category, status).
-    - Teacher assessment workflow allows staff to add notes, witness statements (JSONB array with timestamps), and parent summaries, with role-based visibility controls.
-- **Messaging System:**
-    - Pupil messaging with dynamic safe contacts, priority flags, and urgent help features.
-    - Staff messaging inbox with conversation threads.
-    - Parent messaging allows communication with school staff, listing child's teachers first.
-- **SENCO Caseload Tracker:** Dedicated page for SENCOs to manage pupil caseloads, track progress, feelings, and attitudes, with a timeline history.
-- **Behaviour Escalation Tracker:** Points-based system with 7 escalation levels (Good Standing → Warning → Formal Warning → Suspension Risk → Suspended → Term Exclusion → Full Exclusion). Staff can issue points by category, view school-wide summary. Pupils and parents see their own record with visual gauge and escalation ladder. DB: `behaviour_points`. Routes: `/api/behaviour/*`. Page: `/behaviour`.
-- **PTA Portal (v0.3):** Full PTA portal at `/pta` with 6 sub-tabs: Dashboard (anonymised KPIs, category/trend/behaviour charts), Coordinator Channel (messaging between PTA and coordinator), Policy (acknowledge/flag current safeguarding policy), Annual Report (view approved reports), Co-Design (submit feedback on system design), Resources (LOPIVI guide, Convivèxit guide, templates, PTA rights checklist). DB tables: `pta_messages`, `pta_concerns`, `pta_policy_acknowledgements`, `pta_codesign_responses`, `pta_annual_reports`. All dashboard data is anonymised — no PII returned. Seed accounts: pta.chair@safeschool.dev / pta123, pta.member1@safeschool.dev / pta123.
-- **Newsletter / Register Interest:** Public page at `/newsletter` (no auth required) for schools, authorities, trusts, NGOs, and other organisations to sign up for updates. Collects organisation type, name, contact details, role, region, interests, and consent. DB table: `newsletter_subscribers`. API: `POST /api/newsletter/subscribe` (public). Duplicate email protection. Link from the login page footer.
-- **Analytics:** Anonymized school-wide analytics for parents and detailed staff dashboards with incident statistics, trends, and hotspots.
-- **TypeScript & Composite Projects:** The monorepo leverages TypeScript with composite projects and project references for efficient type-checking and build processes.
+- **Auth & Roles:** JWT-based custom authentication supporting multiple roles (pupil, parent, staff, coordinator, etc.) with a visibility hierarchy. Pupil PINs are unique and resettable by staff.
+- **API Proxy:** Vite development server proxies API requests to the Express backend.
+- **Database Schema:** Core entities include schools, users, incidents, protocols, notifications, pattern alerts, audit logs, messages, SENCO caseload, and compliance-related tables (delegated roles, annex templates, referral bodies). Protocols can include JSONB for dynamic data.
+- **Compliance Frameworks:** Supports LOPIVI, Convivèxit 2024, and Machista Violence.
+- **Incident Management:** Detailed reporting with emotional state capture, safeguarding checks, person identification (including unknown individuals), and three escalation tiers. Robust filtering and a teacher assessment workflow with role-based visibility.
+- **Messaging System:** Dedicated messaging for pupils (safe contacts, urgent help), staff (inbox), and parents (school staff communication).
+- **SENCO Caseload Tracker:** Page for SENCOs to manage pupil caseloads, track progress, and view history.
+- **Behaviour Escalation Tracker:** Points-based system with 7 escalation levels, visible to staff, pupils, and parents.
+- **PTA Portal:** Full portal for PTA members with a dashboard (anonymized KPIs), messaging, policy acknowledgment, annual reports, co-design feedback, and resources. Data is anonymized.
+- **Newsletter / Register Interest:** Public page for organizations to sign up for updates, collecting contact details and interests.
+- **Analytics:** Anonymized school-wide analytics for parents and detailed staff dashboards with incident statistics and trends.
+- **TypeScript & Composite Projects:** Monorepo uses TypeScript with composite projects for efficient type-checking.
+- **Security Enhancements:** Demo login gated by environment variable, JWT secret validation, secure endpoint access (IDOR checks), newsletter subscribe returns 200 to prevent email leaks, restricted CORS, cross-tenant data enforcement, mandatory referral engine for critical incidents, immutable audit logs via PostgreSQL trigger.
+- **Data Integrity:** Correct parent notification logic, alert scope filtering.
+- **Rate Limiting:** Implemented on authentication and newsletter endpoints.
+- **Pattern Detection:** Six specific rules (`sexual_any`, `same_victim_3_incidents`, `same_pair_escalating`, `group_targeting`, `location_hotspot`, `repeat_perpetrator`, `emotional_distress_pattern`) trigger alerts with scheduled cron scans and deduplication.
+- **Pupil Session Timeout:** 90-second inactivity auto-logout for pupil roles only.
+- **Public Endpoints:** `GET /schools` and `GET /schools/:schoolId/pupils` return minimal, privacy-preserving data for login.
+- **PTA PII Middleware:** Dedicated middleware to strip PII from `/pta/*` responses for PTA users.
+- **School Onboarding Diagnostic:** Multi-role climate survey for pupils, staff, and parents to assess safeguarding culture. Features role-adaptive UI, a 20-question bank across 5 categories, tiered disclosure (coordinators see full confidential results with charts; all other roles see only published Agreed Actions), growth-oriented insight framing (Strengths/Growth Areas/Alignment Notes), and an Agreed Actions workflow where coordinators create, refine, and publish action items for the wider school community.
 
 # External Dependencies
 
@@ -79,145 +69,7 @@ The project is structured as a pnpm workspace monorepo, separating deployable ap
 - **Styling:** TailwindCSS
 - **Animation Library:** Framer Motion
 - **Validation:** Zod
-- **API Code Generation:** Orval (from OpenAPI specification)
+- **API Code Generation:** Orval
 - **Authentication Hashing:** bcrypt
-- **Query Management:** TanStack React Query (specifically `@tanstack/react-query`)
-- **Rate Limiting:** express-rate-limit (auth and newsletter endpoints)
-
-# v0.3.0 CRAFT Security & Architecture Fixes
-
-The following 15 priority fixes from the CRAFT review have been implemented:
-
-**Security (T001):**
-- Demo login gated behind `DEMO_MODE=true` env var
-- JWT secret fails startup if missing (no hardcoded fallback)
-- `GET /schools` and `GET /schools/:schoolId/pupils` require auth + cross-school IDOR check
-- Newsletter subscribe always returns 200 (no email existence leak)
-- CORS restricted to dev domain
-- Cross-tenant incident/protocol updates blocked by schoolId enforcement
-
-**Data Integrity (T002):**
-- Parent notification uses correct `parentOf` field (not `childIds`)
-- Alert scope filtered to teacher/head_of_year's own pupils
-
-**Rate Limiting (T003):**
-- Auth endpoints: 10 req/15min per IP
-- Newsletter: 5 req/hour per IP
-
-**Safeguarding (T004):**
-- Mandatory referral engine in escalation.ts for Tier 3/sexual/coercive incidents
-- Protocol close blocked if mandatory referral not recorded
-
-**Database (T005):**
-- Indexes on schoolId, status, createdAt for incidents, protocols, pattern_alerts, audit_log, users, behaviour_points
-
-**Audit (T006):**
-- Audit logging for PIN reset, bulk PIN reset, behaviour points, SENCO caseload changes, message send
-
-**API Contract (T007-T008):**
-- api-zod duplicate export conflict resolved (single barrel export from generated/api)
-- PTA report generation changed from GET to POST in OpenAPI, generated client, and backend
-
-**Accessibility (T009):**
-- Login tabs: role="tablist/tab", aria-selected, aria-live error banner
-- AppLayout mobile menu: aria-label, aria-expanded
-- Report incident: submit error state with aria-live
-- Dashboard/PTA tabs: full ARIA tab semantics
-- Charts wrapped with role="img" and descriptive aria-labels
-
-**Data Retention (T010):**
-- `GET /api/data-retention/policy` endpoint (coordinator/head_teacher/senco/pta only)
-- 8 data categories with retention periods and LOPIVI legal bases
-
-**Architecture (T011):**
-- Dashboard split from 1857-line monolith into 4 sub-components: PupilDashboard, CoordinatorDashboard, TeacherDashboard, ParentDashboard
-- Main dashboard.tsx reduced to ~40-line role router
-
-## Spec Compliance Enhancements (Post-CRAFT)
-
-**Pattern Detection — All 6 Rules (spec-complete):**
-- `sexual_any` — Red alert on any sexual/sexualised category, notifies coordinator + head_teacher
-- `same_victim_3_incidents` — Amber alert for 3+ incidents same victim in 30 days
-- `same_pair_escalating` — Red alert if 3+ incidents across 2+ categories
-- `group_targeting` — Red alert for same victim targeted by 3+ distinct perpetrators in 14 days
-- `location_hotspot` — Amber alert for 3+ incidents at same location in 14 days
-- `repeat_perpetrator` — Amber alert for 3+ incidents by same perpetrator in 30 days
-- `emotional_distress_pattern` — Amber alert for 3+ distress reports in 30 days, notifies coordinator + SENCO
-- Scheduled cron scan runs every 60 minutes across all schools
-- Alert deduplication: `createAlert()` checks for existing open alerts with same rule + school + victim before inserting; notifications only sent for new alerts (idempotent)
-
-**Pupil Session Timeout (90 seconds):**
-- Inactivity auto-logout for pupil role only (mousedown, mousemove, keydown, touchstart, scroll events)
-- Non-pupil roles unaffected (no timeout)
-- Implemented in AuthProvider via useEffect with cleanup
-
-**Schools/Pupils Endpoints — Public for Login:**
-- `GET /schools` returns only id + name (minimal data for login selector)
-- `GET /schools/:schoolId/pupils` returns truncated names for pupil login name picker
-- No sensitive fields (email, address, CIF, legal entity) exposed on public endpoints
-
-**PTA PII Middleware:**
-- Dedicated `ptaPiiMiddleware.ts` intercepts all `/pta/*` responses for PTA role users
-- Comprehensive PII field set (40+ fields): names, emails, IDs, phone, address, DOB, victim/perpetrator/witness identifiers
-- Applied as Express middleware on the PTA route group — defense-in-depth alongside query-level anonymisation
-- Recursively strips PII from nested objects and arrays
-
-**Audit Log Immutability:**
-- PostgreSQL BEFORE trigger `audit_log_no_update` blocks all UPDATE and DELETE on audit_log table
-- Raises exception: "audit_log is append-only: UPDATE and DELETE operations are not permitted"
-- Database-level enforcement — cannot be bypassed by application code
-- Trigger auto-applied on API server startup via `ensureAuditLogImmutability()` in index.ts
-
-## UX Improvements (Post-CRAFT)
-
-**Demo Account Gating:**
-- Staff/parent/PTA demo account lists and "Show me around" button gated behind `IS_DEMO` flag
-- `IS_DEMO = import.meta.env.DEV || import.meta.env.VITE_DEMO_MODE === "true"` — visible in dev, hidden in production unless explicitly enabled
-- When not in demo mode, login shows only email/password manual entry (no account selector)
-
-**Dark Mode Toggle:**
-- Settings page includes Appearance section with Light/Dark/System toggle buttons
-- Theme preference persisted to localStorage (`safeschool_theme` key)
-- System option listens to `prefers-color-scheme` media query and auto-switches
-- Inline script in `index.html` applies theme before React mounts (prevents flash of wrong theme)
-- Full dark theme CSS variables defined in `.dark` class in `index.css`
-
-**Smart Mobile Bottom Navigation:**
-- Replaced arbitrary `navItems.slice(0,4)` with role-specific priority item selection
-- `MOBILE_PRIORITY_HREFS` map defines most important nav items per role (e.g., pupils get Dashboard/Report/Education/Settings, coordinators get Dashboard/Incidents/Protocols/Alerts)
-- Falls back to filling remaining slots from full nav list if fewer than 4 priority items match
-
-**Skeleton Loaders & Error States:**
-- TeacherDashboard: shimmer skeleton during data load, error state with refresh button if both queries fail
-- ParentDashboard: structured skeleton matching dashboard layout (4 stat cards + content blocks)
-- Loading state uses proper `isLoading` query flags (not data presence checks) to avoid premature skeleton dismissal
-
-**Form Accessibility:**
-- `autoComplete` attributes on login form: PIN (`one-time-code`), password (`current-password`), email (`email`)
-- Unicode emoji escapes fixed to actual emoji characters in report-incident.tsx, ParentDashboard.tsx
-
-## School Onboarding Diagnostic
-
-**Purpose:** Multi-role climate survey where pupils, staff, and parents all answer role-appropriate questions to establish a baseline of the school's safeguarding culture, awareness levels, and system readiness. Highlights alignment and perception gaps between groups.
-
-**Question Bank (20 questions across 5 categories):**
-- Awareness & Prevalence (3 questions) — all roles
-- Trust & Reporting (4 questions) — role-specific
-- Culture & Wellbeing (4 questions) — role-specific
-- Safeguarding Knowledge (4 questions) — staff/parents
-- System Readiness (5 questions) — coordinator/head teacher only
-
-**Role-adaptive UI:**
-- Pupils: one-question-at-a-time with emoji face scale (1-5), progress bar, auto-advance
-- Staff/Coordinator: grouped by category, professional Likert 1-5 buttons
-- Parents: same Likert format with parent-focused language
-
-**Database:** `diagnostic_surveys` (per-school, status: active/closed), `diagnostic_responses` (user answers)
-**API:** POST /api/diagnostics (create), GET /api/diagnostics/active (get survey + questions), POST /api/diagnostics/:id/respond (submit), GET /api/diagnostics/:id/results (aggregated), PATCH /api/diagnostics/:id (close)
-**Frontend:** /diagnostics (survey page), /diagnostics/:id/results (results dashboard)
-
-**Results Dashboard (coordinator view):**
-- Participation stats per group (pupils, staff, parents) with progress bars
-- Radar chart overlaying pupil/staff/parent average scores by category
-- Horizontal bar chart for category-by-group comparison
-- Auto-generated insights highlighting perception gaps (>1.5 point differences), low-scoring areas, and missing group participation
+- **Query Management:** TanStack React Query
+- **Rate Limiting:** express-rate-limit

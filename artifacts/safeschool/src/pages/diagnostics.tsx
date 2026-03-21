@@ -230,6 +230,36 @@ function CoordinatorView({ user }: { user: any }) {
   );
 }
 
+function ActionsLink({ surveyId }: { surveyId: string }) {
+  const { data } = useQuery({
+    queryKey: ["/api/diagnostics", surveyId, "actions"],
+    queryFn: async () => {
+      const res = await fetchWithAuth(`/api/diagnostics/${surveyId}/actions`);
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!surveyId,
+  });
+
+  if (!data?.isPublished || !data?.actions?.length) return null;
+
+  return (
+    <Link href={`/diagnostics/${surveyId}/results`}>
+      <Card className="hover:border-primary/30 transition-colors cursor-pointer">
+        <CardContent className="p-4 flex items-center justify-between">
+          <div>
+            <p className="font-bold text-sm">View Agreed Actions</p>
+            <p className="text-xs text-muted-foreground">
+              See what the school has committed to based on the diagnostic
+            </p>
+          </div>
+          <ArrowRight size={16} className="text-muted-foreground" />
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 function RespondentView({ user }: { user: any }) {
   const { data, isLoading } = useQuery({
     queryKey: ["/api/diagnostics/active"],
@@ -267,28 +297,34 @@ function RespondentView({ user }: { user: any }) {
 
   if (data.alreadyCompleted) {
     return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <CheckCircle2 size={48} className="mx-auto text-primary mb-4" />
-          <h2 className="text-xl font-bold mb-2">
-            {user.role === "pupil" ? "All done! Thank you!" : "Thank you for responding!"}
-          </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {user.role === "pupil"
-              ? "Your answers help make school better for everyone."
-              : "Your responses have been recorded. The school coordinator will share the results."}
-          </p>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <CheckCircle2 size={48} className="mx-auto text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2">
+              {user.role === "pupil" ? "All done! Thank you!" : "Thank you for responding!"}
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              {user.role === "pupil"
+                ? "Your answers help make school better for everyone."
+                : "Your responses have been recorded. The school coordinator will share the results."}
+            </p>
+          </CardContent>
+        </Card>
+        <ActionsLink surveyId={data.survey.id} />
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <SurveyForm surveyId={data.survey.id} questions={data.questions} user={user} />
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <SurveyForm surveyId={data.survey.id} questions={data.questions} user={user} />
+        </CardContent>
+      </Card>
+      <ActionsLink surveyId={data.survey.id} />
+    </div>
   );
 }
 

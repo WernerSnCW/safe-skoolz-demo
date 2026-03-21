@@ -89,14 +89,22 @@ export default function NewsletterSignUp() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-50 via-white to-sky-50">
       <div className="max-w-2xl mx-auto px-6 py-12">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <div className="w-16 h-16 bg-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-teal-200">
-            <ShieldCheck className="w-9 h-9 text-white" />
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+          <Link href="/login">
+            <button className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-teal-600 font-medium mb-6 transition-colors">
+              <ArrowLeft size={16} />
+              Back to SafeSchool
+            </button>
+          </Link>
+          <div className="text-center">
+            <div className="w-16 h-16 bg-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-teal-200">
+              <ShieldCheck className="w-9 h-9 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-3">Register your interest</h1>
+            <p className="text-lg text-gray-600 max-w-md mx-auto">
+              Sign up to our newsletter to stay informed about SafeSchool — safeguarding tools built for schools, by schools.
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Register your interest</h1>
-          <p className="text-lg text-gray-600 max-w-md mx-auto">
-            Sign up to our newsletter to stay informed about SafeSchool — safeguarding tools built for schools, by schools.
-          </p>
         </motion.div>
 
         <motion.form

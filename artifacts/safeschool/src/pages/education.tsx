@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-polished";
-import { BookOpen, Shield, Heart, Users, AlertTriangle, CheckCircle2, HelpCircle, HandHeart, Eye, MessageCircle } from "lucide-react";
+import { BookOpen, Shield, Heart, Users, AlertTriangle, CheckCircle2, HelpCircle, HandHeart, Eye, MessageCircle, Lightbulb, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Tab = "pupils" | "staff" | "parents";
@@ -156,13 +156,13 @@ function PupilContent() {
           <p>When something bad happens, you might feel:</p>
           <div className="flex flex-wrap gap-2 my-2">
             {[
-              { emoji: "\u{1F628}", label: "Scared" },
-              { emoji: "\u{1F622}", label: "Sad" },
-              { emoji: "\u{1F620}", label: "Angry" },
-              { emoji: "\u{1F61F}", label: "Worried" },
-              { emoji: "\u{1F615}", label: "Confused" },
-              { emoji: "\u{1F614}", label: "Embarrassed" },
-              { emoji: "\u{1F614}", label: "Lonely" },
+              { emoji: "😨", label: "Scared" },
+              { emoji: "😢", label: "Sad" },
+              { emoji: "😠", label: "Angry" },
+              { emoji: "😟", label: "Worried" },
+              { emoji: "😕", label: "Confused" },
+              { emoji: "😳", label: "Embarrassed" },
+              { emoji: "😔", label: "Lonely" },
             ].map(f => (
               <span key={f.label} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border text-sm">
                 <span className="text-lg">{f.emoji}</span> {f.label}
@@ -170,6 +170,86 @@ function PupilContent() {
             ))}
           </div>
           <p><strong>All of these feelings are completely normal.</strong> You don't have to deal with them alone. Talking about how you feel is one of the bravest things you can do.</p>
+        </AccordionItem>
+
+        <AccordionItem title="Have you been unkind to someone?" icon={Lightbulb}>
+          <p>Sometimes people do unkind things. If you have been mean to someone, pushed them around, left them out on purpose, or said hurtful things — that takes courage to admit. <strong>Reading this is already a brave step.</strong></p>
+
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mt-2 mb-3">
+            <p className="font-bold text-primary">Being unkind to someone doesn't make you a bad person. What matters is what you do next.</p>
+          </div>
+
+          <p className="font-bold mt-3">Why does it happen?</p>
+          <p>People are unkind for lots of reasons. You might recognise some of these:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>You feel angry or stressed and you take it out on others</li>
+            <li>Things are hard at home and it's making you feel bad inside</li>
+            <li>You wanted to fit in or impress friends, so you went along with it</li>
+            <li>Someone was unkind to you first and you passed that hurt on</li>
+            <li>You didn't realise how much it was affecting the other person</li>
+          </ul>
+          <p className="mt-2">None of these reasons make it okay — but understanding <em>why</em> helps you change.</p>
+
+          <p className="font-bold mt-3">Picking on someone weaker isn't being strong</p>
+          <p>It might feel powerful to push someone around or say things that make others laugh. But real strength looks very different:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li><strong>Real strength</strong> is standing up for someone, not against them</li>
+            <li><strong>Real strength</strong> is saying sorry and meaning it</li>
+            <li><strong>Real strength</strong> is walking away from a group that's being mean, even when it's hard</li>
+            <li><strong>Real strength</strong> is asking for help when you're struggling inside</li>
+          </ul>
+
+          <p className="font-bold mt-3">What can you do now?</p>
+          <div className="space-y-3 mt-2">
+            <div className="flex gap-3 items-start">
+              <span className="bg-green-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
+              <div>
+                <p className="font-bold">Stop the behaviour</p>
+                <p className="text-muted-foreground">Even if your friends keep doing it, you can choose to stop. That's your decision and it matters.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="bg-green-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">2</span>
+              <div>
+                <p className="font-bold">Say sorry — and mean it</p>
+                <p className="text-muted-foreground">A real apology sounds like: "I'm sorry I did that. It wasn't okay, and I won't do it again." You don't need to make excuses.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="bg-green-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">3</span>
+              <div>
+                <p className="font-bold">Be honest about how you're feeling</p>
+                <p className="text-muted-foreground">If something is making you act this way — stress, problems at home, feeling angry all the time — tell someone. A teacher, school counsellor, or parent can help you with what's really going on.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 items-start">
+              <span className="bg-green-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">4</span>
+              <div>
+                <p className="font-bold">Talk to an adult you trust</p>
+                <p className="text-muted-foreground">Sometimes being unkind is a way of asking for help without knowing how to ask. Adults won't just punish you — they want to help you too. You deserve support.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-secondary/10 border border-secondary/20 mt-3">
+            <p className="font-bold text-secondary">You are not stuck being this person. Everyone can change. The fact that you're reading this means you already care.</p>
+          </div>
+        </AccordionItem>
+
+        <AccordionItem title="When things are hard at home" icon={HandHeart}>
+          <p>Sometimes what happens at school is connected to what's happening at home. If you're dealing with any of these, it's not your fault:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Arguments, shouting, or fighting at home</li>
+            <li>Someone at home making you feel scared or unsafe</li>
+            <li>A parent or family member who is unwell or going through a tough time</li>
+            <li>Feeling like you have to look after everyone else</li>
+            <li>Not having enough food, clean clothes, or a quiet place to sleep</li>
+          </ul>
+          <p className="mt-2">These things can make you feel angry, tired, or like you can't concentrate. They can also make you lash out at school without meaning to.</p>
+          <p className="mt-2"><strong>You don't have to carry this alone.</strong> Talking to a teacher, counsellor, or another adult you trust is not betraying your family — it's getting help for everyone, including yourself.</p>
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mt-2">
+            <p className="font-bold text-primary">You can use SafeSchool to tell someone what's going on — you don't even have to say it out loud.</p>
+          </div>
         </AccordionItem>
       </div>
     </div>
@@ -275,6 +355,49 @@ function StaffContent() {
           </ul>
         </AccordionItem>
 
+        <AccordionItem title="Supporting children who bully" icon={RefreshCw}>
+          <p>Children who bully are often struggling themselves. A punitive-only response rarely changes behaviour. Effective support combines clear boundaries with genuine pastoral care.</p>
+
+          <p className="font-bold mt-3">Why children bully</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li><strong>Home difficulties</strong> — domestic conflict, neglect, abuse, or inconsistent parenting</li>
+            <li><strong>Social pressure</strong> — seeking status, belonging, or peer approval</li>
+            <li><strong>Past victimisation</strong> — children who have been bullied may replicate the behaviour</li>
+            <li><strong>Emotional regulation difficulties</strong> — struggling with anger, frustration, or stress</li>
+            <li><strong>Lack of empathy skills</strong> — not yet understanding how their actions affect others</li>
+            <li><strong>Undiagnosed needs</strong> — ADHD, attachment difficulties, or trauma responses</li>
+          </ul>
+
+          <p className="font-bold mt-3">How to respond</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            <div className="p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-950/20 dark:border-green-800">
+              <p className="font-bold text-green-700 dark:text-green-400 text-xs uppercase tracking-wider mb-2">Effective approaches</p>
+              <ul className="list-disc pl-4 space-y-1 text-sm">
+                <li>Name the behaviour, not the child ("What you did was bullying" not "You are a bully")</li>
+                <li>Explore what's behind the behaviour — ask "What's going on for you?"</li>
+                <li>Teach empathy explicitly — "How do you think they felt?"</li>
+                <li>Involve SENCO if behaviour is persistent or severe</li>
+                <li>Create a support plan alongside consequences</li>
+                <li>Check home circumstances — bullying can be a cry for help</li>
+              </ul>
+            </div>
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-950/20 dark:border-red-800">
+              <p className="font-bold text-red-700 dark:text-red-400 text-xs uppercase tracking-wider mb-2">Avoid</p>
+              <ul className="list-disc pl-4 space-y-1 text-sm">
+                <li>Labelling a child as "a bully" — this becomes their identity</li>
+                <li>Public humiliation or shaming</li>
+                <li>Assuming the child is "just mean" without investigating causes</li>
+                <li>Punishing without any restorative or educational element</li>
+                <li>Ignoring the child's own wellbeing needs</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 mt-3 dark:bg-amber-950/20 dark:border-amber-800">
+            <p className="font-bold text-amber-700 dark:text-amber-400">Children who bully need support, not just sanctions. A child who is hurting others is often a child who is hurting inside. Address both.</p>
+          </div>
+        </AccordionItem>
+
         <AccordionItem title="Using SafeSchool effectively" icon={BookOpen}>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Report promptly:</strong> Log incidents the same day they are observed or disclosed</li>
@@ -371,14 +494,39 @@ function ParentContent() {
         </AccordionItem>
 
         <AccordionItem title="If your child is accused of bullying" icon={HelpCircle}>
-          <p>This can be upsetting to hear, but try to stay calm and work with the school:</p>
+          <p>Hearing that your child has been unkind to others can be difficult. It's natural to feel defensive or upset. But how you respond now can make a real difference.</p>
+
+          <p className="font-bold mt-3">First steps</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Listen to what the school tells you without being defensive</li>
-            <li>Talk to your child privately — ask for their version, but make clear that bullying is not acceptable</li>
-            <li>Help them understand how their actions affect others</li>
-            <li>Work with the school on a behaviour plan</li>
-            <li>Consider whether something is going on that might be causing your child to act this way (stress, problems at home, being bullied themselves)</li>
+            <li>Listen to what the school tells you without being defensive — they are not attacking your child, they want to help</li>
+            <li>Talk to your child privately and calmly — ask for their version, but make clear that bullying is not acceptable</li>
+            <li>Avoid asking "What did they do to you first?" — this teaches them to justify unkind behaviour</li>
+            <li>Help them understand how their actions affect others: "How would you feel if someone did that to you?"</li>
           </ul>
+
+          <p className="font-bold mt-3">Looking deeper</p>
+          <p>Children who bully are often dealing with their own struggles. Consider whether any of these might apply:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Are there problems at home — arguments, a separation, a bereavement, financial stress?</li>
+            <li>Has your child been bullied themselves, either now or in the past?</li>
+            <li>Are they struggling with school work, friendships, or anxiety?</li>
+            <li>Have they been exposed to aggressive behaviour from older siblings, peers, or media?</li>
+            <li>Are they finding it hard to manage their emotions?</li>
+          </ul>
+          <p className="mt-2">Bullying can sometimes be a child's way of asking for help when they don't have the words. Understanding the root cause doesn't excuse the behaviour, but it helps you address it properly.</p>
+
+          <p className="font-bold mt-3">Moving forward</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Work with the school on a support and behaviour plan</li>
+            <li>Help your child practise empathy — discuss characters' feelings in books or TV shows</li>
+            <li>Praise kind behaviour when you see it — reinforce the positive</li>
+            <li>Set clear, consistent boundaries at home about how we treat others</li>
+            <li>If the behaviour continues, ask the school about counselling or SENCO support</li>
+          </ul>
+
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mt-3">
+            <p className="font-bold text-primary">Your child is not defined by this behaviour. With the right support from home and school working together, children can and do change. What they need most right now is firm boundaries and genuine care.</p>
+          </div>
         </AccordionItem>
 
         <AccordionItem title="How SafeSchool keeps you informed" icon={BookOpen}>

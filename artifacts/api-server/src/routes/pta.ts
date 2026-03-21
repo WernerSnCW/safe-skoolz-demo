@@ -4,6 +4,7 @@ import {
   db, incidentsTable, protocolsTable, patternAlertsTable, usersTable,
   behaviourPointsTable, ptaMessagesTable, ptaConcernsTable,
   ptaPolicyAcknowledgementsTable, ptaCodesignResponsesTable, ptaAnnualReportsTable,
+  pupilDiaryTable,
 } from "@workspace/db";
 import { authMiddleware, requireRole, type JwtPayload } from "../lib/auth";
 import { ptaPiiMiddleware } from "../lib/ptaPiiMiddleware";
@@ -486,6 +487,31 @@ router.post("/pta/codesign/response", authMiddleware, requireRole("pta"), async 
   });
 
   res.status(201).json(entry);
+});
+
+router.get("/pta/mood-trends", authMiddleware, requireRole("pta"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+  const twelveWeeksAgo = new Date();
+  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84);
+
+  const weeklyMoods = await db.execute(sql`
+    SELECT
+      to_char(date_trunc('week', created_at), 'YYYY-MM-DD') as week_start,
+      ROUND(AVG(mood)::numeric, 2) as avg_mood
+    FROM pupil_diary
+    WHERE school_id = ${user.schoolId}
+      AND created_at >= ${twelveWeeksAgo}
+    GROUP BY date_trunc('week', created_at)
+    HAVING COUNT(DISTINCT pupil_id) >= 5
+    ORDER BY week_start ASC
+  `);
+
+  res.json({
+    weeks: (weeklyMoods.rows as any[]).map(r => ({
+      weekStart: r.week_start,
+      avgMood: Number(r.avg_mood),
+    })),
+  });
 });
 
 router.get("/pta/resources", authMiddleware, requireRole("pta"), async (_req, res): Promise<void> => {

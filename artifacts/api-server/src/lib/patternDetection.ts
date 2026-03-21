@@ -1,5 +1,5 @@
-import { db, incidentsTable, patternAlertsTable, notificationsTable, usersTable, schoolsTable } from "@workspace/db";
-import { eq, and, gte, sql, inArray } from "drizzle-orm";
+import { db, incidentsTable, patternAlertsTable, notificationsTable, usersTable, schoolsTable, pupilDiaryTable } from "@workspace/db";
+import { eq, and, gte, sql, inArray, lte } from "drizzle-orm";
 
 export async function runPatternDetection(incident: typeof incidentsTable.$inferSelect) {
   const thirtyDaysAgo = new Date();
@@ -196,6 +196,41 @@ export async function runPatternDetection(incident: typeof incidentsTable.$infer
   }
 }
 
+export async function runMoodDeclineScan() {
+  const schools = await db.select({ id: schoolsTable.id }).from(schoolsTable).where(eq(schoolsTable.active, true));
+  const fourteenDaysAgo = new Date();
+  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+  for (const school of schools) {
+    const pupilMoods = await db.execute(sql`
+      SELECT pupil_id,
+             COUNT(*) as entry_count,
+             AVG(mood) as avg_mood
+      FROM pupil_diary
+      WHERE school_id = ${school.id}
+        AND created_at >= ${fourteenDaysAgo}
+      GROUP BY pupil_id
+      HAVING COUNT(*) >= 5 AND AVG(mood) <= 2.0
+    `);
+
+    for (const row of pupilMoods.rows as any[]) {
+      const created = await createAlert({
+        schoolId: school.id,
+        ruleId: "mood_decline",
+        ruleLabel: `Mood diary decline: average mood ${Number(row.avg_mood).toFixed(1)}/5 over ${row.entry_count} entries (14 days)`,
+        alertLevel: "amber",
+        victimId: row.pupil_id,
+        perpetratorIds: [],
+        linkedIncidentIds: [],
+      });
+      if (created) {
+        await notifyByRole(school.id, "senco", "Amber alert: Pupil mood diary shows sustained low wellbeing");
+        await notifyCoordinators(school.id, "Amber alert: Pupil mood diary shows sustained low wellbeing");
+      }
+    }
+  }
+}
+
 export async function runScheduledPatternScan() {
   const schools = await db.select({ id: schoolsTable.id }).from(schoolsTable).where(eq(schoolsTable.active, true));
 
@@ -221,6 +256,13 @@ export async function runScheduledPatternScan() {
       }
     }
   }
+
+  try {
+    await runMoodDeclineScan();
+  } catch (err) {
+    console.error("[cron] Mood decline scan error:", err);
+  }
+
   console.log(`[cron] Pattern scan complete for ${schools.length} school(s)`);
 }
 

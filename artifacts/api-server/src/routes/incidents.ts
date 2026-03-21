@@ -42,7 +42,7 @@ router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teache
     const [{ count: totalCount }] = await db.select({ count: sql<number>`count(*)::int` }).from(incidentsTable).where(and(...parentConditions));
     const incidents = await db.select().from(incidentsTable).where(and(...parentConditions))
       .orderBy(desc(incidentsTable.createdAt)).limit(limit).offset(offset);
-    const enriched = await enrichIncidents(incidents, user.role, childIds);
+    const enriched = await enrichIncidents(incidents, user.role, childIds, user.userId);
     res.json({ data: enriched, total: totalCount, page, limit });
     return;
   }
@@ -129,7 +129,7 @@ router.get("/incidents", authMiddleware, requireRole("coordinator", "head_teache
     db.select({ count: sql<number>`count(*)` }).from(incidentsTable).where(whereClause),
   ]);
 
-  const enriched = await enrichIncidents(incidents, user.role);
+  const enriched = await enrichIncidents(incidents, user.role, undefined, user.userId);
 
   res.json({
     data: enriched,
@@ -242,7 +242,7 @@ router.post("/incidents", authMiddleware, async (req, res): Promise<void> => {
 
   runPatternDetection(incident).catch(console.error);
 
-  const enriched = await enrichIncidents([incident], user.role);
+  const enriched = await enrichIncidents([incident], user.role, undefined, user.userId);
   res.status(201).json(enriched[0]);
 });
 
@@ -315,7 +315,7 @@ router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => 
     const [pr] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
     parentChildIds = pr?.parentOf || [];
   }
-  const enriched = await enrichIncidents([incident], user.role, parentChildIds);
+  const enriched = await enrichIncidents([incident], user.role, parentChildIds, user.userId);
   res.json(enriched[0]);
 });
 
@@ -350,7 +350,7 @@ router.patch("/incidents/:id/status", authMiddleware, requireRole("coordinator",
     req,
   });
 
-  const enriched = await enrichIncidents([incident], user.role);
+  const enriched = await enrichIncidents([incident], user.role, undefined, user.userId);
   res.json(enriched[0]);
 });
 
@@ -464,11 +464,106 @@ router.patch("/incidents/:id/assess", authMiddleware, requireRole("coordinator",
     }
   }
 
-  const enriched = await enrichIncidents([incident], user.role);
+  const enriched = await enrichIncidents([incident], user.role, undefined, user.userId);
   res.json(enriched[0]);
 });
 
-async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[], viewerRole?: string, parentChildIds?: string[]) {
+router.post("/incidents/:id/consent-request", authMiddleware, requireRole("coordinator", "head_teacher", "senco"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+  const [incident] = await db.select().from(incidentsTable)
+    .where(and(eq(incidentsTable.id, id), eq(incidentsTable.schoolId, user.schoolId)));
+
+  if (!incident) {
+    res.status(404).json({ error: "Incident not found" });
+    return;
+  }
+
+  if (incident.teacherConsentStatus !== "not_requested") {
+    res.status(400).json({ error: "Consent has already been requested for this incident" });
+    return;
+  }
+
+  const [updated] = await db.update(incidentsTable)
+    .set({
+      teacherConsentStatus: "requested",
+      teacherConsentRequestedAt: new Date(),
+    })
+    .where(eq(incidentsTable.id, id))
+    .returning();
+
+  await writeAudit({
+    schoolId: user.schoolId,
+    eventType: "teacher_consent_requested",
+    actor: { userId: user.userId, schoolId: user.schoolId, role: user.role },
+    targetType: "incident",
+    targetId: id,
+    details: { referenceNumber: incident.referenceNumber },
+    req,
+  });
+
+  res.json({ success: true, teacherConsentStatus: updated.teacherConsentStatus });
+});
+
+router.patch("/incidents/:id/consent-respond", authMiddleware, requireRole("parent"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+  const { decision } = req.body;
+
+  if (!decision || !["approved", "declined"].includes(decision)) {
+    res.status(400).json({ error: "Decision must be 'approved' or 'declined'" });
+    return;
+  }
+
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+  const [incident] = await db.select().from(incidentsTable)
+    .where(and(eq(incidentsTable.id, id), eq(incidentsTable.schoolId, user.schoolId)));
+
+  if (!incident) {
+    res.status(404).json({ error: "Incident not found" });
+    return;
+  }
+
+  const [parent] = await db.select().from(usersTable).where(eq(usersTable.id, user.userId));
+  const childIds = parent?.parentOf || [];
+  const involvedVictims = (incident.victimIds || []).filter(v => childIds.includes(v));
+  const involvedPerps = (incident.perpetratorIds || []).filter(p => childIds.includes(p));
+
+  if (involvedVictims.length === 0 && involvedPerps.length === 0) {
+    res.status(403).json({ error: "Your child is not involved in this incident" });
+    return;
+  }
+
+  if (incident.teacherConsentStatus !== "requested") {
+    res.status(400).json({ error: "No consent request pending for this incident" });
+    return;
+  }
+
+  const [updated] = await db.update(incidentsTable)
+    .set({
+      teacherConsentStatus: decision,
+      teacherConsentRespondedAt: new Date(),
+      teacherConsentRespondedBy: user.userId,
+    })
+    .where(eq(incidentsTable.id, id))
+    .returning();
+
+  await writeAudit({
+    schoolId: user.schoolId,
+    eventType: "teacher_consent_responded",
+    actor: { userId: user.userId, schoolId: user.schoolId, role: user.role },
+    targetType: "incident",
+    targetId: id,
+    details: { decision, referenceNumber: incident.referenceNumber },
+    req,
+  });
+
+  const enriched = await enrichIncidents([updated], user.role, childIds, user.userId);
+  res.json(enriched[0]);
+});
+
+async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[], viewerRole?: string, parentChildIds?: string[], viewerUserId?: string) {
   if (incidents.length === 0) return [];
 
   const userIds = new Set<string>();
@@ -493,6 +588,7 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
   const isParent = viewerRole === "parent";
   const isPupil = viewerRole === "pupil";
   const isFullAccess = ["coordinator", "head_teacher", "senco"].includes(viewerRole || "");
+  const needsConsent = ["teacher", "head_of_year", "support_staff"].includes(viewerRole || "");
 
   return incidents.map((inc) => {
     const base: any = {
@@ -541,6 +637,8 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
       base.reporterName = null;
       base.parentSummary = inc.parentSummary || null;
       base.updatedAt = inc.updatedAt ? inc.updatedAt.toISOString() : null;
+      base.teacherConsentStatus = inc.teacherConsentStatus;
+      base.teacherConsentRequestedAt = inc.teacherConsentRequestedAt ? inc.teacherConsentRequestedAt.toISOString() : null;
     } else if (isPupil) {
       base.reporterId = inc.reporterId;
       base.reporterRole = inc.reporterRole;
@@ -553,19 +651,21 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
       base.victimIds = inc.victimIds || [];
       base.perpetratorIds = [];
     } else {
+      const consentGranted = !needsConsent || inc.teacherConsentStatus === "approved";
+      base.teacherConsentStatus = inc.teacherConsentStatus;
       base.reporterId = inc.reporterId;
       base.reporterRole = inc.reporterRole;
       base.anonymous = inc.anonymous;
       base.incidentTime = inc.incidentTime;
-      base.description = inc.description;
-      base.victimIds = inc.victimIds || [];
-      base.perpetratorIds = inc.perpetratorIds || [];
-      base.personInvolvedText = inc.personInvolvedText;
-      base.unknownPersonDescriptions = inc.unknownPersonDescriptions as any[] || [];
-      base.witnessIds = inc.witnessIds || [];
-      base.witnessText = inc.witnessText;
+      base.description = consentGranted ? inc.description : "[Consent required — parent has not yet approved teacher access to this incident's details]";
+      base.victimIds = consentGranted ? (inc.victimIds || []) : [];
+      base.perpetratorIds = consentGranted ? (inc.perpetratorIds || []) : [];
+      base.personInvolvedText = consentGranted ? inc.personInvolvedText : null;
+      base.unknownPersonDescriptions = consentGranted ? (inc.unknownPersonDescriptions as any[] || []) : [];
+      base.witnessIds = consentGranted ? (inc.witnessIds || []) : [];
+      base.witnessText = consentGranted ? inc.witnessText : null;
       base.emotionalState = inc.emotionalState;
-      base.emotionalFreetext = inc.emotionalFreetext;
+      base.emotionalFreetext = consentGranted ? inc.emotionalFreetext : null;
       base.happeningToMe = inc.happeningToMe;
       base.happeningToSomeoneElse = inc.happeningToSomeoneElse;
       base.iSawIt = inc.iSawIt;
@@ -578,14 +678,14 @@ async function enrichIncidents(incidents: (typeof incidentsTable.$inferSelect)[]
       base.formalResponseRequested = inc.formalResponseRequested;
       base.requestExternalReferral = inc.requestExternalReferral;
       base.confidentialFlag = inc.confidentialFlag;
-      base.staffNotes = inc.staffNotes;
-      base.witnessStatements = inc.witnessStatements;
-      base.parentSummary = inc.parentSummary;
+      base.staffNotes = consentGranted ? inc.staffNotes : null;
+      base.witnessStatements = consentGranted ? inc.witnessStatements : null;
+      base.parentSummary = consentGranted ? inc.parentSummary : null;
       base.assessedBy = inc.assessedBy;
       base.assessedAt = inc.assessedAt ? inc.assessedAt.toISOString() : null;
       base.reporterName = inc.reporterId ? (userMap[inc.reporterId] || null) : null;
-      base.victimNames = (inc.victimIds || []).map((id) => userMap[id] || "Unknown");
-      base.perpetratorNames = (inc.perpetratorIds || []).map((id) => userMap[id] || "Unknown");
+      base.victimNames = consentGranted ? (inc.victimIds || []).map((id) => userMap[id] || "Unknown") : ["[Consent required]"];
+      base.perpetratorNames = consentGranted ? (inc.perpetratorIds || []).map((id) => userMap[id] || "Unknown") : ["[Consent required]"];
       if (inc.assessedBy && userMap[inc.assessedBy]) {
         base.assessedByName = userMap[inc.assessedBy];
       }

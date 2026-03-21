@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
 import { useGetIncident, useUpdateIncidentStatus, useAssessIncident } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -45,6 +45,41 @@ export default function IncidentDetail() {
     parentSummary: "",
   });
   const [assessmentSaved, setAssessmentSaved] = useState(false);
+  const canRequestConsent = ["coordinator", "head_teacher", "senco"].includes(userRole);
+  const needsConsent = ["teacher", "head_of_year", "support_staff"].includes(userRole);
+
+  const consentRequestMutation = useMutation({
+    mutationFn: async (incidentId: string) => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch(`/api/incidents/${incidentId}/consent-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Failed to request consent");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/incidents'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/incidents/${id}`] });
+    },
+  });
+
+  const consentRespondMutation = useMutation({
+    mutationFn: async ({ incidentId, decision }: { incidentId: string; decision: "approved" | "declined" }) => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch(`/api/incidents/${incidentId}/consent-respond`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ decision }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Failed to respond to consent");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/incidents'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/incidents/${id}`] });
+    },
+  });
 
   const handleStatusChange = async (newStatus: string) => {
     try {
@@ -139,6 +174,78 @@ export default function IncidentDetail() {
           </p>
         </div>
       </div>
+
+      {needsConsent && incAny.teacherConsentStatus !== "approved" && (
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-start gap-3">
+          <Shield size={20} className="text-amber-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">
+              {incAny.teacherConsentStatus === "requested"
+                ? "Parent consent pending"
+                : incAny.teacherConsentStatus === "declined"
+                  ? "Parent has declined teacher access"
+                  : "Parent consent not yet requested"}
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+              {incAny.teacherConsentStatus === "requested"
+                ? "The school has requested parent consent for you to view full incident details. Some information is currently redacted."
+                : incAny.teacherConsentStatus === "declined"
+                  ? "The parent has declined to share full details of this incident with class teachers."
+                  : "A safeguarding coordinator must request parent consent before you can view full incident details. Pupil names and sensitive information are redacted."}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {userRole === "parent" && incAny.teacherConsentStatus === "requested" && (
+        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <Info size={20} className="text-blue-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold text-blue-800 dark:text-blue-300 text-sm">
+                Teacher access consent request
+              </p>
+              <p className="text-xs text-blue-700 dark:text-blue-400 mt-1 mb-3">
+                The school's safeguarding team has requested your consent to share details of this incident with your child's class teacher. 
+                This helps teachers provide appropriate support. You can approve or decline — your decision will be recorded.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => consentRespondMutation.mutate({ incidentId: id, decision: "approved" })}
+                  disabled={consentRespondMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle size={14} className="mr-1" /> Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => consentRespondMutation.mutate({ incidentId: id, decision: "declined" })}
+                  disabled={consentRespondMutation.isPending}
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                >
+                  <EyeOff size={14} className="mr-1" /> Decline
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {userRole === "parent" && incAny.teacherConsentStatus === "approved" && (
+        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-3 flex items-center gap-2">
+          <CheckCircle size={16} className="text-green-600 shrink-0" />
+          <p className="text-xs text-green-700 dark:text-green-400">You have approved teacher access to this incident's details.</p>
+        </div>
+      )}
+
+      {userRole === "parent" && incAny.teacherConsentStatus === "declined" && (
+        <div className="bg-muted/30 border border-border rounded-xl p-3 flex items-center gap-2">
+          <EyeOff size={16} className="text-muted-foreground shrink-0" />
+          <p className="text-xs text-muted-foreground">You have declined teacher access to this incident's details.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
@@ -252,6 +359,44 @@ export default function IncidentDetail() {
                       View Linked Protocol
                     </Button>
                   </Link>
+                )}
+
+                {canRequestConsent && incAny.teacherConsentStatus === "not_requested" && (
+                  <>
+                    <hr className="my-4 border-border" />
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => consentRequestMutation.mutate(id)}
+                      disabled={consentRequestMutation.isPending}
+                    >
+                      <Eye className="mr-2" size={18} /> Request Parent Consent for Teacher Access
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      This will ask the parent to consent to sharing incident details with the class teacher.
+                    </p>
+                  </>
+                )}
+                {canRequestConsent && incAny.teacherConsentStatus === "requested" && (
+                  <div className="bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3 mt-2">
+                    <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                      <Clock size={12} /> Parent consent requested — awaiting response
+                    </p>
+                  </div>
+                )}
+                {canRequestConsent && incAny.teacherConsentStatus === "approved" && (
+                  <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 mt-2">
+                    <p className="text-xs text-green-700 dark:text-green-400 flex items-center gap-1.5">
+                      <CheckCircle size={12} /> Parent has approved teacher access
+                    </p>
+                  </div>
+                )}
+                {canRequestConsent && incAny.teacherConsentStatus === "declined" && (
+                  <div className="bg-red-50 dark:bg-red-950/20 rounded-lg p-3 mt-2">
+                    <p className="text-xs text-red-700 dark:text-red-400 flex items-center gap-1.5">
+                      <EyeOff size={12} /> Parent has declined teacher access
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>

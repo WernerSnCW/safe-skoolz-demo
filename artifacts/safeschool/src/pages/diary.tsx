@@ -141,7 +141,7 @@ export default function DiaryPage() {
           </h1>
           <p className="text-muted-foreground mt-1 flex items-center gap-2">
             <Lock size={14} className="text-muted-foreground" />
-            Private — only you and your parent can see this
+            This is your space — only you and your parent can see it
           </p>
         </div>
         {!showForm && (
@@ -174,7 +174,7 @@ export default function DiaryPage() {
           >
             <Card className="border-pink-200 dark:border-pink-900/50 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950/20 dark:to-purple-950/20 pb-3 border-b border-pink-100 dark:border-pink-900/30">
-                <CardTitle className="text-lg">How are you feeling right now?</CardTitle>
+                <CardTitle className="text-lg">How are you feeling?</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-5">
                 <div>
@@ -208,7 +208,7 @@ export default function DiaryPage() {
                     rows={3}
                     maxLength={1000}
                     className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background text-sm focus-visible:outline-none focus-visible:border-pink-400 focus-visible:ring-4 focus-visible:ring-pink-100 dark:focus-visible:ring-pink-950/30 transition-all resize-none"
-                    placeholder="What happened today? How does it make you feel?"
+                    placeholder="You can write about anything — what happened, how it made you feel, or anything on your mind..."
                   />
                   <p className="text-xs text-muted-foreground text-right mt-1">
                     {note.length}/1000
@@ -249,12 +249,12 @@ export default function DiaryPage() {
         <Card>
           <CardContent className="p-10 text-center">
             <BookHeart size={48} className="mx-auto text-pink-300 mb-4" />
-            <h3 className="text-lg font-bold mb-2">Your diary is empty</h3>
+            <h3 className="text-lg font-bold mb-2">This is your diary</h3>
             <p className="text-muted-foreground text-sm mb-6">
-              Start writing about how you feel. It's completely private and only your parent can see it.
+              A place just for you to say how you're feeling. You can write as much or as little as you like — it's yours.
             </p>
             <Button onClick={() => setShowForm(true)} className="bg-pink-500 hover:bg-pink-600">
-              <Plus size={16} className="mr-1" /> Write my first entry
+              <Plus size={16} className="mr-1" /> How am I feeling today?
             </Button>
           </CardContent>
         </Card>

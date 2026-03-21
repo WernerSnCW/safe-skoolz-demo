@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import {
   useGetPtaDashboard,
@@ -17,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button, Input } from "@/compo
 import {
   BarChart3, TrendingUp, Shield, MessageCircle, FileText, BookOpen,
   Send, AlertTriangle, CheckCircle2, Flag, ChevronRight, Download,
-  Users, Activity, Lightbulb, ArrowUpDown
+  Users, Activity, Lightbulb, ArrowUpDown, Heart
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -130,6 +131,17 @@ export default function PtaPortal() {
 
 function PtaDashboardTab() {
   const { data, isLoading } = useGetPtaDashboard();
+  const { data: moodData } = useQuery({
+    queryKey: ["/api/pta/mood-trends"],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/pta/mood-trends", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return { weeks: [] };
+      return res.json();
+    },
+  });
 
   if (isLoading) {
     return <div className="flex justify-center p-12"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>;
@@ -256,6 +268,43 @@ function PtaDashboardTab() {
           )}
         </CardContent>
       </Card>
+
+      {moodData && moodData.weeks && moodData.weeks.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Heart size={16} className="text-pink-500" /> Pupil Wellbeing Trend (Anonymised)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              School-wide average mood from the pupil feelings diary — no individual entries or names are shown
+            </p>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={moodData.weeks}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="weekStart"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v: string) => {
+                    const d = new Date(v);
+                    return `${d.getDate()}/${d.getMonth() + 1}`;
+                  }}
+                />
+                <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 11 }} />
+                <Tooltip
+                  formatter={(value: number) => [`${value.toFixed(2)} / 5`, "Avg Mood"]}
+                  labelFormatter={(label: string) => {
+                    const d = new Date(label);
+                    return `Week of ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
+                  }}
+                />
+                <Line type="monotone" dataKey="avgMood" stroke="#ec4899" strokeWidth={2} dot={{ r: 4, fill: "#ec4899" }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
         <p className="text-xs text-muted-foreground flex items-center gap-2">

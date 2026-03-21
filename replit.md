@@ -195,3 +195,29 @@ The following 15 priority fixes from the CRAFT review have been implemented:
 **Form Accessibility:**
 - `autoComplete` attributes on login form: PIN (`one-time-code`), password (`current-password`), email (`email`)
 - Unicode emoji escapes fixed to actual emoji characters in report-incident.tsx, ParentDashboard.tsx
+
+## School Onboarding Diagnostic
+
+**Purpose:** Multi-role climate survey where pupils, staff, and parents all answer role-appropriate questions to establish a baseline of the school's safeguarding culture, awareness levels, and system readiness. Highlights alignment and perception gaps between groups.
+
+**Question Bank (20 questions across 5 categories):**
+- Awareness & Prevalence (3 questions) — all roles
+- Trust & Reporting (4 questions) — role-specific
+- Culture & Wellbeing (4 questions) — role-specific
+- Safeguarding Knowledge (4 questions) — staff/parents
+- System Readiness (5 questions) — coordinator/head teacher only
+
+**Role-adaptive UI:**
+- Pupils: one-question-at-a-time with emoji face scale (1-5), progress bar, auto-advance
+- Staff/Coordinator: grouped by category, professional Likert 1-5 buttons
+- Parents: same Likert format with parent-focused language
+
+**Database:** `diagnostic_surveys` (per-school, status: active/closed), `diagnostic_responses` (user answers)
+**API:** POST /api/diagnostics (create), GET /api/diagnostics/active (get survey + questions), POST /api/diagnostics/:id/respond (submit), GET /api/diagnostics/:id/results (aggregated), PATCH /api/diagnostics/:id (close)
+**Frontend:** /diagnostics (survey page), /diagnostics/:id/results (results dashboard)
+
+**Results Dashboard (coordinator view):**
+- Participation stats per group (pupils, staff, parents) with progress bars
+- Radar chart overlaying pupil/staff/parent average scores by category
+- Horizontal bar chart for category-by-group comparison
+- Auto-generated insights highlighting perception gaps (>1.5 point differences), low-scoring areas, and missing group participation

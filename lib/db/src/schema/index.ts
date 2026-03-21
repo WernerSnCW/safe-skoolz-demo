@@ -15,3 +15,4 @@ export * from "./sencoCaseload";
 export * from "./behaviourPoints";
 export * from "./pta";
 export * from "./newsletter";
+export * from "./diagnostics";

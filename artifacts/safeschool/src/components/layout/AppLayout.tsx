@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { 
   ShieldCheck, Home, AlertTriangle, FileText, Shield,
-  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle, ClipboardList, Gauge, GraduationCap
+  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle, ClipboardList, Gauge, GraduationCap, ClipboardCheck
 } from "lucide-react";
 import { useListNotifications } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -65,6 +65,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "My Behaviour", href: "/behaviour", icon: Gauge },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "My Settings", href: "/settings", icon: Settings },
       ];
     }
@@ -78,6 +79,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
       ];
@@ -94,6 +96,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
       ];
@@ -108,6 +111,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
       ];
@@ -126,6 +130,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
       ];
@@ -137,6 +142,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "PTA Portal", href: "/pta", icon: Users },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
       ];
@@ -152,6 +158,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       { name: "Messages", href: "/messages", icon: MessageCircle },
       { name: "Protocols", href: "/protocols", icon: Shield },
       { name: "Alerts", href: "/alerts", icon: Activity },
+      { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
       { name: "Training", href: "/training", icon: GraduationCap },
       { name: "Learn", href: "/education", icon: BookOpen },
       { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },

@@ -16,3 +16,4 @@ export * from "./behaviourPoints";
 export * from "./pta";
 export * from "./newsletter";
 export * from "./diagnostics";
+export * from "./diary";

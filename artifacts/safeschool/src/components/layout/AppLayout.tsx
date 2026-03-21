@@ -4,13 +4,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { 
   ShieldCheck, Home, AlertTriangle, FileText, Shield,
-  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle, ClipboardList, Gauge, GraduationCap, ClipboardCheck
+  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle, ClipboardList, Gauge, GraduationCap, ClipboardCheck, BookHeart
 } from "lucide-react";
 import { useListNotifications } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MOBILE_PRIORITY_HREFS: Record<string, string[]> = {
-  pupil: ["/", "/report", "/education", "/settings"],
+  pupil: ["/", "/report", "/diary", "/education"],
   parent: ["/", "/report", "/messages", "/notifications"],
   teacher: ["/", "/report", "/class", "/messages"],
   head_of_year: ["/", "/report", "/class", "/messages"],
@@ -62,6 +62,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       return [
         ...base,
         { name: "Report Incident", href: "/report", icon: AlertTriangle },
+        { name: "My Diary", href: "/diary", icon: BookHeart },
         { name: "My Behaviour", href: "/behaviour", icon: Gauge },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },

@@ -30,6 +30,7 @@ import PtaPortal from "@/pages/pta";
 import NewsletterSignUp from "@/pages/newsletter";
 import Diagnostics from "@/pages/diagnostics";
 import DiagnosticsResults from "@/pages/diagnostics-results";
+import DiaryPage from "@/pages/diary";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -115,6 +116,9 @@ function Router() {
       </Route>
       <Route path="/diagnostics/:id/results">
         {() => <ProtectedRoute component={DiagnosticsResults} />}
+      </Route>
+      <Route path="/diary">
+        {() => <ProtectedRoute component={DiaryPage} />}
       </Route>
       <Route path="/diagnostics">
         {() => <ProtectedRoute component={Diagnostics} />}

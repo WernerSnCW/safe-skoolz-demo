@@ -18,6 +18,7 @@ import ptaRouter from "./pta";
 import newsletterRouter from "./newsletter";
 import dataRetentionRouter from "./dataRetention";
 import diagnosticsRouter from "./diagnostics";
+import diaryRouter from "./diary";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,6 @@ router.use(behaviourRouter);
 router.use(ptaRouter);
 router.use(dataRetentionRouter);
 router.use(diagnosticsRouter);
+router.use(diaryRouter);
 
 export default router;

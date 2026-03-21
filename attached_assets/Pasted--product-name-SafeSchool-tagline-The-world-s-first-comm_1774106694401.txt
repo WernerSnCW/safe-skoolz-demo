@@ -1,0 +1,298 @@
+{
+  "product": {
+    "name": "SafeSchool",
+    "tagline": "The world's first community-owned safeguarding platform",
+    "version": "0.3",
+    "last_updated": "March 2026",
+    "one_line": "SafeSchool is the only safeguarding platform where the child has a voice — a private mood diary feeds pattern detection alongside incident data, catching declining wellbeing before any adult has filed a report.",
+
+    "core_principle": "Data belongs to the family, not the institution. Every access decision flows from this.",
+
+    "founding_story": {
+      "founder": "A 10-year-old girl who saw how schools treat every bullying incident as if it is the first one — and decided to build the tool that joins the dots",
+      "co_founder": "Her father, who is helping her build it",
+      "anonymity": "Founder is anonymous in all materials"
+    }
+  },
+
+  "modules": [
+
+    {
+      "id": "MOD_01",
+      "name": "Child Mood Diary",
+      "status": "Decided capability. In active development.",
+      "what_it_is": "A private daily wellbeing journal for the child. Structured prompts to start, free text to expand. The child's own space to say how they are feeling.",
+      "input_method": {
+        "structured_prompts": true,
+        "free_text": true,
+        "description": "Prompts lower the barrier and create scoreable data. Free text captures nuance the prompts cannot."
+      },
+      "visibility": {
+        "child": "Writes entries, reads their own entries",
+        "parent": "Full visibility of all entries, always. Granted at sign-up.",
+        "teacher": "No access",
+        "dsl": "No direct access. Parent can choose to share with DSL when escalating.",
+        "pta_admin": "No access to individual diaries. Anonymised aggregate mood trends only."
+      },
+      "feeds_pattern_detection": true,
+      "design_note": "Must feel like it belongs to the child — not a monitoring tool. Framing: their space to express how they feel. The safeguarding function is real but must never be the child-facing message.",
+      "why_it_matters": "The only safeguarding data stream that comes from the child directly. Detects declining wellbeing before any formal incident is logged. A child being subtly bullied — excluded, whispered about, nothing formally reportable — will show in mood data weeks before the incident log catches up.",
+      "differentiator": "No existing safeguarding platform ingests child-reported wellbeing data as an input to pattern detection. First-mover position in child-voice safeguarding."
+    },
+
+    {
+      "id": "MOD_02",
+      "name": "Incident Reporting Module",
+      "status": "Decided capability. In active development.",
+      "what_it_is": "Structured digital reporting for staff and age-appropriate reporting for pupils, replacing paper forms and email chains.",
+      "reporters": ["staff", "pupils", "parents"],
+      "core_features": [
+        "Multi-reporter input",
+        "Structured incident categories",
+        "Timestamp and chain-of-custody logging",
+        "Evidence attachment — photos, messages, documents",
+        "Audit trail from first report to resolution"
+      ],
+      "visibility": {
+        "parent": "Full access to incidents involving their child",
+        "teacher": "Named incident data — per-incident parental consent required",
+        "dsl": "Full access — statutory obligation, no consent required",
+        "pta_admin": "Anonymised aggregate counts only — no named data"
+      },
+      "benefit": "Every incident captured consistently, completely, in a format that produces an audit trail. No more 'I didn't know about that because it wasn't reported to me.'"
+    },
+
+    {
+      "id": "MOD_03",
+      "name": "Pattern Detection Engine",
+      "status": "Decided capability. In active development.",
+      "what_it_is": "Automated analysis layer that correlates data across two independent streams — incident reports from adults and mood diary entries from the child — to identify patterns over time.",
+      "data_streams": [
+        {
+          "stream": "Incident log",
+          "source": "Adults — staff, parents",
+          "data_type": "Structured incident records"
+        },
+        {
+          "stream": "Mood diary",
+          "source": "Child",
+          "data_type": "Daily wellbeing scores and free text entries"
+        }
+      ],
+      "core_features": [
+        "Cross-staff incident correlation — connects incidents handled by different staff members",
+        "Mood trend analysis — identifies sustained decline in child-reported wellbeing",
+        "Dual-stream correlation — cross-references mood data against incident timeline",
+        "Configurable alert thresholds",
+        "Automatic escalation workflow to DSL",
+        "Anonymised cohort-level analysis for PTA and governors"
+      ],
+      "trigger_rules": "NEEDS INPUT — confirm thresholds e.g. 3 incidents in 30 days; mood score below X for Y consecutive days",
+      "why_it_matters": "Catches what every other safeguarding system misses — a child whose wellbeing is declining before a single formal report has been filed. The dual-stream model is structurally novel: no competitor has both incident data and child mood data feeding the same detection engine.",
+      "benefit": "Turns isolated incident management into genuine safeguarding. The single most important missing capability in every existing tool."
+    },
+
+    {
+      "id": "MOD_04",
+      "name": "Regulatory Reporting Module",
+      "status": "Decided capability. In active development.",
+      "what_it_is": "Automated generation of reports aligned to any territory's regulatory safeguarding framework.",
+      "frameworks": {
+        "launch": ["KCSIE (UK)", "LOPIVI (Spain)"],
+        "architecture": "Framework library designed to be extended territory by territory without platform rebuilds",
+        "localisation": "Regulatory framework and language localised per territory"
+      },
+      "core_features": [
+        "Framework-mapped report templates",
+        "PDF export with audit signature",
+        "Multi-agency information sharing format",
+        "Version history",
+        "Configurable per territory"
+      ],
+      "benefit": "Turns hours of manual report compilation into a single export action — in a format regulators will accept. A DSL currently spends half a day compiling a report for an external agency. SafeSchool produces it in minutes."
+    },
+
+    {
+      "id": "MOD_05",
+      "name": "Family Data Ownership and Consent Layer",
+      "status": "Decided capability. In active development.",
+      "what_it_is": "The permission architecture that makes the family the data owner — not the institution.",
+      "consent_model": "Per-incident parental consent for teacher access. Each teacher disclosure is individually consented. Standing permission is not granted at enrolment.",
+      "core_features": [
+        "Parent data dashboard — full named view of their child's entire record",
+        "Per-incident teacher consent requests with accept / decline / no-response workflow",
+        "Consent audit trail — parent can see exactly which teachers accessed which incident, and when",
+        "DSL full-access carve-out — statutory obligation, no consent required",
+        "Sign-up permission grant for mood diary parental visibility"
+      ],
+      "legal_note": "Per-incident consent model and PTA data ownership are structurally novel. Legal review required before presenting as confirmed in investor documents. Present as the model being built toward.",
+      "edge_cases_to_resolve": [
+        "What happens when a parent does not respond to a consent request",
+        "What happens when a parent refuses teacher access for a non-statutory disclosure",
+        "Interaction with school's statutory safeguarding duties when teacher access is declined",
+        "GDPR lawful basis for each access tier"
+      ]
+    },
+
+    {
+      "id": "MOD_06",
+      "name": "PTA Community Ownership and Event Platform",
+      "status": "Decided capability. In active development.",
+      "what_it_is": "The commercial and governance layer that makes the PTA — not the school — the contracting party.",
+      "contract_model": {
+        "contracting_party": "PTA signs directly with SafeSchool",
+        "data_owner": "PTA / parent community",
+        "school_role": "Uses the platform. Does not own it. Cannot cancel it.",
+        "head_teacher_role": "Informed by the PTA once the contract is signed. Not the primary sales target."
+      },
+      "funding_mechanism": {
+        "model": "Annual community fundraising event",
+        "timing": "Anti-Bullying Week, November — already in every UK school calendar",
+        "format": "Stalls, food, fun activities — organised by the PTA with SafeSchool framework and branding",
+        "proceeds": "Go to SafeSchool. School receives access for the year in return.",
+        "renewal": "Event repeats annually. Renewal is built into the community calendar — not a procurement decision."
+      },
+      "pta_admin_access": {
+        "sees": "Anonymised aggregate data — incident counts, mood trends, cohort patterns",
+        "cannot_see": "Any named data. Any identifiable information about individual children."
+      },
+      "why_it_matters": "No competitor can displace SafeSchool through a school procurement process because SafeSchool is not in the school procurement process. Removing it requires the parent community to vote to defund something they raised money for.",
+      "legal_note": "PTA as contracting party for safeguarding data is structurally novel. Requires data protection legal advice before presenting as confirmed."
+    },
+
+    {
+      "id": "MOD_07",
+      "name": "Interview and Investigation Management Module",
+      "status": "Specification complete. Prototype build commencing.",
+      "what_it_is": "Structured workflow for managing formal safeguarding investigations, including pupil and parent interviews.",
+      "core_features": [
+        "Interview scheduling",
+        "Guided interview structure",
+        "Outcome recording",
+        "Escalation pathway to external agencies"
+      ],
+      "scope_note": "NEEDS INPUT — module named in v0.2 but not fully designed. Confirm scope before publishing.",
+      "benefit": "Closes the gap between pattern detection and formal investigation — the stage at which schools most frequently make evidence-destroying mistakes."
+    }
+
+  ],
+
+  "data_architecture": {
+    "principle": "Data belongs to the family, not the institution.",
+    "roles": [
+      {
+        "role": "Parent",
+        "sees": "Full named data for their child — all incidents, all records, all timestamps, all mood diary entries",
+        "condition": "Always",
+        "basis": "Data owner"
+      },
+      {
+        "role": "Child",
+        "sees": "Writes mood diary entries. Reads their own entries. Does not see the incident log.",
+        "condition": "Always — diary is the child's own space",
+        "basis": "Child as author of their own record"
+      },
+      {
+        "role": "Teacher",
+        "sees": "Named data for a specific incident only",
+        "condition": "Parent consents per incident — individually, not by standing permission",
+        "basis": "Parental consent"
+      },
+      {
+        "role": "DSL (Designated Safeguarding Lead)",
+        "sees": "Full named access across all incidents and all children",
+        "condition": "Always — no parental consent required",
+        "basis": "Statutory obligation (KCSIE and equivalents)"
+      },
+      {
+        "role": "PTA Administrator",
+        "sees": "Anonymised aggregate data only — incident counts, mood trends, cohort patterns. No names. No identifiable details.",
+        "condition": "Always",
+        "basis": "Community governance"
+      }
+    ]
+  },
+
+  "pricing": {
+    "primary_model": "PTA community event funding",
+    "routes": [
+      {
+        "route": "PTA Community Event",
+        "who_signs": "PTA",
+        "how_it_works": "Annual event raises proceeds. Proceeds fund SafeSchool access. PTA owns contract and data. School cannot cancel."
+      },
+      {
+        "route": "Direct School Purchase",
+        "who_signs": "School",
+        "how_it_works": "Standard licence fee. For schools whose PTA prefers not to lead."
+      },
+      {
+        "route": "LA / Trust Portfolio",
+        "who_signs": "Local authority or academy trust",
+        "how_it_works": "Portfolio contract covering multiple schools. Means-tested access for underfunded schools built in."
+      },
+      {
+        "route": "Means-Tested Free Access",
+        "who_signs": "PTA or school",
+        "how_it_works": "For communities that cannot raise the threshold. Funded by cross-subsidy. No school excluded on cost grounds."
+      }
+    ],
+    "note": "Pricing negotiated individually. No specific figures published externally."
+  },
+
+  "competitive_position": {
+    "category": "Community-owned safeguarding infrastructure",
+    "differentiators": [
+      "Child mood diary feeding pattern detection — no competitor has this data stream",
+      "Dual-stream pattern detection — incident data plus mood data correlated across time",
+      "Family data ownership with per-incident parental consent",
+      "PTA as contracting party — school cannot cancel",
+      "Multi-territory regulatory localisation without platform rebuilds",
+      "Universal access — means-tested pricing and community event funding model"
+    ],
+    "competitors": [
+      {
+        "name": "MyConcern",
+        "what_they_offer": "Incident logging, case management. From £429/year. UK state school focused.",
+        "missing": "No child mood data. No pattern detection. No parental visibility. No community ownership. No multi-territory localisation.",
+        "threat": "Medium — incumbent in UK state schools, absent from global market"
+      },
+      {
+        "name": "CPOMS",
+        "what_they_offer": "Incident logging, case management. UK school focused.",
+        "missing": "Same structural gaps as MyConcern.",
+        "threat": "Medium — same segment and same limitations"
+      }
+    ]
+  },
+
+  "legal_flags": [
+    {
+      "area": "Per-incident parental consent model",
+      "issue": "Novel — edge cases where parent does not respond or refuses teacher access need defined protocol",
+      "status": "Legal review required before confirming in investor documents"
+    },
+    {
+      "area": "PTA as data owner for safeguarding records",
+      "issue": "Structurally novel. Interaction with school statutory safeguarding duties under KCSIE needs legal validation.",
+      "status": "Legal review required before confirming in investor documents"
+    },
+    {
+      "area": "GDPR lawful basis per access tier",
+      "issue": "Special category data (children's welfare). Each tier needs a confirmed lawful basis.",
+      "status": "Legal review required before confirming in investor documents"
+    }
+  ],
+
+  "open_inputs_needed": [
+    "Pattern detection trigger thresholds — incidents and mood score",
+    "Mood diary alert thresholds — score below X for Y consecutive days",
+    "Interview module scope confirmation",
+    "Raise details — instrument, valuation, target, ticket sizes",
+    "Revenue projections Years 1-5",
+    "Use of funds",
+    "Founder bios",
+    "EIS / SEIS eligibility confirmation",
+    "Pilot commitment from Morna — signed heads of terms"
+  ]
+}

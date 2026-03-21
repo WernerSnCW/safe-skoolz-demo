@@ -5,7 +5,7 @@ import { eq, desc, and, or, sql } from "drizzle-orm";
 
 const STAFF_ROLES = ["teacher", "head_of_year", "support_staff", "senco", "coordinator", "head_teacher"];
 
-const VALID_CATEGORIES = ["general", "safeguarding", "wellbeing", "curriculum", "event", "policy"];
+const VALID_CATEGORIES = ["general", "safeguarding", "wellbeing", "curriculum", "event", "policy", "heads_up"];
 const VALID_AUDIENCES = ["everyone", "pupils", "parents", "staff", "pupils_parents"];
 
 const router: IRouter = Router();

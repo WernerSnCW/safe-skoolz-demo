@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import {
   Megaphone, Plus, Trash2, Shield, Heart, BookOpen, Calendar,
-  Users, Tag, Send, X, CheckCircle2, ChevronDown, ChevronUp
+  Users, Tag, Send, X, CheckCircle2, ChevronDown, ChevronUp, Eye
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDate } from "@/lib/utils";
@@ -18,6 +18,7 @@ const CATEGORIES = [
   { id: "curriculum", label: "Curriculum", icon: BookOpen, color: "bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400" },
   { id: "event", label: "Event", icon: Calendar, color: "bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400" },
   { id: "policy", label: "Policy", icon: Tag, color: "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" },
+  { id: "heads_up", label: "Heads Up", icon: Eye, color: "bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400" },
 ];
 
 const AUDIENCES = [
@@ -137,7 +138,10 @@ function ComposeForm({ onClose }: { onClose: () => void }) {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setCategory(cat.id)}
+                onClick={() => {
+                  setCategory(cat.id);
+                  if (cat.id === "heads_up") setAudience("staff");
+                }}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                   category === cat.id
                     ? `${cat.color} border-current`
@@ -362,6 +366,44 @@ export default function LearningsPage() {
           </button>
         ))}
       </div>
+
+      {isStaff && (() => {
+        const headsUpPosts = posts.filter((p: any) => p.category === "heads_up");
+        if (headsUpPosts.length === 0) return null;
+        return (
+          <Card className="border-orange-300 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 overflow-hidden">
+            <CardHeader className="pb-2 pt-4 px-5">
+              <CardTitle className="text-base flex items-center gap-2 text-orange-700 dark:text-orange-400">
+                <Eye size={20} />
+                Heads Up — What to Look Out For
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 pb-4 space-y-3">
+              {headsUpPosts.slice(0, 3).map((post: any) => (
+                <div key={post.id} className="flex items-start gap-3 p-3 bg-white/70 dark:bg-white/5 rounded-xl border border-orange-200 dark:border-orange-900/40">
+                  <Eye size={16} className="text-orange-500 mt-0.5 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-sm">{post.title}</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{post.body}</p>
+                    <span className="text-[11px] text-muted-foreground mt-1 block">
+                      {post.authorFirstName} {post.authorLastName} · {formatDate(post.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {headsUpPosts.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setFilterCategory("heads_up")}
+                  className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline"
+                >
+                  View all {headsUpPosts.length} observation notes →
+                </button>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {filteredPosts.length === 0 ? (
         <Card>

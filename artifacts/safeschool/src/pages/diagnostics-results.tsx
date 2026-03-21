@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/u
 import {
   BarChart3, Users, TrendingUp, CheckCircle2,
   ArrowLeft, Sparkles, Target, Plus, Trash2, Send, Shield, Eye,
-  MessageSquare
+  MessageSquare, MessageCircle
 } from "lucide-react";
 import { Link } from "wouter";
 import {
@@ -493,6 +493,7 @@ function AgreedActionsPanel({ surveyId, existingActions, categories }: {
 }
 
 function PublicActionsView({ surveyId }: { surveyId: string | undefined }) {
+  const { user } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["/api/diagnostics", surveyId, "actions"],
     queryFn: async () => {
@@ -535,35 +536,137 @@ function PublicActionsView({ surveyId }: { surveyId: string | undefined }) {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target size={20} className="text-primary" />
-              Agreed Actions
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Based on the school diagnostic, these are the actions the school has committed to.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {data.actions.map((a: any) => (
-                <li key={a.id} className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
-                  <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium">{a.action}</p>
-                    {a.category && (
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
-                        {a.category}
-                      </span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target size={20} className="text-primary" />
+                Agreed Actions
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Based on the school diagnostic, these are the actions the school has committed to.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {data.actions.map((a: any) => (
+                  <li key={a.id} className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                    <CheckCircle2 size={18} className="text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">{a.action}</p>
+                      {a.category && (
+                        <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
+                          {a.category}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {user?.role === "parent" && (
+            <PTAContactPrompt />
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+function PTAContactPrompt() {
+  const [showForm, setShowForm] = useState(false);
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const { data: ptaContacts } = useQuery({
+    queryKey: ["/api/parent/pta-contacts"],
+    queryFn: async () => {
+      const res = await fetchWithAuth("/api/parent/pta-contacts");
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetchWithAuth("/api/parent/pta-message", {
+        method: "POST",
+        body: JSON.stringify({
+          message,
+          subject: "Question about diagnostic actions",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+      return res.json();
+    },
+    onSuccess: () => {
+      setSent(true);
+      setMessage("");
+    },
+  });
+
+  if (!ptaContacts || ptaContacts.length === 0) return null;
+
+  return (
+    <Card className="border-purple-200 dark:border-purple-900/50">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-950/30 rounded-xl flex items-center justify-center">
+              <MessageCircle size={20} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">Have questions about these actions?</p>
+              <p className="text-xs text-muted-foreground">
+                Reach out to your PTA: {ptaContacts.map((c: any) => c.name).join(", ")}
+              </p>
+            </div>
+          </div>
+          {!sent && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowForm(!showForm)}
+              className="border-purple-300 text-purple-700 dark:text-purple-400"
+            >
+              <Send size={14} className="mr-1" />
+              {showForm ? "Close" : "Message PTA"}
+            </Button>
+          )}
+        </div>
+
+        {sent && (
+          <div className="mt-3 p-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-green-500" />
+            <p className="text-sm font-medium">Message sent to your PTA representatives.</p>
+          </div>
+        )}
+
+        {showForm && !sent && (
+          <div className="mt-3 space-y-2">
+            <textarea
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              placeholder="Write your question or comment about the agreed actions..."
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none"
+            />
+            <div className="flex justify-end">
+              <Button
+                onClick={() => sendMutation.mutate()}
+                disabled={!message.trim() || sendMutation.isPending}
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Send size={14} className="mr-1" />
+                {sendMutation.isPending ? "Sending..." : "Send to PTA"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useListNotifications } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui-polished";
 import {
   AlertTriangle, Bell, FileText, Activity, TrendingUp, Users,
   BarChart3, PieChart as PieChartIcon, MapPin, Clock, Calendar,
-  UserCheck, ChevronDown, ChevronUp, Shield, Gauge
+  UserCheck, ChevronDown, ChevronUp, Shield, Gauge, MessageCircle, Send,
+  CheckCircle2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDate } from "@/lib/utils";
@@ -228,6 +229,135 @@ function ParentReportCard({ inc }: { inc: any }) {
   );
 }
 
+function ContactPTACard() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [subject, setSubject] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const { data: ptaContacts } = useQuery({
+    queryKey: ["/api/parent/pta-contacts"],
+    queryFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/parent/pta-contacts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      const token = localStorage.getItem("safeschool_token");
+      const res = await fetch("/api/parent/pta-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message, subject }),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+      return res.json();
+    },
+    onSuccess: () => {
+      setSent(true);
+      setMessage("");
+      setSubject("");
+    },
+  });
+
+  if (!ptaContacts || ptaContacts.length === 0) return null;
+
+  return (
+    <Card className="border-purple-200 dark:border-purple-900/50">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950/30 rounded-xl flex items-center justify-center">
+              <MessageCircle size={24} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h3 className="font-bold">Contact Your PTA</h3>
+              <p className="text-xs text-muted-foreground">
+                {ptaContacts.length} PTA {ptaContacts.length === 1 ? "member" : "members"}: {ptaContacts.map((c: any) => c.name).join(", ")}
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setIsOpen(!isOpen); setSent(false); }}
+            className="border-purple-300 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/30"
+          >
+            <Send size={14} className="mr-1" />
+            {isOpen ? "Close" : "Send Message"}
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              {sent ? (
+                <div className="mt-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 text-center">
+                  <CheckCircle2 size={32} className="mx-auto text-green-500 mb-2" />
+                  <p className="font-bold text-sm">Message sent!</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your PTA representatives will receive your message and get back to you.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground block mb-1">Subject (optional)</label>
+                    <input
+                      type="text"
+                      value={subject}
+                      onChange={e => setSubject(e.target.value)}
+                      placeholder="e.g. Question about the diagnostic actions"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-muted-foreground block mb-1">Your message</label>
+                    <textarea
+                      value={message}
+                      onChange={e => setMessage(e.target.value)}
+                      placeholder="Write your message to the PTA here..."
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 resize-none"
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => sendMutation.mutate()}
+                      disabled={!message.trim() || sendMutation.isPending}
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      <Send size={14} className="mr-1" />
+                      {sendMutation.isPending ? "Sending..." : "Send to PTA"}
+                    </Button>
+                  </div>
+                  {sendMutation.isError && (
+                    <p className="text-destructive text-xs">Failed to send. Please try again.</p>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ParentDashboard({ user }: { user: any }) {
   const [periodDays, setPeriodDays] = useState(180);
   const { data: notificationsData } = useListNotifications();
@@ -422,6 +552,8 @@ export default function ParentDashboard({ user }: { user: any }) {
           </Card>
         ))}
       </div>
+
+      <ContactPTACard />
 
       {childBehaviourData && childBehaviourData.length > 0 && (
         <div className="space-y-4">

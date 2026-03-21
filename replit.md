@@ -58,6 +58,7 @@ The project is a pnpm workspace monorepo, separating deployable applications fro
 - **Public Endpoints:** `GET /schools` and `GET /schools/:schoolId/pupils` return minimal, privacy-preserving data for login.
 - **PTA PII Middleware:** Dedicated middleware to strip PII from `/pta/*` responses for PTA users.
 - **School Onboarding Diagnostic:** Multi-role climate survey for pupils, staff, and parents to assess safeguarding culture. Features role-adaptive UI, a 20-question bank across 5 categories, tiered disclosure (coordinators see full confidential results with charts; all other roles see only published Agreed Actions), growth-oriented insight framing (Strengths/Growth Areas/Alignment Notes), and an Agreed Actions workflow where coordinators create, refine, and publish action items for the wider school community.
+- **Parent-to-PTA Contact:** Parents can message PTA representatives directly from their dashboard ("Contact Your PTA" card) and from the diagnostic actions page. Messages are stored as `pta_concerns` with category `parent_outreach` and audited. PTA member names (first name + last initial only) shown to parents via GET `/parent/pta-contacts`.
 
 # External Dependencies
 

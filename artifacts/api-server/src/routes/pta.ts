@@ -544,4 +544,55 @@ router.get("/pta/resources", authMiddleware, requireRole("pta"), async (_req, re
   });
 });
 
+router.get("/parent/pta-contacts", authMiddleware, requireRole("parent"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+
+  const ptaMembers = await db.select({
+    id: usersTable.id,
+    firstName: usersTable.firstName,
+    lastName: usersTable.lastName,
+  })
+    .from(usersTable)
+    .where(and(
+      eq(usersTable.schoolId, user.schoolId),
+      eq(usersTable.role, "pta"),
+    ));
+
+  res.json(ptaMembers.map(m => ({
+    id: m.id,
+    name: `${m.firstName} ${m.lastName?.charAt(0) || ""}.`,
+  })));
+});
+
+router.post("/parent/pta-message", authMiddleware, requireRole("parent"), async (req, res): Promise<void> => {
+  const user = (req as any).user as JwtPayload;
+  const { message, subject } = req.body;
+
+  if (!message || typeof message !== "string" || message.trim().length === 0) {
+    res.status(400).json({ error: "Message is required" });
+    return;
+  }
+
+  const [concern] = await db.insert(ptaConcernsTable).values({
+    schoolId: user.schoolId,
+    submittedById: user.userId,
+    category: "parent_outreach",
+    subject: subject || "Message from a parent",
+    body: message.trim(),
+    status: "open",
+  }).returning();
+
+  await writeAudit({
+    schoolId: user.schoolId,
+    eventType: "parent_pta_message_sent",
+    actor: user,
+    targetType: "pta_concern",
+    targetId: concern.id,
+    details: { subject: subject || "Message from a parent" },
+    req,
+  });
+
+  res.status(201).json({ success: true, id: concern.id });
+});
+
 export default router;

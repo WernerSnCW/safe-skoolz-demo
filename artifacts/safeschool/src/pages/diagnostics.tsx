@@ -180,6 +180,19 @@ function CoordinatorView({ user }: { user: any }) {
                   <Lock size={16} className="mr-2" />
                   {closeMutation.isPending ? "Closing..." : "Close Survey"}
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    closeMutation.mutate(activeSurvey.id, {
+                      onSuccess: () => createMutation.mutate(),
+                    });
+                  }}
+                  disabled={closeMutation.isPending || createMutation.isPending}
+                >
+                  <Play size={16} className="mr-2" />
+                  New Diagnostic
+                </Button>
               </div>
             </CardHeader>
           </Card>

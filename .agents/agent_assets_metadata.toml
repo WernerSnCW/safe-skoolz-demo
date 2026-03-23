@@ -24,3 +24,9 @@ id = "2BMUqTQjvQLHKrlsKX7yX"
 uri = "file://safeskoolz-platform-functions.json"
 type = "unspecified"
 title = "SafeSkoolZ Platform - Complete Functions JSON"
+
+[[outputs]]
+id = "WbjASXSnLIqsJYaFMAguw"
+uri = "file://safeskoolz-project-review.json"
+type = "unspecified"
+title = "safeskoolz Full Project JSON"

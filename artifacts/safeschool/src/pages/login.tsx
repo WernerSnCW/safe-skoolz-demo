@@ -172,11 +172,11 @@ export default function Login() {
         </motion.div>
 
         <Card className="shadow-2xl shadow-primary/5 border-border/50 bg-background/80 backdrop-blur-xl">
-          <div className="flex p-2 gap-2 border-b border-border/50 bg-muted/30" role="tablist" aria-label="Login type">
+          <div className="grid grid-cols-4 p-1.5 gap-1 border-b border-border/50 bg-muted/30" role="tablist" aria-label="Login type">
             {[
-              { id: "pupil" as const, label: "I'm a Pupil", icon: User },
-              { id: "staff" as const, label: "I'm Staff", icon: GraduationCap },
-              { id: "parent" as const, label: "I'm a Parent", icon: Users },
+              { id: "pupil" as const, label: "Pupil", icon: User },
+              { id: "staff" as const, label: "Staff", icon: GraduationCap },
+              { id: "parent" as const, label: "Parent", icon: Users },
               { id: "pta" as const, label: "PTA", icon: UserCheck },
             ].map((tab) => (
               <button
@@ -185,7 +185,7 @@ export default function Login() {
                 aria-selected={activeTab === tab.id}
                 aria-controls={`tabpanel-${tab.id}`}
                 onClick={() => { setActiveTab(tab.id); setError(""); setSelectedStaffEmail(""); }}
-                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
                   activeTab === tab.id
                     ? "bg-card shadow-sm text-primary"
                     : "text-muted-foreground hover:bg-black/5"
@@ -197,7 +197,7 @@ export default function Login() {
             ))}
           </div>
 
-          <CardContent className="p-8">
+          <CardContent className="p-6 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div role="alert" aria-live="assertive" aria-atomic="true">
                 {error && (

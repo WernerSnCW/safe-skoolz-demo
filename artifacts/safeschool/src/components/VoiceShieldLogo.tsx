@@ -27,13 +27,13 @@ export function VoiceShieldLogo({ size = 40, className = "" }: VoiceShieldLogoPr
         strokeLinejoin="round"
       />
       <path
-        d="M18 25C18 23.3 19.3 22 21 22H25V38H21C19.3 38 18 36.7 18 35V25Z"
+        d="M16 22C16 18.7 18.7 16 22 16H42C45.3 16 48 18.7 48 22V34C48 37.3 45.3 40 42 40H26L18 47V40H22C18.7 40 16 37.3 16 34V22Z"
         fill="currentColor"
-        opacity="0.8"
+        opacity="0.7"
       />
-      <path d="M25 20L38 13V47L25 40V20Z" fill="currentColor" opacity="0.8" />
-      <path d="M42 19C46 23 48 27 48 30.5C48 34 46 38 42 42" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" opacity="0.6" />
-      <path d="M42 26C43.8 28 44.5 29.5 44.5 30.5C44.5 31.5 43.8 33 42 35" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.45" />
+      <circle cx="25" cy="28" r="2.5" fill="currentColor" opacity="0.3" />
+      <circle cx="32" cy="28" r="2.5" fill="currentColor" opacity="0.3" />
+      <circle cx="39" cy="28" r="2.5" fill="currentColor" opacity="0.3" />
     </svg>
   );
 }
@@ -54,12 +54,13 @@ export function VoiceShieldIcon({ size = 24, className = "" }: VoiceShieldLogoPr
         fill="#0D9488"
       />
       <path
-        d="M18 25C18 23.3 19.3 22 21 22H25V38H21C19.3 38 18 36.7 18 35V25Z"
+        d="M16 22C16 18.7 18.7 16 22 16H42C45.3 16 48 18.7 48 22V34C48 37.3 45.3 40 42 40H26L18 47V40H22C18.7 40 16 37.3 16 34V22Z"
         fill="white"
+        opacity="0.95"
       />
-      <path d="M25 20L38 13V47L25 40V20Z" fill="white" />
-      <path d="M42 19C46 23 48 27 48 30.5C48 34 46 38 42 42" stroke="white" strokeWidth="3.5" strokeLinecap="round" opacity="0.85" />
-      <path d="M42 26C43.8 28 44.5 29.5 44.5 30.5C44.5 31.5 43.8 33 42 35" stroke="white" strokeWidth="3" strokeLinecap="round" opacity="0.65" />
+      <circle cx="25" cy="28" r="2.8" fill="#0D9488" opacity="0.6" />
+      <circle cx="32" cy="28" r="2.8" fill="#0D9488" opacity="0.6" />
+      <circle cx="39" cy="28" r="2.8" fill="#0D9488" opacity="0.6" />
     </svg>
   );
 }

@@ -185,7 +185,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <ShieldCheck size={24} strokeWidth={2.5} />
           </div>
           <span className="font-display font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-            SafeSchool
+            SafeSkoolZ
           </span>
         </div>
 
@@ -239,6 +239,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <LogOut size={20} />
             Sign Out
           </button>
+          <p className="text-center text-[9px] text-muted-foreground/50 mt-3 pb-1">Powered by Cloudworkz</p>
         </div>
       </aside>
 
@@ -246,7 +247,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="md:hidden glass-panel sticky top-0 z-30 px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShieldCheck className="text-primary" size={24} />
-          <span className="font-display font-bold text-lg">SafeSchool</span>
+          <span className="font-display font-bold text-lg">SafeSkoolZ</span>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

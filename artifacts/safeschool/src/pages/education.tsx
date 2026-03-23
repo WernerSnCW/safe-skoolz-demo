@@ -324,7 +324,7 @@ function PupilContent() {
               <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0">1</span>
               <div>
                 <p className="font-bold">Tell a trusted adult</p>
-                <p className="text-muted-foreground">Talk to a teacher, parent, school counsellor, or any grown-up you trust. You can also use SafeSchool to report it — even anonymously.</p>
+                <p className="text-muted-foreground">Talk to a teacher, parent, school counsellor, or any grown-up you trust. You can also use SafeSkoolZ to report it — even anonymously.</p>
               </div>
             </div>
             <div className="flex gap-3 items-start">
@@ -364,7 +364,7 @@ function PupilContent() {
             <li><strong>Don't join in</strong> — even laughing can make the person being bullied feel worse</li>
             <li><strong>Tell an adult</strong> — this isn't "snitching" or "telling tales", it's looking out for someone</li>
             <li><strong>Be kind afterwards</strong> — check on the person. Ask if they're okay. Include them.</li>
-            <li><strong>Use SafeSchool</strong> — you can report what you saw, even if it didn't happen to you</li>
+            <li><strong>Use SafeSkoolZ</strong> — you can report what you saw, even if it didn't happen to you</li>
           </ul>
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mt-2">
             <p className="font-bold text-primary">Being a good friend means speaking up when something isn't right.</p>
@@ -479,7 +479,7 @@ function PupilContent() {
           <p className="mt-2">These things can make you feel angry, tired, or like you can't concentrate. They can also make you lash out at school without meaning to.</p>
           <p className="mt-2"><strong>You don't have to carry this alone.</strong> Talking to a teacher, counsellor, or another adult you trust is not betraying your family — it's getting help for everyone, including yourself.</p>
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 mt-2">
-            <p className="font-bold text-primary">You can use SafeSchool to tell someone what's going on — you don't even have to say it out loud.</p>
+            <p className="font-bold text-primary">You can use SafeSkoolZ to tell someone what's going on — you don't even have to say it out loud.</p>
           </div>
         </AccordionItem>
       </div>
@@ -550,7 +550,7 @@ function StaffContent() {
           <p>The Convivèxit 2024 protocol applies to all forms of peer-on-peer bullying. Key steps:</p>
           <ol className="list-decimal pl-5 space-y-2">
             <li><strong>Immediate action:</strong> Separate the children involved and ensure safety</li>
-            <li><strong>Record:</strong> Log the incident on SafeSchool with full details</li>
+            <li><strong>Record:</strong> Log the incident on SafeSkoolZ with full details</li>
             <li><strong>Notify:</strong> Inform the Safeguarding Coordinator same day</li>
             <li><strong>Risk assessment:</strong> Complete the structured risk assessment (low/medium/high/critical) with risk and protective factors</li>
             <li><strong>Formal protocol:</strong> If escalation is needed, open a formal protocol linking to the incident</li>
@@ -629,7 +629,7 @@ function StaffContent() {
           </div>
         </AccordionItem>
 
-        <AccordionItem title="Using SafeSchool effectively" icon={BookOpen}>
+        <AccordionItem title="Using SafeSkoolZ effectively" icon={BookOpen}>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Report promptly:</strong> Log incidents the same day they are observed or disclosed</li>
             <li><strong>Be specific:</strong> Use exact words the child used, note times, locations, and witnesses</li>
@@ -707,7 +707,7 @@ function ParentContent() {
         <AccordionItem title="What to do if your child is being bullied" icon={Shield}>
           <ol className="list-decimal pl-5 space-y-2">
             <li><strong>Reassure your child</strong> — tell them it's not their fault and that you will help sort it out together</li>
-            <li><strong>Contact the school</strong> — speak to your child's class teacher or the Safeguarding Coordinator. You can also use SafeSchool to submit a formal concern</li>
+            <li><strong>Contact the school</strong> — speak to your child's class teacher or the Safeguarding Coordinator. You can also use SafeSkoolZ to submit a formal concern</li>
             <li><strong>Keep records</strong> — note dates, times, what happened, and who was involved. Save screenshots of any online bullying</li>
             <li><strong>Agree a plan with the school</strong> — the school will follow the appropriate protocol (Convivèxit, LOPIVI, or Machista Violence) and keep you informed</li>
             <li><strong>Monitor and follow up</strong> — check in with your child regularly and contact the school again if the situation doesn't improve</li>
@@ -760,9 +760,9 @@ function ParentContent() {
           </div>
         </AccordionItem>
 
-        <AccordionItem title="How SafeSchool keeps you informed" icon={BookOpen}>
+        <AccordionItem title="How SafeSkoolZ keeps you informed" icon={BookOpen}>
           <ul className="list-disc pl-5 space-y-1">
-            <li>You can log into SafeSchool with your parent account to view your children's reported incidents</li>
+            <li>You can log into SafeSkoolZ with your parent account to view your children's reported incidents</li>
             <li>You will receive notifications when your child is involved in an incident</li>
             <li>You can submit concerns directly through the Report Incident form</li>
             <li>The school will contact you separately for formal protocol discussions</li>

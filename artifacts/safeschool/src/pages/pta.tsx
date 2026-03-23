@@ -717,7 +717,7 @@ function PtaCodesignTab() {
             <Lightbulb size={18} /> Co-Design Workspace
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Share your preferences for how SafeSchool should work for parents at Morna.
+            Share your preferences for how SafeSkoolZ should work for parents at Morna.
             Your input shapes the platform configuration.
           </p>
         </CardHeader>

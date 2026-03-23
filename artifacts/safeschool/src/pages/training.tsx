@@ -63,8 +63,8 @@ function QuickStart({ role }: { role: string }) {
     return (
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardContent className="p-6 space-y-3">
-          <h2 className="text-xl font-display font-bold">Welcome to SafeSchool</h2>
-          <p className="text-muted-foreground">SafeSchool is here to help you if something isn't right at school. Here are the main things you can do:</p>
+          <h2 className="text-xl font-display font-bold">Welcome to SafeSkoolZ</h2>
+          <p className="text-muted-foreground">SafeSkoolZ is here to help you if something isn't right at school. Here are the main things you can do:</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
             <div className="bg-white dark:bg-gray-900 rounded-xl border border-border p-4 text-center space-y-2">
               <div className="w-12 h-12 mx-auto rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center"><AlertTriangle size={20} className="text-red-600" /></div>
@@ -92,7 +92,7 @@ function QuickStart({ role }: { role: string }) {
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
         <CardContent className="p-6 space-y-3">
           <h2 className="text-xl font-display font-bold">Getting started as a parent</h2>
-          <p className="text-muted-foreground">SafeSchool keeps you informed about your child's wellbeing at school. Here's what you can do:</p>
+          <p className="text-muted-foreground">SafeSkoolZ keeps you informed about your child's wellbeing at school. Here's what you can do:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-4">
             {[
               { icon: Eye, label: "View incidents", desc: "See reports involving your child", color: "bg-blue-100 dark:bg-blue-950/50 text-blue-600" },
@@ -116,7 +116,7 @@ function QuickStart({ role }: { role: string }) {
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
       <CardContent className="p-6 space-y-3">
         <h2 className="text-xl font-display font-bold">Staff training guide</h2>
-        <p className="text-muted-foreground">This guide covers every feature you'll use in SafeSchool. Work through each section to learn how to log incidents, manage pupil accounts, respond to alerts, and use the protocol system.</p>
+        <p className="text-muted-foreground">This guide covers every feature you'll use in SafeSkoolZ. Work through each section to learn how to log incidents, manage pupil accounts, respond to alerts, and use the protocol system.</p>
         <div className="flex items-center gap-2 text-sm text-primary font-bold mt-2">
           <CheckCircle2 size={16} />
           Estimated training time: 30–45 minutes
@@ -192,7 +192,7 @@ function ParentGuides() {
     <div className="space-y-3">
       <GuideSection title="Logging in" icon={Key} color="bg-amber-100 dark:bg-amber-950/50 text-amber-600">
         <div className="space-y-3">
-          <Step number={1} title="Go to the SafeSchool login page">Click "I'm a Parent" tab at the top.</Step>
+          <Step number={1} title="Go to the SafeSkoolZ login page">Click "I'm a Parent" tab at the top.</Step>
           <Step number={2} title="Select your name or enter credentials">If you see your name in the dropdown, select it. Otherwise, enter your email and password manually.</Step>
           <Step number={3} title="Sign in">You'll see your dashboard with your child's information.</Step>
         </div>
@@ -379,11 +379,11 @@ export default function TrainingPage() {
         <div className="w-16 h-16 mx-auto bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-4">
           <GraduationCap size={32} />
         </div>
-        <h1 className="text-3xl font-display font-bold">How to use SafeSchool</h1>
+        <h1 className="text-3xl font-display font-bold">How to use SafeSkoolZ</h1>
         <p className="text-muted-foreground mt-2">
-          {isPupil && "A simple guide to help you use SafeSchool"}
-          {isParent && "Everything you need to know about using SafeSchool as a parent"}
-          {isStaff && "Step-by-step training guide for all SafeSchool features"}
+          {isPupil && "A simple guide to help you use SafeSkoolZ"}
+          {isParent && "Everything you need to know about using SafeSkoolZ as a parent"}
+          {isStaff && "Step-by-step training guide for all SafeSkoolZ features"}
         </p>
         <div className="mt-4">
           <StartDemoButton />

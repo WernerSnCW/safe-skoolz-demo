@@ -8,7 +8,7 @@ const ORG_TYPES = [
   { id: "authority", label: "Local Authority", description: "Municipal or regional education authority" },
   { id: "trust", label: "School Trust / MAT", description: "Multi-academy trust or school group" },
   { id: "ngo", label: "NGO / Charity", description: "Child protection or education charity" },
-  { id: "other", label: "Other", description: "Other organisation interested in SafeSchool" },
+  { id: "other", label: "Other", description: "Other organisation interested in SafeSkoolZ" },
 ];
 
 export default function NewsletterSignUp() {
@@ -70,7 +70,7 @@ export default function NewsletterSignUp() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">You're registered!</h1>
           <p className="text-lg text-gray-600 mb-3">
-            Thank you for your interest in SafeSchool. We'll keep you updated on product launches, features, and safeguarding resources.
+            Thank you for your interest in SafeSkoolZ. We'll keep you updated on product launches, features, and safeguarding resources.
           </p>
           <p className="text-sm text-gray-500 mb-8">
             Check your inbox for a confirmation. You can unsubscribe at any time.
@@ -78,7 +78,7 @@ export default function NewsletterSignUp() {
           <Link href="/login">
             <button className="inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors">
               <ArrowLeft size={18} />
-              Back to SafeSchool
+              Back to SafeSkoolZ
             </button>
           </Link>
         </motion.div>
@@ -93,7 +93,7 @@ export default function NewsletterSignUp() {
           <Link href="/login">
             <button className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-teal-600 font-medium mb-6 transition-colors">
               <ArrowLeft size={16} />
-              Back to SafeSchool
+              Back to SafeSkoolZ
             </button>
           </Link>
           <div className="text-center">
@@ -102,7 +102,7 @@ export default function NewsletterSignUp() {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-3">Register your interest</h1>
             <p className="text-lg text-gray-600 max-w-md mx-auto">
-              Sign up to our newsletter to stay informed about SafeSchool — safeguarding tools built for schools, by schools.
+              Sign up to our newsletter to stay informed about SafeSkoolZ — safeguarding tools built for schools, by schools.
             </p>
           </div>
         </motion.div>
@@ -234,7 +234,7 @@ export default function NewsletterSignUp() {
               required
             />
             <label htmlFor="consent" className="text-sm text-gray-600 leading-relaxed">
-              I consent to receive newsletters and product updates from SafeSchool. We respect your privacy and will never share your data. You can unsubscribe at any time.
+              I consent to receive newsletters and product updates from SafeSkoolZ. We respect your privacy and will never share your data. You can unsubscribe at any time.
             </label>
           </div>
 
@@ -273,8 +273,9 @@ export default function NewsletterSignUp() {
         </motion.form>
 
         <div className="mt-10 text-center text-sm text-gray-500">
-          <p>SafeSchool — safeguarding compliance made simple.</p>
+          <p>SafeSkoolZ — safeguarding compliance made simple.</p>
           <p className="mt-1">LOPIVI · Convivèxit · Machista Violence Protocol</p>
+          <p className="mt-2 text-xs text-gray-400">Powered by Cloudworkz</p>
         </div>
       </div>
     </div>

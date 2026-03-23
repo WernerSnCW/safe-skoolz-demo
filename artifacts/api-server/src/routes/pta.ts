@@ -562,7 +562,7 @@ router.get("/pta/resources", authMiddleware, requireRole("pta"), async (_req, re
       {
         id: "annual-report-template",
         title: "Annual Report Template (Blank)",
-        description: "A blank annual safeguarding report template for PTAs without SafeSchool to use manually.",
+        description: "A blank annual safeguarding report template for PTAs without SafeSkoolZ to use manually.",
         category: "template",
         type: "document",
       },

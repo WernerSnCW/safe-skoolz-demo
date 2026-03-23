@@ -79,8 +79,8 @@ function getStepsForRole(role: string): DemoStep[] {
         page: "/settings",
         navHighlight: "My Settings",
         title: "Your Avatar & Settings",
-        description: "Pick your animal avatar from the grid — dog, cat, rabbit, bear, fox, owl, penguin, lion, panda, unicorn, and more. Your chosen animal appears next to your name everywhere in SafeSchool. You can change it any time.",
-        benefit: "Your avatar is your identity in SafeSchool — pick the one that feels like you.",
+        description: "Pick your animal avatar from the grid — dog, cat, rabbit, bear, fox, owl, penguin, lion, panda, unicorn, and more. Your chosen animal appears next to your name everywhere in SafeSkoolZ. You can change it any time.",
+        benefit: "Your avatar is your identity in SafeSkoolZ — pick the one that feels like you.",
       },
     ];
   }
@@ -131,7 +131,7 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/training",
         navHighlight: "Training",
-        title: "How To Use SafeSchool",
+        title: "How To Use SafeSkoolZ",
         description: "Step-by-step guides for every feature — viewing incidents, checking behaviour points and levels, messaging staff, and reporting concerns. Each guide has numbered steps you can follow along with.",
         benefit: "Never feel lost — everything is explained here.",
       },

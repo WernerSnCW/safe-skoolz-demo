@@ -1,6 +1,6 @@
 # Overview
 
-This project, SafeSchool, is a pnpm workspace monorepo using TypeScript, designed as a multi-role safeguarding and incident reporting platform for schools. Its core purpose is to provide a comprehensive solution for managing incidents, ensuring compliance with safeguarding frameworks (LOPIVI, Convivèxit 2024, Machista Violence), and facilitating secure communication among all school community members.
+This project, SafeSkoolZ (formerly SafeSchool), is a pnpm workspace monorepo using TypeScript, designed as a multi-role safeguarding and incident reporting platform for schools. Powered by Cloudworkz. Its core purpose is to provide a comprehensive solution for managing incidents, ensuring compliance with safeguarding frameworks (LOPIVI, Convivèxit 2024, Machista Violence), and facilitating secure communication among all school community members.
 
 Key capabilities include role-based access, detailed incident tracking with escalation, compliance framework integration, pattern detection for early alerts, structured risk assessment, and dedicated messaging systems for pupils, parents, and staff. The platform also offers SENCO caseload management and comprehensive analytics. SafeSchool aims to enhance child protection and school safety through a secure, privacy-conscious, and user-friendly experience.
 

@@ -512,7 +512,7 @@ router.get("/diagnostics/:id/results", authMiddleware, async (req: Request, res:
         { metric: "Average time from report to first staff response", baseline: "Measure via system", target: "< 24 hours", timeframe: "3 months" },
       ],
       actions: [
-        "Publicise reporting channels (SafeSchool, trusted adults list) in every classroom",
+        "Publicise reporting channels (SafeSkoolZ, trusted adults list) in every classroom",
         "Run 'It's OK to tell' campaign — normalise reporting as caring, not snitching",
         "Introduce anonymous reporting option and communicate it to pupils and parents",
         "Share response-time data with staff to build accountability",
@@ -541,7 +541,7 @@ router.get("/diagnostics/:id/results", authMiddleware, async (req: Request, res:
         "Schedule termly safeguarding refresher for all staff (including non-teaching)",
         "Send parent-friendly policy summary via school comms channel",
         "Run scenario-based training: 'What would you do if...?'",
-        "Display escalation flowchart in staff room and on SafeSchool",
+        "Display escalation flowchart in staff room and on SafeSkoolZ",
       ],
     },
     "System Readiness": {

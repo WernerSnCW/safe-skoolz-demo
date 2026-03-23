@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-polished";
-import { BookOpen, Shield, Heart, Users, AlertTriangle, CheckCircle2, HelpCircle, HandHeart, Eye, MessageCircle, Lightbulb, RefreshCw } from "lucide-react";
+import { BookOpen, Shield, Heart, Users, AlertTriangle, CheckCircle2, HelpCircle, HandHeart, Eye, MessageCircle, Lightbulb, RefreshCw, Scale } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Tab = "pupils" | "staff" | "parents";
@@ -285,6 +285,34 @@ function PupilContent() {
           <p className="text-muted-foreground">
             Everyone has the right to feel safe, happy, and respected at school. If something doesn't feel right, it's always okay to tell someone. You are never alone.
           </p>
+        </CardContent>
+      </Card>
+
+      <Card className="border-indigo-200 dark:border-indigo-900/50 bg-indigo-50/50 dark:bg-indigo-950/20">
+        <CardContent className="p-6">
+          <h2 className="text-lg font-display font-bold mb-3 flex items-center gap-2">
+            <Scale size={20} className="text-indigo-600 dark:text-indigo-400" />
+            Your Rights
+          </h2>
+          <p className="text-sm text-muted-foreground mb-3">These are things every child is entitled to. They are part of the law and the school's duty of care.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {[
+              { emoji: "\uD83D\uDEE1\uFE0F", text: "You have the right to feel safe at school — nobody should hurt you, scare you, or make you feel bad about yourself" },
+              { emoji: "\uD83D\uDDE3\uFE0F", text: "You have the right to be listened to — when you tell an adult something, they must take it seriously" },
+              { emoji: "\uD83D\uDD12", text: "You have the right to privacy — your diary is private, and your personal information is protected" },
+              { emoji: "\u2696\uFE0F", text: "You have the right to be treated fairly — no matter who you are, where you come from, or what language you speak" },
+              { emoji: "\uD83D\uDCAC", text: "You have the right to say how you feel — your feelings and opinions matter and should be respected" },
+              { emoji: "\uD83E\uDD1D", text: "You have the right to get help — if something is wrong, adults in school must help you, not ignore you" },
+              { emoji: "\uD83D\uDCDA", text: "You have the right to understand what's happening — if a report involves you, the school should explain what they are doing and why" },
+              { emoji: "\u2764\uFE0F", text: "You have the right to support — whether you are the person who was hurt or the person who did something wrong, you deserve help" },
+            ].map((right, i) => (
+              <div key={i} className="flex items-start gap-2 p-2.5 rounded-lg bg-white dark:bg-zinc-900/50 border border-indigo-100 dark:border-indigo-900/30">
+                <span className="text-base shrink-0 mt-0.5">{right.emoji}</span>
+                <p className="text-xs leading-relaxed">{right.text}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 italic">These rights come from the UN Convention on the Rights of the Child, Spanish LOPIVI law, and the Balearic Islands Convivèxit protocol.</p>
         </CardContent>
       </Card>
 
@@ -655,6 +683,53 @@ function ParentContent() {
           </p>
         </CardContent>
       </Card>
+
+      <AccordionItem title="Your Rights as a Parent" icon={Scale}>
+        <p>Under Spanish law (LOPIVI), the Balearic Islands Convivèxit protocol, and EU data protection regulations, you have specific rights when it comes to your child's safety and welfare at school.</p>
+
+        <p className="font-bold mt-3">Right to information</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>You have the right to be informed promptly if your child is involved in a safeguarding incident — whether as a victim, witness, or perpetrator</li>
+          <li>The school must explain what protocol is being followed (LOPIVI, Convivèxit, or Machista Violence) and what steps are being taken</li>
+          <li>You have the right to receive updates on the progress and outcome of any investigation</li>
+          <li>You have the right to receive a written summary of any formal protocol actions taken</li>
+        </ul>
+
+        <p className="font-bold mt-3">Right to be heard</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>You have the right to contribute your perspective during any investigation or protocol process</li>
+          <li>You have the right to raise concerns directly — through SafeSkoolZ, by contacting your child's teacher, or by requesting a meeting with the Safeguarding Coordinator</li>
+          <li>You have the right to formally disagree with the school's handling of a situation and to have your objection recorded</li>
+          <li>You have the right to contact the PTA or school governance body if you feel concerns are not being addressed</li>
+        </ul>
+
+        <p className="font-bold mt-3">Right to data protection</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Your child's personal data is protected under the EU General Data Protection Regulation (GDPR) and Spanish Organic Law 3/2018</li>
+          <li>You have the right to know what data the school holds about your child and how it is used</li>
+          <li>Incident reports involving your child are confidential — the school cannot share details about your child with other families without your consent</li>
+          <li>Your child's diary entries are completely private — only they can see them. The AI safeguarding scanner may alert staff to concerns, but diary content is never shared</li>
+          <li>You have the right to request access to, correction of, or deletion of your child's personal data (subject to safeguarding obligations)</li>
+        </ul>
+
+        <p className="font-bold mt-3">Right to consent</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>The school must request your consent before sharing incident details with classroom teachers beyond the Safeguarding Coordinator</li>
+          <li>You can approve or decline consent requests through SafeSkoolZ — your decision is recorded and audited</li>
+          <li>You have the right to withdraw consent at any time</li>
+        </ul>
+
+        <p className="font-bold mt-3">Right to external support</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>You can contact external bodies if you believe the school is not meeting its safeguarding duties — including the Balearic Islands Education Department, social services, or the police</li>
+          <li>The school must cooperate with external agencies during investigations</li>
+          <li>You have the right to seek independent legal advice at any stage</li>
+        </ul>
+
+        <div className="p-3 rounded-lg bg-indigo-50 border border-indigo-200 mt-3 dark:bg-indigo-950/20 dark:border-indigo-800">
+          <p className="font-bold text-indigo-700 dark:text-indigo-400">If you feel your rights are not being respected, you can raise a formal concern through SafeSkoolZ, contact the PTA, or speak directly to the school's Safeguarding Coordinator. Every concern is logged and must receive a response.</p>
+        </div>
+      </AccordionItem>
 
       <div className="space-y-3">
         <AccordionItem title="Signs your child might be experiencing bullying" icon={Eye}>

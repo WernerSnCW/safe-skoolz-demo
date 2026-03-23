@@ -309,21 +309,56 @@ function RespondentView({ user }: { user: any }) {
   }
 
   if (data.alreadyCompleted) {
+    const isPupil = user.role === "pupil";
     return (
       <div className="space-y-6">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <CheckCircle2 size={48} className="mx-auto text-primary mb-4" />
-            <h2 className="text-xl font-bold mb-2">
-              {user.role === "pupil" ? "All done! Thank you!" : "Thank you for responding!"}
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              {user.role === "pupil"
-                ? "Your answers help make school better for everyone."
-                : "Your responses have been recorded. The school coordinator will share the results."}
-            </p>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="overflow-hidden border-0 shadow-lg">
+            <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-cyan-950/20 p-8 text-center">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mx-auto mb-5"
+              >
+                <span className="text-4xl">{isPupil ? "⭐" : "✅"}</span>
+              </motion.div>
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-2xl font-bold mb-2 text-emerald-900 dark:text-emerald-100"
+              >
+                {isPupil ? "You're a star!" : "Thank you for responding!"}
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-emerald-700 dark:text-emerald-300 max-w-sm mx-auto text-sm leading-relaxed"
+              >
+                {isPupil
+                  ? "Your answers help make your school a safer, happier place for everyone. That's really important!"
+                  : "Your responses have been recorded and will help shape the school's safeguarding approach. The coordinator will share the combined results."}
+              </motion.p>
+              {isPupil && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="mt-6 inline-flex items-center gap-2 bg-white/60 dark:bg-white/10 rounded-full px-4 py-2 text-sm text-emerald-700 dark:text-emerald-300"
+                >
+                  <span className="text-lg">🎉</span>
+                  Survey complete — well done!
+                </motion.div>
+              )}
+            </div>
+          </Card>
+        </motion.div>
         <ActionsLink surveyId={data.survey.id} />
       </div>
     );
@@ -372,17 +407,58 @@ function SurveyForm({ surveyId, questions, user }: { surveyId: string; questions
   if (submitted) {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-8"
+        transition={{ type: "spring", stiffness: 180, damping: 20 }}
+        className="text-center py-10"
       >
-        <CheckCircle2 size={48} className="mx-auto text-primary mb-4" />
-        <h3 className="text-xl font-bold mb-2">
-          {isPupil ? "Brilliant! All done!" : "Thank you!"}
-        </h3>
-        <p className="text-muted-foreground">
-          {isPupil ? "Your answers help your school be the best it can be." : "Your responses have been recorded."}
-        </p>
+        <div className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-cyan-950/20 rounded-2xl p-8">
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.15 }}
+            className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mx-auto mb-5"
+          >
+            <span className="text-4xl">{isPupil ? "🌟" : "✅"}</span>
+          </motion.div>
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="text-2xl font-bold mb-2 text-emerald-900 dark:text-emerald-100"
+          >
+            {isPupil ? "Brilliant! You did it!" : "Thank you!"}
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-emerald-700 dark:text-emerald-300 max-w-sm mx-auto text-sm leading-relaxed"
+          >
+            {isPupil
+              ? "Your answers help your school be the best it can be. You should be really proud!"
+              : "Your responses have been recorded. The coordinator will share the combined results."}
+          </motion.p>
+          {isPupil && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="mt-5 flex justify-center gap-2 text-2xl"
+            >
+              {["🎉", "⭐", "🎉"].map((e, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8 + i * 0.1 }}
+                >
+                  {e}
+                </motion.span>
+              ))}
+            </motion.div>
+          )}
+        </div>
       </motion.div>
     );
   }

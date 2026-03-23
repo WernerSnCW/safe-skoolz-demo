@@ -2,516 +2,2112 @@
   "project": {
     "name": "safeskoolz",
     "description": "Multi-role safeguarding and incident reporting platform for schools, compliant with LOPIVI, Convivèxit 2024, and Machista Violence protocols. Powered by Cloudworkz.",
-    "branding": "safeskoolz (all lowercase)",
-    "targetSchool": "Morna International College, Ibiza",
-    "tagline": "A safe space to speak up and seek help."
+    "branding": "safeskoolz (all lowercase everywhere)",
+    "targetSchool": "Morna International College, Ibiza, Spain",
+    "tagline": "A safe space to speak up and seek help.",
+    "jurisdiction": "Spain — Balearic Islands",
+    "legalFrameworks": ["LOPIVI (Ley Orgánica de Protección Integral a la Infancia y la Adolescencia)", "Convivèxit 2024 (Balearic coexistence protocol)", "Machista Violence Protocol"]
   },
 
   "architecture": {
     "type": "pnpm workspace monorepo",
-    "language": "TypeScript",
+    "language": "TypeScript (strict, composite projects)",
     "structure": {
-      "artifacts/api-server": "Express 5 REST API backend",
-      "artifacts/safeschool": "React + Vite frontend SPA",
-      "lib/db": "Drizzle ORM schema + PostgreSQL connection",
-      "lib/api-spec": "OpenAPI specification",
-      "lib/api-client-react": "Generated React Query hooks (Orval)",
-      "lib/api-zod": "Generated Zod validators",
-      "scripts/src/seed.ts": "Database seeding script"
+      "artifacts/api-server": {
+        "description": "Express 5 REST API backend",
+        "entrypoint": "src/index.ts",
+        "port": "8080",
+        "files": {
+          "src/app.ts": "Express app setup, CORS, rate limiting, middleware registration",
+          "src/index.ts": "Server bootstrap, cron scheduling for pattern detection",
+          "src/routes/index.ts": "Route aggregator — mounts all route files under /api prefix",
+          "src/routes/auth.ts": "Authentication routes (pupil PIN, staff email, parent email, demo login, profile)",
+          "src/routes/incidents.ts": "Incident CRUD, consent workflow, assessment, status management",
+          "src/routes/protocols.ts": "Protocol CRUD with escalation tier calculation and mandatory referral engine",
+          "src/routes/alerts.ts": "Pattern alert listing and status management",
+          "src/routes/dashboard.ts": "Coordinator, teacher, parent dashboards and analytics",
+          "src/routes/diagnostics.ts": "Diagnostic survey CRUD, response submission, results, summary, actions, priorities",
+          "src/routes/diary.ts": "Pupil diary CRUD with AI safeguarding scan",
+          "src/routes/messages.ts": "Messaging system, conversations, safe contacts, child alerts",
+          "src/routes/behaviour.ts": "Behaviour points CRUD, levels, pupil records, summary",
+          "src/routes/pta.ts": "PTA portal — dashboard, messaging, policy, concerns, reports, codesign, mood trends, resources, parent-to-PTA",
+          "src/routes/senco.ts": "SENCO caseload management and tracking",
+          "src/routes/caseTasks.ts": "Case task management linked to protocols",
+          "src/routes/schools.ts": "School listing, pupil listing, staff listing, pupil search, PIN reset, avatar management",
+          "src/routes/teacherPosts.ts": "School updates (teacher posts) with audience filtering",
+          "src/routes/notifications.ts": "Notification listing and read marking",
+          "src/routes/delegatedRoles.ts": "Delegated safeguarding role assignment and revocation",
+          "src/routes/annexTemplates.ts": "Annex template CRUD per compliance framework",
+          "src/routes/referralBodies.ts": "External referral body directory management",
+          "src/routes/newsletter.ts": "Public newsletter subscription",
+          "src/routes/dataRetention.ts": "Data retention policy endpoint",
+          "src/routes/health.ts": "Health check endpoint",
+          "src/lib/auth.ts": "JWT signing/verification, authMiddleware, requireRole middleware",
+          "src/lib/patternDetection.ts": "8-rule pattern detection engine with deduplication",
+          "src/lib/escalation.ts": "Escalation tier determination and mandatory referral engine",
+          "src/lib/ptaPiiMiddleware.ts": "PII stripping middleware for PTA role responses",
+          "src/lib/auditHelper.ts": "Immutable audit log writer",
+          "src/lib/referenceNumber.ts": "Unique reference number generator for incidents and protocols"
+        }
+      },
+      "artifacts/safeschool": {
+        "description": "React + Vite frontend SPA",
+        "files": {
+          "src/App.tsx": "Router configuration with ProtectedRoute wrapper and role guards",
+          "src/components/layout/AppLayout.tsx": "Sidebar navigation with role-specific menu items, dark mode toggle, notification badges, mobile bottom nav",
+          "src/components/demo/DemoWalkthrough.tsx": "Interactive demo walkthrough overlay for new users",
+          "src/pages/login.tsx": "Login page with school selector, pupil PIN pad, staff/parent email forms, demo login",
+          "src/pages/dashboard.tsx": "Role router — dispatches to CoordinatorDashboard, TeacherDashboard, PupilDashboard, or ParentDashboard",
+          "src/pages/dashboard/CoordinatorDashboard.tsx": "Full analytics dashboard with charts, PTA report management tab, delegated roles, recent incidents",
+          "src/pages/dashboard/TeacherDashboard.tsx": "Teacher analytics scoped to class/year group",
+          "src/pages/dashboard/PupilDashboard.tsx": "Pupil home with quick actions, behaviour overview, diary mood history",
+          "src/pages/dashboard/ParentDashboard.tsx": "Parent dashboard with child incidents, emotional timeline, school overview, PTA contact card",
+          "src/pages/report-incident.tsx": "Dual-mode incident form — child-friendly (pupils) vs professional (staff)",
+          "src/pages/incidents.tsx": "Incident list with filtering, search, pagination; incident detail with consent workflow",
+          "src/pages/diagnostics.tsx": "Diagnostic survey taking UI with role-adaptive question rendering",
+          "src/pages/diagnostics-results.tsx": "Full results (coordinator) or published summary (others) with charts and priorities",
+          "src/pages/diary.tsx": "Pupil feelings diary with physical diary aesthetic, mood emoji picker, leather-look cover",
+          "src/pages/behaviour.tsx": "Behaviour tracker — staff can issue points, pupils see own record, parents see child record",
+          "src/pages/messages.tsx": "Messaging with conversations, compose, safe contacts (pupils), urgent help",
+          "src/pages/pta.tsx": "PTA portal with 6 tabs: Dashboard, Messages, Policy, Report, CoDesign, Resources",
+          "src/pages/caseload.tsx": "SENCO caseload management with tracking forms and progress charts",
+          "src/pages/learnings.tsx": "School updates feed with compose form (staff), category filters, Heads Up banner",
+          "src/pages/my-class.tsx": "Class/year group pupil list with behaviour status and incident history links",
+          "src/pages/education.tsx": "Rights education page — UNCRC, LOPIVI, Convivèxit, Machista Violence protocol accordions",
+          "src/pages/training.tsx": "Role-specific training guides with step-by-step walkthroughs",
+          "src/pages/alerts.tsx": "Pattern alerts list with review actions",
+          "src/pages/notifications.tsx": "Notification centre with read/unread management",
+          "src/pages/settings.tsx": "User settings — avatar, profile, dark mode, language preferences",
+          "src/pages/newsletter.tsx": "Public newsletter signup form for organisations"
+        }
+      },
+      "lib/db": {
+        "description": "Drizzle ORM schema definitions + PostgreSQL connection",
+        "orm": "Drizzle ORM",
+        "configFile": "drizzle.config.ts"
+      },
+      "lib/api-spec": "OpenAPI 3.0 specification file",
+      "lib/api-client-react": "Auto-generated React Query hooks via Orval from OpenAPI spec",
+      "lib/api-zod": "Auto-generated Zod validation schemas from OpenAPI spec",
+      "scripts/src/seed.ts": "Database seeding script for demo data"
     },
     "stack": {
-      "backend": ["Node.js 24", "Express 5", "PostgreSQL", "Drizzle ORM", "Zod", "bcrypt", "jsonwebtoken"],
-      "frontend": ["React 19", "Vite", "TailwindCSS", "Framer Motion", "Recharts", "TanStack React Query", "Wouter"],
-      "auth": "Custom JWT (bcrypt password hashing, PIN-based for pupils)",
-      "build": "esbuild",
-      "ai": "OpenAI SDK via Replit AI Integrations (gpt-5-nano)"
+      "backend": {
+        "runtime": "Node.js 24",
+        "framework": "Express 5",
+        "database": "PostgreSQL",
+        "orm": "Drizzle ORM",
+        "validation": "Zod",
+        "passwordHashing": "bcrypt (12 salt rounds)",
+        "jwt": "jsonwebtoken (HS256)",
+        "ai": "OpenAI SDK via Replit AI Integrations proxy",
+        "aiModel": "gpt-5-nano",
+        "apiCodegen": "Orval (from OpenAPI spec)",
+        "bundler": "esbuild",
+        "rateLimiting": "express-rate-limit"
+      },
+      "frontend": {
+        "framework": "React 19",
+        "bundler": "Vite",
+        "styling": "TailwindCSS",
+        "animation": "Framer Motion",
+        "charts": "Recharts",
+        "stateManagement": "TanStack React Query v5",
+        "routing": "Wouter",
+        "icons": "Lucide React",
+        "toasts": "Sonner"
+      }
     }
   },
 
-  "roles": [
-    { "role": "pupil", "loginMethod": "PIN (4-digit)", "capabilities": ["Report incidents (child-friendly form)", "Feelings diary (fully private)", "View behaviour record", "Send messages to safe contacts", "Urgent help button", "View school updates", "Take diagnostic survey", "Training guides"] },
-    { "role": "parent", "loginMethod": "Email + password", "capabilities": ["View children's incidents", "Approve/decline teacher consent", "Contact PTA", "View school analytics (anonymised)", "Message school staff", "Take diagnostic survey", "View diagnostic results summary", "View school updates"] },
-    { "role": "teacher", "loginMethod": "Email + password", "capabilities": ["Log incidents (professional form)", "View class pupils", "Reset pupil PINs", "Issue behaviour points", "View teacher analytics", "Broadcast school updates (Heads Up)", "Take diagnostic survey", "View diagnostic results summary"] },
-    { "role": "head_of_year", "loginMethod": "Email + password", "capabilities": ["All teacher capabilities", "View year group incidents", "Year group oversight"] },
-    { "role": "coordinator", "loginMethod": "Email + password", "capabilities": ["Full incident management", "Open/manage protocols", "View all alerts", "Full analytics dashboard", "Manage delegated roles", "Request teacher consent", "Generate/approve PTA annual reports", "Full diagnostic results + priorities/KPIs", "Manage annex templates", "Manage referral bodies", "View audit log"] },
-    { "role": "head_teacher", "loginMethod": "Email + password", "capabilities": ["Same as coordinator"] },
-    { "role": "senco", "loginMethod": "Email + password", "capabilities": ["SENCO caseload management", "Tracking & progress recording", "Case tasks", "View coordinator dashboard", "View alerts"] },
-    { "role": "support_staff", "loginMethod": "Email + password", "capabilities": ["Log incidents", "View assigned incidents", "School updates"] },
-    { "role": "pta", "loginMethod": "Email + password", "capabilities": ["PTA Dashboard (anonymised KPIs, mood trends)", "Messaging with coordinator", "Policy acknowledgment/flagging", "Annual report viewing", "Co-design feedback", "Resources library", "Concern submission"] }
-  ],
-
-  "features": {
-    "incidentManagement": {
-      "description": "Comprehensive incident reporting with role-adaptive forms",
-      "details": [
-        "Child-friendly form for pupils (emoji emotional state, simplified categories)",
-        "Professional form for staff (detailed categories, safeguarding checks, person identification)",
-        "Three escalation tiers",
-        "Emotional state capture (before/after incident)",
-        "Location tracking",
-        "Unknown person identification support",
-        "Per-incident teacher consent workflow (coordinator requests, parent approves/declines)",
-        "Redacted view for teachers until parent consent granted",
-        "Status workflow: open → under_investigation → resolved/escalated/closed",
-        "Reference number generation",
-        "Audit-trailed consent decisions"
+  "roles": {
+    "pupil": {
+      "loginMethod": "PIN (4-digit, bcrypt hashed)",
+      "lockout": "3 failed attempts → locked until 2099-12-31 (permanent until admin reset)",
+      "sessionTimeout": "90 seconds inactivity auto-logout",
+      "capabilities": [
+        "Report incidents via child-friendly form (emoji emotional state, simplified categories)",
+        "Feelings diary (fully private — no parent/teacher/coordinator access)",
+        "View own behaviour record (total points, current level, points to next level, recent history)",
+        "Send messages to safe contacts (staff designated as form tutors)",
+        "Urgent help button (triggers immediate notification to safe contact)",
+        "View school updates filtered by audience=everyone|pupils|pupils_parents",
+        "Take diagnostic survey (emoji face scale 1-5)",
+        "View diagnostic summary (closed surveys only, published actions only)",
+        "Access training guides",
+        "Access rights education page",
+        "Update avatar"
       ],
-      "categories": ["bullying", "cyberbullying", "physical", "verbal", "emotional", "sexual", "neglect", "discrimination", "safeguarding", "coercive_control", "other"]
+      "sidebarNav": [
+        {"label": "Dashboard", "path": "/", "icon": "Home"},
+        {"label": "Report Incident", "path": "/report", "icon": "AlertTriangle"},
+        {"label": "My Diary", "path": "/diary", "icon": "BookHeart"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "My Behaviour", "path": "/behaviour", "icon": "Gauge"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "My Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    },
+    "parent": {
+      "loginMethod": "Email + password (bcrypt hashed)",
+      "lockout": "3 failed attempts → locked until 2099-12-31",
+      "capabilities": [
+        "View children's incidents (only parentVisible=true incidents involving their child)",
+        "Approve/decline teacher consent requests on incidents",
+        "View anonymised school overview analytics",
+        "Message school staff directly (teacher, coordinator, etc.)",
+        "View child urgent help alerts",
+        "Contact PTA representatives (first name + last initial shown)",
+        "Send message to PTA (stored as pta_concern with category=parent_outreach)",
+        "View behaviour record for linked children",
+        "Take diagnostic survey (Likert scale)",
+        "View diagnostic summary with published actions",
+        "View school updates filtered by audience=everyone|parents|pupils_parents",
+        "Access training guides and education page"
+      ],
+      "sidebarNav": [
+        {"label": "Dashboard", "path": "/", "icon": "Home"},
+        {"label": "Report Incident", "path": "/report", "icon": "AlertTriangle"},
+        {"label": "Incidents", "path": "/incidents", "icon": "FileText"},
+        {"label": "Behaviour", "path": "/behaviour", "icon": "Gauge"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "Messages", "path": "/messages", "icon": "MessageCircle"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "Notifications", "path": "/notifications", "icon": "Bell", "badge": "unreadCount"},
+        {"label": "Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    },
+    "teacher": {
+      "loginMethod": "Email + password",
+      "capabilities": [
+        "Log incidents via professional form (safeguarding checks, person identification)",
+        "View incidents involving own class pupils only",
+        "Redacted incident view until parent grants teacher consent",
+        "Assess incidents involving own pupils (add staff notes, witness statements, parent summary)",
+        "View class pupils list with behaviour and incident links",
+        "Reset pupil PINs (individual and bulk)",
+        "Issue behaviour points with reason and category",
+        "View teacher analytics scoped to own class",
+        "Broadcast school updates (all categories including 'Heads Up')",
+        "View pattern alerts",
+        "Take diagnostic survey",
+        "View diagnostic summary with published actions"
+      ],
+      "sidebarNav": [
+        {"label": "Dashboard", "path": "/", "icon": "Home"},
+        {"label": "Log Incident", "path": "/report", "icon": "AlertTriangle"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "Behaviour", "path": "/behaviour", "icon": "Gauge"},
+        {"label": "My Class", "path": "/class", "icon": "Users"},
+        {"label": "Messages", "path": "/messages", "icon": "MessageCircle"},
+        {"label": "Incidents", "path": "/incidents", "icon": "FileText"},
+        {"label": "Alerts", "path": "/alerts", "icon": "Activity"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "Notifications", "path": "/notifications", "icon": "Bell", "badge": "unreadCount"},
+        {"label": "Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    },
+    "head_of_year": {
+      "loginMethod": "Email + password",
+      "capabilities": ["All teacher capabilities plus:", "View incidents involving entire year group", "Year group pupil list", "Sidebar label shows 'My Year Group' instead of 'My Class'"]
+    },
+    "coordinator": {
+      "loginMethod": "Email + password",
+      "capabilities": [
+        "Full incident management (all incidents in school, no redaction)",
+        "Update incident status (submitted/under_investigation/resolved/escalated/closed)",
+        "Request teacher consent from parents on incidents",
+        "Assess all incidents (staff notes, witness statements, parent summary, parent visibility toggle)",
+        "Open and manage protocols (LOPIVI/Convivèxit/Machista Violence)",
+        "Automatic escalation tier calculation on protocol creation",
+        "Mandatory referral engine check on protocol creation",
+        "Cannot close protocol if mandatory external referral is pending",
+        "View and review all pattern alerts",
+        "Full analytics dashboard (totals, breakdowns by category/status/year/location/tier, top victims/perpetrators, monthly trend)",
+        "Child profile view (incident history, open protocols, emotional state trend)",
+        "Manage delegated safeguarding roles",
+        "Generate PTA annual reports from coordinator dashboard",
+        "Approve PTA annual reports for PTA member access",
+        "View all PTA concerns",
+        "Full diagnostic results (group averages, perception gaps, priorities with KPIs, alignment notes)",
+        "Manage diagnostic survey lifecycle (create/close)",
+        "Manage diagnostic agreed actions (add/edit/delete/publish)",
+        "Seed demo diagnostic data (dev-only)",
+        "Manage annex templates per compliance framework",
+        "Manage referral body directory",
+        "View and manage case tasks",
+        "View behaviour summary for all pupils",
+        "Manage all school data"
+      ],
+      "sidebarNav": [
+        {"label": "Dashboard", "path": "/", "icon": "Home"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "Behaviour", "path": "/behaviour", "icon": "Gauge"},
+        {"label": "Log Incident", "path": "/report", "icon": "AlertTriangle"},
+        {"label": "Incidents", "path": "/incidents", "icon": "FileText"},
+        {"label": "All Pupils", "path": "/class", "icon": "Users"},
+        {"label": "Messages", "path": "/messages", "icon": "MessageCircle"},
+        {"label": "Protocols", "path": "/protocols", "icon": "Shield"},
+        {"label": "Alerts", "path": "/alerts", "icon": "Activity"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Notifications", "path": "/notifications", "icon": "Bell", "badge": "unreadCount"},
+        {"label": "Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    },
+    "head_teacher": {
+      "loginMethod": "Email + password",
+      "capabilities": ["Identical to coordinator — same permissions, same sidebar, same access"]
+    },
+    "senco": {
+      "loginMethod": "Email + password",
+      "capabilities": [
+        "SENCO caseload management (add/remove pupils, soft-delete)",
+        "Progress tracking with 4 dimensions (progress, feelings, attitude to learning, attitude to others) — each rated 1-5",
+        "View tracking history per caseload entry",
+        "View list of available pupils not yet on caseload",
+        "Access coordinator-level dashboard stats",
+        "View and manage case tasks linked to protocols",
+        "Log incidents",
+        "View all incidents",
+        "View and review pattern alerts",
+        "View protocols",
+        "View all pupils list"
+      ],
+      "sidebarNav": [
+        {"label": "Dashboard", "path": "/", "icon": "Home"},
+        {"label": "My Caseload", "path": "/caseload", "icon": "ClipboardList"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "Behaviour", "path": "/behaviour", "icon": "Gauge"},
+        {"label": "Log Incident", "path": "/report", "icon": "AlertTriangle"},
+        {"label": "Incidents", "path": "/incidents", "icon": "FileText"},
+        {"label": "All Pupils", "path": "/class", "icon": "Users"},
+        {"label": "Messages", "path": "/messages", "icon": "MessageCircle"},
+        {"label": "Protocols", "path": "/protocols", "icon": "Shield"},
+        {"label": "Alerts", "path": "/alerts", "icon": "Activity"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "Notifications", "path": "/notifications", "icon": "Bell", "badge": "unreadCount"},
+        {"label": "Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    },
+    "support_staff": {
+      "loginMethod": "Email + password",
+      "capabilities": [
+        "Log incidents",
+        "View incidents (redacted until parent consent approved)",
+        "View assigned pupils",
+        "Issue behaviour points",
+        "View school updates (audience=everyone|staff)",
+        "Messages"
+      ],
+      "sidebarNav": [
+        {"label": "Dashboard", "path": "/", "icon": "Home"},
+        {"label": "Log Incident", "path": "/report", "icon": "AlertTriangle"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "Behaviour", "path": "/behaviour", "icon": "Gauge"},
+        {"label": "My Pupils", "path": "/class", "icon": "Users"},
+        {"label": "Messages", "path": "/messages", "icon": "MessageCircle"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "Notifications", "path": "/notifications", "icon": "Bell", "badge": "unreadCount"},
+        {"label": "Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    },
+    "pta": {
+      "loginMethod": "Email + password",
+      "capabilities": [
+        "PTA Dashboard with anonymised KPIs",
+        "Coordinator messaging channel",
+        "Policy acknowledgment and flagging with mandatory comments",
+        "Submit concerns (categories: policy, incident_pattern, safety_concern, communication, resources, other)",
+        "View latest approved annual report",
+        "Co-design feedback on school features",
+        "Resources library (LOPIVI guide, SAR templates, etc.)",
+        "View school-wide mood trends (12-week rolling, requires ≥5 distinct pupils per week for privacy)",
+        "View school updates",
+        "View diagnostic summary with published actions"
+      ],
+      "sidebarNav": [
+        {"label": "PTA Dashboard", "path": "/pta", "icon": "Home"},
+        {"label": "School Updates", "path": "/learnings", "icon": "Megaphone"},
+        {"label": "Training", "path": "/training", "icon": "GraduationCap"},
+        {"label": "Learn", "path": "/education", "icon": "BookOpen"},
+        {"label": "Diagnostic", "path": "/diagnostics", "icon": "ClipboardCheck"},
+        {"label": "Notifications", "path": "/notifications", "icon": "Bell", "badge": "unreadCount"},
+        {"label": "Settings", "path": "/settings", "icon": "Settings"}
+      ]
+    }
+  },
+
+  "apiEndpoints": {
+    "authentication": {
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/auth/pupil/login",
+          "access": "public",
+          "requestBody": {"schoolId": "uuid", "pupilId": "uuid", "pin": "string (4-digit)"},
+          "response": {"token": "JWT string", "user": "User object (sanitised)", "firstLogin": "boolean"},
+          "logic": [
+            "Validates pupil exists in school with role='pupil' and active=true",
+            "Checks lockout (lockedUntil > now → 403)",
+            "Max 3 failed attempts → locked until 2099-12-31 (permanent lockout)",
+            "bcrypt PIN verification",
+            "Resets failed_login_attempts on success",
+            "Updates last_login timestamp",
+            "firstLogin = true if user.lastLogin was null before this request",
+            "Audit log: pupil_login event"
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/staff/login",
+          "access": "public",
+          "requestBody": {"email": "string", "password": "string"},
+          "response": {"token": "JWT string", "user": "User object (sanitised)", "firstLogin": "boolean"},
+          "logic": [
+            "Only allows roles: teacher, head_of_year, coordinator, head_teacher, senco, support_staff, pta",
+            "Checks lockout",
+            "bcrypt password verification",
+            "Resets failed_login_attempts on success",
+            "Audit log: staff_login event"
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/parent/login",
+          "access": "public",
+          "requestBody": {"email": "string", "password": "string"},
+          "response": {"token": "JWT string", "user": "User object (sanitised)", "firstLogin": "boolean"},
+          "logic": ["Strictly requires role='parent'", "Same lockout/bcrypt flow as staff", "Audit log: parent_login event"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/demo-login",
+          "access": "public (gated by DEMO_MODE=true env var)",
+          "requestBody": {"role": "string"},
+          "response": {"token": "JWT string", "user": "User object"},
+          "logic": ["Returns 403 if DEMO_MODE !== 'true'", "Fetches first active user matching requested role", "Audit log: demo_login event"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/auth/me",
+          "access": "authenticated",
+          "response": "User object (sanitised — no passwordHash, pinHash)",
+          "logic": ["Returns current user from JWT userId"]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/auth/profile",
+          "access": "authenticated",
+          "requestBody": {"firstName?": "string", "lastName?": "string", "email?": "string", "avatarType?": "string", "avatarValue?": "string"},
+          "response": "Updated User object",
+          "logic": ["Requires at least one field", "Audit log: profile_updated event"]
+        }
+      ],
+      "jwtPayload": {
+        "userId": "uuid",
+        "schoolId": "uuid",
+        "role": "string",
+        "email": "string (optional)"
+      },
+      "jwtConfig": {
+        "algorithm": "HS256",
+        "secret": "JWT_SECRET env var (throws on startup if missing)",
+        "expiry": "8h (configurable via JWT_EXPIRES_IN env var)"
+      },
+      "middleware": {
+        "authMiddleware": "Extracts Bearer token from Authorization header, verifies JWT, attaches decoded payload to (req as any).user",
+        "requireRole": "Higher-order function — returns middleware that checks req.user.role against allowed roles array, returns 403 if no match"
+      }
     },
 
-    "patternDetection": {
-      "description": "Automated pattern analysis with 8 detection rules",
-      "rules": [
-        { "name": "sexual_any", "description": "Any sexual incident triggers immediate red alert" },
-        { "name": "same_victim_3_incidents", "description": "Same victim in 3+ incidents" },
-        { "name": "same_pair_escalating", "description": "Same victim-perpetrator pair with escalating severity" },
-        { "name": "group_targeting", "description": "Multiple perpetrators targeting same victim" },
-        { "name": "location_hotspot", "description": "Multiple incidents at same location" },
-        { "name": "repeat_perpetrator", "description": "Same perpetrator in multiple incidents" },
-        { "name": "emotional_distress_pattern", "description": "Repeated high emotional distress in reports" },
-        { "name": "mood_decline", "description": "Sustained low mood (avg ≤2 over 5+ diary entries in 14 days) triggers amber alert to SENCO + coordinators" }
-      ],
-      "alertLevels": ["red", "amber"],
-      "execution": "Cron-scheduled every 60 minutes with deduplication"
-    },
-
-    "complianceFrameworks": {
-      "supported": ["LOPIVI", "Convivèxit 2024", "Machista Violence"],
-      "features": [
-        "Protocol management with framework assignment",
-        "Annex template library per framework",
-        "Mandatory referral engine for critical incidents",
-        "Referral body directory management",
-        "Delegated roles management"
+    "incidents": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/incidents",
+          "access": "coordinator, head_teacher, senco, head_of_year, teacher, parent",
+          "queryParams": {
+            "status": "Filter by incident status",
+            "category": "Filter by category (case-insensitive partial match)",
+            "from": "Date range start (incidentDate)",
+            "to": "Date range end (incidentDate)",
+            "page": "Pagination page (default: 1)",
+            "limit": "Page size (default: 20)",
+            "pupilId": "Filter by involved pupil",
+            "yearGroup": "Filter by pupil year group",
+            "className": "Filter by pupil class"
+          },
+          "response": {"data": "[IncidentObject]", "total": "number", "page": "number", "limit": "number"},
+          "visibilityRules": {
+            "parent": "Only parentVisible=true incidents where their child is victim or perpetrator",
+            "teacher": "Only incidents involving pupils in their assigned class",
+            "head_of_year": "Only incidents involving pupils in their assigned year group",
+            "coordinator/head_teacher/senco": "All incidents in school"
+          },
+          "enrichment": "enrichIncidents maps user IDs to names and redacts sensitive fields based on viewer role"
+        },
+        {
+          "method": "POST",
+          "path": "/api/incidents",
+          "access": "authenticated (any role)",
+          "requestBody": {
+            "anonymous": "boolean",
+            "category": "string (required)",
+            "incidentDate": "date (required)",
+            "incidentTime": "time",
+            "location": "string",
+            "description": "text",
+            "victimIds": "uuid[]",
+            "perpetratorIds": "uuid[]",
+            "personInvolvedText": "text (free text for unknown persons)",
+            "witnessIds": "uuid[]",
+            "witnessText": "text",
+            "emotionalState": "string",
+            "emotionalFreetext": "text",
+            "happeningToMe": "boolean",
+            "happeningToSomeoneElse": "boolean",
+            "iSawIt": "boolean",
+            "childrenSeparated": "boolean",
+            "coordinatorNotified": "boolean",
+            "immediateActionTaken": "text",
+            "partOfKnownPattern": "boolean",
+            "toldByChild": "boolean",
+            "childConsentToShare": "boolean",
+            "formalResponseRequested": "boolean",
+            "requestExternalReferral": "boolean",
+            "confidentialFlag": "boolean"
+          },
+          "response": "IncidentObject (HTTP 201)",
+          "logic": [
+            "Generates unique reference number via generateIncidentRef()",
+            "Calls determineEscalationTier() to calculate severity tier (1-3)",
+            "Calls isSafeguardingTrigger() to check for critical categories",
+            "If tier >= 3 or safeguarding trigger → immediately notifies all active coordinators/head teachers via in-app notification",
+            "Runs runPatternDetection(incident) asynchronously (non-blocking)",
+            "Sends in-app confirmation notification to reporter (if not anonymous)",
+            "Audit log: incident_created event"
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/incidents/:id",
+          "access": "authenticated (role-based visibility)",
+          "response": "IncidentObject",
+          "accessControl": {
+            "pupil": "Can only view reports they filed",
+            "parent": "Can view if they are reporter OR if parentVisible=true and involves their child",
+            "teacher/head_of_year/support_staff": "Limited to class/year group unless linked to accessible pattern alert",
+            "coordinator/head_teacher/senco": "Full access"
+          },
+          "consentMasking": "For teacher, head_of_year, support_staff — description, victimIds, and sensitive fields masked unless teacherConsentStatus='approved'"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/incidents/:id/status",
+          "access": "coordinator, head_teacher, senco",
+          "requestBody": {"status": "string", "note": "string (optional)"},
+          "response": "IncidentObject",
+          "logic": ["Audit log: incident_status_updated event with new status and note"]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/incidents/:id/assess",
+          "access": "coordinator, head_teacher, senco, teacher, head_of_year",
+          "requestBody": {
+            "staffNotes": "text",
+            "witnessStatements": "jsonb",
+            "parentSummary": "text",
+            "addedToFile": "boolean",
+            "parentVisible": "boolean",
+            "status": "string"
+          },
+          "response": "IncidentObject",
+          "logic": [
+            "Teachers can only assess incidents involving their own pupils",
+            "If parentVisible set to true with parentSummary → auto-sends notification to parents of all involved victims",
+            "Audit log: incident_assessed event"
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/incidents/:id/consent-request",
+          "access": "coordinator, head_teacher, senco",
+          "response": {"success": true, "teacherConsentStatus": "requested"},
+          "logic": ["Transitions teacherConsentStatus from 'not_requested' to 'requested'", "Sets teacherConsentRequestedAt timestamp"]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/incidents/:id/consent-respond",
+          "access": "parent",
+          "requestBody": {"decision": "'approved' | 'declined'"},
+          "response": "IncidentObject",
+          "logic": [
+            "Validates parent's child is actually involved (victim or perpetrator)",
+            "Updates teacherConsentStatus, teacherConsentRespondedAt, teacherConsentRespondedBy",
+            "Once 'approved', teachers see full unredacted incident details"
+          ]
+        }
       ]
     },
 
     "protocols": {
-      "description": "Formal safeguarding protocol management",
-      "fields": ["framework", "status", "measures", "referral bodies", "timeline", "JSONB dynamic data"],
-      "statuses": ["open", "resolved", "closed"]
-    },
-
-    "behaviourTracker": {
-      "description": "Points-based behaviour escalation system",
-      "levels": 7,
-      "features": ["Staff issue points with reasons", "Pupil self-view", "Parent visibility", "Linked to incidents", "Summary view for staff"]
-    },
-
-    "pupilDiary": {
-      "description": "Fully private wellbeing diary for pupils",
-      "privacy": "Only the pupil can see their entries — no parent, teacher, or coordinator access",
-      "features": [
-        "Daily mood recording (1-5 emoji scale)",
-        "Optional text notes",
-        "Physical diary aesthetic (leather cover, lined paper, serif fonts)",
-        "AI safeguarding scan after each entry (gpt-5-nano)",
-        "Flagged entries create pattern_alert with safe message (no diary text exposed)"
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/protocols",
+          "access": "coordinator, head_teacher, senco",
+          "response": "Protocol[] enriched with victimName and openedByName"
+        },
+        {
+          "method": "POST",
+          "path": "/api/protocols",
+          "access": "coordinator, head_teacher, senco",
+          "requestBody": {
+            "protocolType": "string (required — e.g. 'lopivi_serious', 'convivexit_mediation')",
+            "protocolSource": "string",
+            "genderBasedViolence": "boolean",
+            "context": "text",
+            "linkedIncidentIds": "uuid[]",
+            "victimId": "uuid (required)",
+            "allegedPerpetratorIds": "uuid[]",
+            "interviewsRequired": "boolean",
+            "riskLevel": "string",
+            "riskAssessment": "text",
+            "riskFactors": "text[]",
+            "protectiveFactors": "text[]",
+            "protectiveMeasures": "text[]",
+            "externalReferralRequired": "boolean",
+            "externalReferralBody": "string",
+            "familyContext": "jsonb"
+          },
+          "response": "Enriched Protocol object",
+          "logic": [
+            "Generates unique reference number via generateProtocolRef()",
+            "Calls determineEscalationTier() to calculate tier based on incident category",
+            "Calls checkMandatoryReferral() — returns required=true if: tier 3, category='sexual'|'coercive', or linked to red-level repeat alert",
+            "Auto-populates externalReferralBody suggestion if mandatory (Sexual → 'Child Protection Services / Policía Nacional', Coercive → 'Child Protection Services / Social Services')",
+            "Audit log: protocol_opened event"
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/protocols/:id",
+          "access": "coordinator, head_teacher, senco",
+          "response": "Enriched protocol + linkedIncidents[] + interviews[] (with names) + notifications[] log"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/protocols/:id",
+          "access": "coordinator, head_teacher, senco",
+          "logic": [
+            "Prevents closing if mandatory external referral is pending (externalReferralRequired=true but no externalReferralAt)",
+            "Sets closedAt if status changes to 'closed'",
+            "Audit log: protocol_updated event"
+          ]
+        }
       ]
     },
 
-    "messaging": {
-      "channels": [
-        { "type": "Pupil messages", "description": "Messages to safe contacts + urgent help button" },
-        { "type": "Staff inbox", "description": "Internal staff messaging" },
-        { "type": "Parent messages", "description": "Parent to school staff communication" },
-        { "type": "PTA coordinator channel", "description": "PTA members ↔ coordinator" },
-        { "type": "Parent-to-PTA", "description": "Parents can message PTA directly" }
+    "alerts": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/alerts",
+          "access": "coordinator, head_teacher, teacher, head_of_year, senco",
+          "queryParams": {"status": "Filter by alert status (open/reviewed/dismissed)"},
+          "response": "PatternAlert[] with victimName and perpetratorNames"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/alerts/:id",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"status": "string", "notes": "text"},
+          "logic": ["Sets reviewedAt and reviewedBy on status change", "Audit log: alert_reviewed event"]
+        }
       ]
     },
 
-    "diagnosticSurvey": {
-      "description": "Multi-role school climate diagnostic",
-      "questionBank": "20 questions across 5 categories",
-      "categories": ["Awareness & Prevalence", "Trust & Reporting", "Culture & Wellbeing", "Safeguarding Knowledge", "System Readiness"],
-      "respondentGroups": ["pupil", "staff", "parent"],
-      "features": [
-        "Role-adaptive UI (face emojis for pupils, Likert scale for adults)",
-        "Tiered disclosure: coordinators see full results; others see published summary",
-        "Published summary includes aggregated scores, participation counts, bar charts by group",
-        "Agreed Actions workflow with publish control",
-        "Auto-ranked priorities with urgency badges (Critical/High/Moderate/Strength)",
-        "KPIs with baseline/target/timeframe per priority",
-        "Suggested actions mapped to categories",
-        "Strengths, Growth Areas, and Alignment Notes narrative",
-        "Demo data seeding (dev-only)"
+    "dashboard": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/dashboard/coordinator",
+          "access": "coordinator, head_teacher, senco",
+          "response": {
+            "openProtocols": "count",
+            "patternAlerts": {"amber": "count", "red": "count"},
+            "reportsThisMonth": "count",
+            "emotionalWelfareAlerts": "count",
+            "overdueNotifications": "count",
+            "reportsByDay": "[{date, count}] (last 7 days trend)",
+            "recentIncidents": "[{incident with reporterName}]",
+            "recentAlerts": "[{alert with victimName}]"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/analytics",
+          "access": "coordinator, head_teacher, senco",
+          "response": {
+            "totalIncidents": "count",
+            "totalPupils": "count",
+            "safeguardingCount": "count",
+            "byCategory": "[{category, count}]",
+            "byStatus": "[{status, count}]",
+            "byYearGroup": "[{yearGroup, count}]",
+            "byLocation": "[{location, count}]",
+            "byEscalationTier": "[{tier, count}]",
+            "topVictims": "[{pupilId, name, count}] (top 10)",
+            "topPerpetrators": "[{pupilId, name, count}] (top 10)",
+            "monthlyTrend": "[{month, count}]"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/teacher-analytics",
+          "access": "teacher, head_of_year, support_staff",
+          "response": {
+            "totalIncidents": "count (scoped to teacher's class/year group)",
+            "scopeLabel": "string (e.g. 'Class 6A' or 'Year 6')",
+            "byLocation": "[{location, count}]",
+            "byCategory": "[{category, count}]",
+            "monthlyTrend": "[{month, count}]"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/parent",
+          "access": "parent",
+          "response": {
+            "totalReports": "count",
+            "openReports": "count",
+            "closedReports": "count",
+            "monthlyTrend": "[{month, count}]",
+            "byCategory": "[{category, count}]",
+            "byStatus": "[{status, count}]",
+            "emotionalTimeline": "[{date, emotionalState}] for their children",
+            "incidents": "[parent-visible incident summaries with staffMap names]"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/child/:id",
+          "access": "coordinator, head_teacher, senco",
+          "response": {
+            "child": "User info",
+            "incidentHistory": "[Incident[]]",
+            "openProtocols": "[Protocol[]]",
+            "patternAlerts": "[PatternAlert[]]",
+            "emotionalStateTrend": "[{date, state}] chronological list"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/dashboard/school-overview",
+          "access": "parent",
+          "response": "Anonymised school-wide statistics for parent transparency"
+        }
       ]
     },
 
-    "ptaPortal": {
-      "description": "Full PTA member portal with anonymised data",
-      "tabs": ["Dashboard", "Coordinator Channel", "Policy", "Annual Report", "Co-Design", "Resources"],
-      "features": [
-        "Anonymised KPI dashboard",
-        "School-wide mood trend chart (12-week rolling, from pupil diary data)",
-        "Policy acknowledgment and flagging",
-        "Annual report viewing (approved reports only)",
-        "Co-design feedback collection",
-        "Resources library",
-        "Concern submission"
+    "diagnostics": {
+      "questionBank": {
+        "totalQuestions": 20,
+        "categories": ["Awareness & Prevalence", "Trust & Reporting", "Culture & Wellbeing", "Safeguarding Knowledge", "System Readiness"],
+        "roleTargeting": "Questions have role-specific display text (pupil version vs staff version vs parent version)",
+        "scale": "1-5 (Low to High)",
+        "questionKeys": ["awareness_prevalence_1", "awareness_prevalence_2", "awareness_prevalence_3", "awareness_prevalence_4", "trust_reporting_1", "trust_reporting_2", "trust_reporting_3", "trust_reporting_4", "culture_wellbeing_1", "culture_wellbeing_2", "culture_wellbeing_3", "culture_wellbeing_4", "safeguarding_knowledge_1", "safeguarding_knowledge_2", "safeguarding_knowledge_3", "safeguarding_knowledge_4", "system_readiness_1", "system_readiness_2", "system_readiness_3", "system_readiness_4"]
+      },
+      "roleGroupMapping": {
+        "pupil": "pupil group",
+        "parent": "parent group",
+        "pta": "parent group",
+        "teacher": "staff group",
+        "head_of_year": "staff group",
+        "coordinator": "staff group",
+        "head_teacher": "staff group",
+        "senco": "staff group",
+        "support_staff": "staff group"
+      },
+      "prioritySystem": {
+        "urgencyLevels": [
+          {"level": "critical", "condition": "Category average ≤ 2.5", "colour": "red"},
+          {"level": "high", "condition": "Category average ≤ 3.2 OR (moderate + perception gap ≥ 1.5)", "colour": "orange"},
+          {"level": "moderate", "condition": "Category average ≤ 3.8 OR (monitor + perception gap ≥ 1.5)", "colour": "yellow"},
+          {"level": "monitor", "condition": "Category average > 3.8", "colour": "green"}
+        ],
+        "perceptionGap": "Difference between highest and lowest scoring role groups — flagged as alignmentNote when gap ≥ 1.5",
+        "ranking": "Sorted by urgency (critical first), then by lowest overallAvg"
+      },
+      "kpiMap": {
+        "description": "Each category maps to specific KPIs with baseline/target/timeframe and suggested actions",
+        "example": {
+          "category": "Awareness & Prevalence",
+          "kpis": [{"metric": "% of staff completing safeguarding training", "baseline": "current", "target": "95%", "timeframe": "6 months"}],
+          "actions": ["Launch termly awareness campaigns", "Integrate safeguarding into PSHE curriculum"]
+        }
+      },
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/diagnostics",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"title": "string (default: 'School Onboarding Diagnostic')"},
+          "response": "DiagnosticSurvey object"
+        },
+        {
+          "method": "GET",
+          "path": "/api/diagnostics/active",
+          "access": "authenticated",
+          "response": {"survey": "DiagnosticSurvey", "questions": "[role-specific questions with displayText]", "alreadyCompleted": "boolean"}
+        },
+        {
+          "method": "GET",
+          "path": "/api/diagnostics",
+          "access": "authenticated",
+          "response": "[DiagnosticSurvey[]] (all active + closed surveys for school)"
+        },
+        {
+          "method": "POST",
+          "path": "/api/diagnostics/:id/respond",
+          "access": "authenticated",
+          "requestBody": {"responses": "[{questionKey, answer (1-5)}]", "comments": "text (optional)"},
+          "logic": ["Validates user hasn't already responded", "Only accepts question keys valid for user's role", "Audit log: diagnostic_response event"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/diagnostics/:id/results",
+          "access": "coordinator, head_teacher, senco",
+          "response": {
+            "survey": "DiagnosticSurvey",
+            "participation": {"total": "count", "byGroup": {"pupil": "count", "staff": "count", "parent": "count"}},
+            "categoryScores": "[{category, overallAvg, byGroup: {pupil, staff, parent}}]",
+            "strengths": "[categories with avg > 3.8]",
+            "growthAreas": "[categories with avg ≤ 3.2]",
+            "alignmentNotes": "[string descriptions of perception gaps ≥ 1.5]",
+            "priorities": "[{category, urgency, overallAvg, perceptionGap, kpis, suggestedActions}] ranked by urgency"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/diagnostics/:id/summary",
+          "access": "authenticated (closed surveys only)",
+          "response": {
+            "survey": "DiagnosticSurvey",
+            "participation": {"total": "count", "byGroup": {"pupil": "count", "staff": "count", "parent": "count"}},
+            "categoryScores": "[{category, overallAvg, byGroup}]",
+            "actions": "[published actions only for non-leadership roles]"
+          },
+          "logic": ["Returns 403 if survey status !== 'closed'", "Non-leadership roles only see actions where publishedAt IS NOT NULL"]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/diagnostics/:id",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"status": "'active' | 'closed'"},
+          "logic": ["Setting to 'closed' stamps closedAt timestamp"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/diagnostics/:id/actions",
+          "access": "authenticated",
+          "response": "[DiagnosticAction[]]",
+          "logic": ["Non-leadership roles only see published actions"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/diagnostics/:id/actions",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"action": "text", "category": "string", "owner": "string (optional)", "status": "string (default: 'planned')"}
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/diagnostics/:id/actions/:actionId",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"action?": "text", "category?": "string", "owner?": "string", "status?": "string"}
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/diagnostics/:id/actions/:actionId",
+          "access": "coordinator, head_teacher"
+        },
+        {
+          "method": "POST",
+          "path": "/api/diagnostics/:id/actions/publish",
+          "access": "coordinator, head_teacher",
+          "logic": ["Sets publishedAt on ALL actions for this survey, making them visible to non-leadership roles"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/diagnostics/:id/seed-demo",
+          "access": "coordinator, head_teacher (dev only — gated to non-production)",
+          "logic": [
+            "Deletes existing responses for survey",
+            "Generates synthetic responses for all users in school",
+            "Uses role-specific 'profiles' with means and spreads for realistic distribution",
+            "Transactional — all-or-nothing"
+          ]
+        }
+      ]
+    },
+
+    "diary": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/diary/entries",
+          "access": "pupil only",
+          "response": "[DiaryEntry[]] ordered by created_at DESC",
+          "logic": ["Strictly filtered to pupil's own entries only — no other role can access"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/diary/entries",
+          "access": "pupil only",
+          "requestBody": {"mood": "integer (1-5)", "note": "text (optional)"},
+          "response": "DiaryEntry (HTTP 201)",
+          "logic": [
+            "Inserts entry into pupil_diary table",
+            "Triggers async (non-blocking) AI safeguarding scan via scanDiaryEntry()",
+            "AI scan only runs if note exists and length ≥ 10 characters",
+            "Uses OpenAI gpt-5-nano model via Replit AI Integrations proxy",
+            "AI system prompt defines strict flagging criteria: ONLY flag self-harm, abuse, violence, exploitation, neglect, grooming",
+            "AI must NOT flag normal sadness, friend arguments, homework stress, feeling left out",
+            "AI responds with JSON: {flag: boolean, level: 'red'|'amber'|null, reason: string|null}",
+            "If flagged → creates pattern_alert with SAFE MESSAGE ('A pupil's diary entry has been flagged for welfare review') — NO diary text in alert",
+            "Red flags → notifies coordinator and head_teacher",
+            "Amber flags → notifies coordinator and SENCO",
+            "If AI unavailable or errors → silently fails (no user impact)"
+          ]
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/diary/entries/:id",
+          "access": "pupil only",
+          "logic": ["Verifies entry belongs to requesting pupil before deletion"]
+        }
       ],
-      "annualReports": {
-        "generate": "POST /pta/report/generate (coordinator/head_teacher)",
-        "approve": "POST /pta/report/approve (coordinator/head_teacher)",
-        "listAll": "GET /pta/report/all (coordinator/head_teacher)",
-        "latestApproved": "GET /pta/report/latest (PTA)",
-        "reportData": ["totalIncidents", "incidentsByCategory", "protocolsByStatus", "alertsSummary"]
+      "aiSafeguardingConfig": {
+        "model": "gpt-5-nano",
+        "provider": "OpenAI SDK via Replit AI Integrations",
+        "envVars": ["AI_INTEGRATIONS_OPENAI_BASE_URL", "AI_INTEGRATIONS_OPENAI_API_KEY"],
+        "apiParam": "max_completion_tokens (NOT max_tokens)",
+        "noTemperature": "temperature parameter not supported for this model",
+        "flagCriteria": ["Self-harm or suicidal ideation", "Physical abuse or violence at home", "Sexual abuse or inappropriate contact", "Severe bullying with threats of harm", "Substance abuse", "Neglect (not fed, not cared for)", "Exploitation or grooming", "Domestic violence witnessed"],
+        "notFlagged": ["Normal childhood sadness", "Friend arguments", "Bad days at school", "Homework stress", "Feeling left out occasionally", "Normal peer conflict"],
+        "alertLevels": {"red": "Immediate danger, urgent intervention needed", "amber": "Concerning pattern, welfare check needed"},
+        "privacyGuarantee": "Diary text is NEVER included in alerts, logs, or any external-facing data"
       }
     },
 
-    "sencoCaseload": {
-      "description": "SENCO pupil caseload management",
-      "features": ["Add/remove pupils", "Progress tracking (4 dimensions)", "Case tasks linked to protocols", "History timeline"]
+    "behaviour": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/behaviour/levels",
+          "access": "public",
+          "response": {
+            "levels": [
+              {"level": 1, "name": "Good Standing", "minPoints": 0, "maxPoints": 5},
+              {"level": 2, "name": "Informal Warning", "minPoints": 6, "maxPoints": 15},
+              {"level": 3, "name": "Formal Warning", "minPoints": 16, "maxPoints": 30},
+              {"level": 4, "name": "Behaviour Contract", "minPoints": 31, "maxPoints": 50},
+              {"level": 5, "name": "Internal Exclusion", "minPoints": 51, "maxPoints": 75},
+              {"level": 6, "name": "Fixed-Term Exclusion", "minPoints": 76, "maxPoints": 100},
+              {"level": 7, "name": "Full Exclusion Review", "minPoints": 101}
+            ],
+            "pointCategories": ["disruption", "defiance", "aggression", "bullying", "damage", "safety", "attendance", "other"]
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/behaviour/pupil/:pupilId",
+          "access": "pupil (self), parent (child), staff roles",
+          "response": {
+            "totalPoints": "number",
+            "level": "current level object",
+            "nextLevel": "next level object or null",
+            "pointsToNextLevel": "number",
+            "history": "[{point entry with issuedByName}]"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/behaviour/summary",
+          "access": "staff roles",
+          "response": "Aggregated totalPoints and current level for all pupils in school"
+        },
+        {
+          "method": "POST",
+          "path": "/api/behaviour/points",
+          "access": "staff roles",
+          "requestBody": {"pupilId": "uuid", "points": "integer", "reason": "text", "category": "string", "incidentId": "uuid (optional)", "note": "text (optional)"},
+          "response": "Point entry with recalculated totalPoints and level",
+          "logic": ["Audit log: behaviour_point_issued event"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/behaviour/my-record",
+          "access": "pupil only",
+          "response": "Own totalPoints, level, pointsToNextLevel, recentHistory (last 10)"
+        }
+      ]
+    },
+
+    "messages": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/messages",
+          "access": "authenticated",
+          "response": "[Message[] with senderName, recipientName, isFromMe]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/messages",
+          "access": "authenticated (role-restricted recipients)",
+          "requestBody": {"recipientId": "uuid", "body": "text", "isUrgent": "boolean", "type": "string ('message'|'urgent_help')"},
+          "logic": [
+            "Pupils/Parents can only message staff",
+            "Creates notification for recipient with auto-generated subject/body based on message type",
+            "Urgent messages generate priority notifications"
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/messages/:id/read",
+          "access": "authenticated",
+          "logic": ["Updates readAt timestamp"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/messages/conversations",
+          "access": "staff, parent",
+          "response": "[{contactId, contactName, contactRole, unreadCount, lastMessage preview}]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/messages/child-alerts",
+          "access": "parent",
+          "response": "[urgent_help messages sent by parent's children, with childName, recipientName, recipientRole]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/safe-contacts",
+          "access": "pupil only",
+          "response": "[staff members with isFormTutor boolean and child-friendly displayRole (e.g. 'School Counsellor')]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/parent-contacts",
+          "access": "pupil only",
+          "response": "[parent contacts for the pupil]"
+        }
+      ]
+    },
+
+    "pta": {
+      "piiMiddleware": {
+        "description": "Intercepts all /pta/* responses for users with role='pta'",
+        "strippedFields": ["firstName", "lastName", "email", "pinHash", "passwordHash", "parentOf", "avatarImageUrl", "fullName", "senderEmail", "recipientEmail", "reporterName", "victimName", "perpetratorName", "witnessName", "childName", "parentName", "staffName", "phone", "address", "dateOfBirth", "victimIds", "perpetratorIds", "witnessIds", "and 20+ more PII field names"],
+        "mechanism": "Recursively walks JSON response body, removes any key matching PII_FIELDS Set"
+      },
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/pta/dashboard",
+          "access": "pta",
+          "response": {
+            "incidentsThisTerm": "count",
+            "incidentsLastTerm": "count",
+            "categoryBreakdown": "[{category, count}]",
+            "protocols": {"open": "count", "closedThisTerm": "count"},
+            "alerts": {"amber": "count", "red": "count", "resolvedThisTerm": "count"},
+            "monthlyTrend": "[{month, count}] (12-month trend)",
+            "behaviourDistribution": "[{level name, count}] — classifies students into behaviour levels by accumulated points"
+          },
+          "note": "All data anonymised via PII middleware — no student/staff names exposed"
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/messages",
+          "access": "pta, coordinator, head_teacher",
+          "response": "[last 100 PTA-coordinator channel messages]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/messages",
+          "access": "pta, coordinator, head_teacher",
+          "requestBody": {"body": "text"},
+          "logic": ["Audit log: pta_message_sent event"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/concerns",
+          "access": "coordinator, head_teacher",
+          "response": "[PtaConcern[] with submitter info]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/concerns",
+          "access": "pta",
+          "requestBody": {"category": "string (policy|incident_pattern|safety_concern|communication|resources|other)", "subject": "text", "body": "text"},
+          "logic": ["Validates category against allowed values", "Audit log: pta_concern_submitted event"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/policy",
+          "access": "pta, coordinator, head_teacher",
+          "response": {"policy": "hardcoded Safeguarding & Child Protection Policy metadata", "acknowledgements": "[all user acknowledgements/flags]"}
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/policy/acknowledge",
+          "access": "pta",
+          "requestBody": {"policyVersion": "string", "comment": "text (optional)"},
+          "logic": ["Records positive acknowledgement in pta_policy_acknowledgements"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/policy/flag",
+          "access": "pta",
+          "requestBody": {"policyVersion": "string", "comment": "text (required)"},
+          "logic": ["Records a 'flag' action_type — mandatory comment explaining concern"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/report/latest",
+          "access": "pta",
+          "response": "Most recent approved annual report",
+          "logic": ["Updates accessedByPtaAt timestamp on first PTA view"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/report/all",
+          "access": "coordinator, head_teacher",
+          "response": "[all PTA annual reports for school, any status]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/report/generate",
+          "access": "coordinator, head_teacher",
+          "response": "Generated draft PtaAnnualReport",
+          "logic": [
+            "Compiles academic year data: totalIncidents, incidentsByCategory, protocolsByStatus (open/resolved/closed counts), alertsSummary (total/amber/red/resolved counts)",
+            "Saves as 'draft' status in pta_annual_reports table",
+            "reportData stored as JSONB"
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/report/approve",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"reportId": "uuid"},
+          "logic": ["Transitions status from 'draft' to 'approved'", "Sets approvedById and approvedAt", "Once approved, visible to PTA members via /report/latest"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/mood-trends",
+          "access": "pta",
+          "response": "[{week, avgMood}] (12-week rolling)",
+          "logic": [
+            "Queries pupil_diary entries from last 12 weeks",
+            "Groups by ISO week",
+            "Privacy guard: HAVING COUNT(DISTINCT pupil_id) >= 5 — only returns data for weeks with ≥5 distinct pupils",
+            "Prevents de-anonymisation of individual student moods"
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/codesign",
+          "access": "pta, coordinator",
+          "response": {"questions": "[predefined co-design questions e.g. 'Preferred language for parent notifications']", "responses": "[submitted PTA responses]"}
+        },
+        {
+          "method": "POST",
+          "path": "/api/pta/codesign/response",
+          "access": "pta",
+          "requestBody": {"questionKey": "string", "response": "text"}
+        },
+        {
+          "method": "GET",
+          "path": "/api/pta/resources",
+          "access": "pta",
+          "response": "[static resource list including 'LOPIVI Plain English Guide', 'Subject Access Request templates', etc.]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/parent/pta-contacts",
+          "access": "parent",
+          "response": "[PTA members with names partially masked (first name + last initial only, e.g. 'John D.')]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/parent/pta-message",
+          "access": "parent",
+          "requestBody": {"message": "text", "subject": "text"},
+          "logic": ["Stored in pta_concerns table with category='parent_outreach'", "Audit log: parent_pta_message event"]
+        }
+      ]
+    },
+
+    "senco": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/senco/caseload",
+          "access": "senco",
+          "response": "[CaseloadEntry[] with pupil details and latestTracking record]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/senco/caseload",
+          "access": "senco",
+          "requestBody": {"pupilId": "uuid", "reason": "text", "priority": "string"},
+          "logic": ["Validates pupil exists and is not a duplicate on caseload"]
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/senco/caseload/:id",
+          "access": "senco",
+          "logic": ["Soft-deletes by setting active=false"]
+        },
+        {
+          "method": "GET",
+          "path": "/api/senco/caseload/:id/tracking",
+          "access": "senco",
+          "response": "[TrackingRecord[]] chronological"
+        },
+        {
+          "method": "POST",
+          "path": "/api/senco/caseload/:id/tracking",
+          "access": "senco",
+          "requestBody": {
+            "progressRating": "integer (1-5)",
+            "feelingsRating": "integer (1-5)",
+            "attitudeToLearning": "integer (1-5)",
+            "attitudeToOthers": "integer (1-5)",
+            "notes": "text"
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/senco/pupils-available",
+          "access": "senco",
+          "response": "[pupils in school NOT currently on requester's active caseload]"
+        }
+      ]
     },
 
     "schoolUpdates": {
-      "description": "Staff broadcast posts to school community",
-      "categories": ["general", "safeguarding", "wellbeing", "curriculum", "event", "policy", "heads_up"],
-      "audiences": ["everyone", "pupils", "parents", "staff", "pupils_parents"],
-      "specialBehaviour": "'Heads Up' category auto-sets audience to staff with prominent observation guidance banner"
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/teacher-posts",
+          "access": "authenticated",
+          "response": "[TeacherPost[] with authorName]",
+          "audienceFiltering": {
+            "staff roles": "See posts with audience = everyone | staff",
+            "pupil": "See posts with audience = everyone | pupils | pupils_parents",
+            "parent": "See posts with audience = everyone | parents | pupils_parents",
+            "pta": "See posts with audience = everyone"
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/teacher-posts",
+          "access": "staff roles only (teacher, head_of_year, support_staff, senco, coordinator, head_teacher)",
+          "requestBody": {"title": "string", "body": "text", "category": "string", "audience": "string"},
+          "validCategories": ["general", "safeguarding", "wellbeing", "curriculum", "event", "policy", "heads_up"],
+          "validAudiences": ["everyone", "pupils", "parents", "staff", "pupils_parents"],
+          "specialBehaviour": "'heads_up' category auto-sets audience to 'staff' regardless of what's submitted"
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/teacher-posts/:id",
+          "access": "author OR coordinator/head_teacher",
+          "logic": ["Cross-tenant check (schoolId match)", "Only author or leadership can delete"]
+        }
+      ]
     },
 
-    "educationLearn": {
-      "description": "Rights-based education page",
-      "content": [
-        "Pupil rights (UNCRC, LOPIVI, Convivèxit)",
-        "Parent rights and responsibilities",
-        "Protocol accordions for all three frameworks",
-        "Age-appropriate safety guidance"
+    "caseTasks": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/case-tasks",
+          "access": "coordinator, head_teacher, senco"
+        },
+        {
+          "method": "POST",
+          "path": "/api/case-tasks",
+          "access": "coordinator, head_teacher, senco",
+          "requestBody": {"protocolId": "uuid", "taskType": "string", "title": "string", "description": "text", "assigneeId": "uuid", "priority": "string", "dueAt": "timestamp"}
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/case-tasks/:id",
+          "access": "coordinator, head_teacher, senco",
+          "requestBody": {"status": "string", "notes": "text", "completedAt": "timestamp"}
+        }
+      ]
+    },
+
+    "schoolAdmin": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/schools",
+          "access": "public",
+          "response": "[{id, name}] — minimal data for login school selector"
+        },
+        {
+          "method": "GET",
+          "path": "/api/schools/:schoolId/pupils",
+          "access": "public",
+          "response": "[{id, firstName, lastName, yearGroup, className, avatarType, avatarValue}] — minimal privacy-preserving data for pupil PIN login selector"
+        },
+        {
+          "method": "GET",
+          "path": "/api/schools/:schoolId/staff",
+          "access": "coordinator, head_teacher",
+          "response": "[staff members with full details]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/my-pupils",
+          "access": "staff roles",
+          "response": "[pupils in teacher's class or year group]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/pupils/search",
+          "access": "staff, pupil",
+          "queryParams": {"q": "search query"},
+          "logic": ["Privacy-conscious — limited result fields"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/pupils/reset-pin/:pupilId",
+          "access": "teacher, head_of_year, coordinator, head_teacher",
+          "requestBody": {"newPin": "string (4-digit)"},
+          "logic": ["bcrypt hashes new PIN", "Resets failed_login_attempts to 0", "Clears lockedUntil", "Audit log: pin_reset event"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/pupils/bulk-reset-pins",
+          "access": "teacher, head_of_year, coordinator, head_teacher",
+          "requestBody": {"pupilIds": "uuid[]", "newPin": "string"},
+          "logic": ["Resets all specified pupils to same PIN"]
+        },
+        {
+          "method": "POST",
+          "path": "/api/users/:id/avatar",
+          "access": "authenticated",
+          "requestBody": {"avatarType": "string", "avatarValue": "string"}
+        }
+      ]
+    },
+
+    "notifications": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/notifications",
+          "access": "authenticated",
+          "response": "[Notification[] for current user, ordered by sent_at DESC]"
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/notifications/:id/read",
+          "access": "authenticated",
+          "logic": ["Sets acknowledgedAt timestamp"]
+        }
+      ]
+    },
+
+    "delegatedRoles": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/delegated-roles",
+          "access": "coordinator, head_teacher"
+        },
+        {
+          "method": "POST",
+          "path": "/api/delegated-roles",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"userId": "uuid", "roleType": "string", "mandateScope": "string", "trainingDate": "date", "trainingNotes": "text", "expiresAt": "timestamp"}
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/delegated-roles/:id/revoke",
+          "access": "coordinator, head_teacher",
+          "logic": ["Sets revokedAt timestamp"]
+        }
+      ]
+    },
+
+    "annexTemplates": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/annex-templates",
+          "access": "authenticated",
+          "response": "[AnnexTemplate[]]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/annex-templates/:framework",
+          "access": "authenticated",
+          "response": "[AnnexTemplate[] filtered by framework]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/annex-templates",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"framework": "string", "annexCode": "string", "title": "string", "description": "text", "templateUrl": "string"}
+        }
+      ]
+    },
+
+    "referralBodies": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/referral-bodies",
+          "access": "authenticated"
+        },
+        {
+          "method": "POST",
+          "path": "/api/referral-bodies",
+          "access": "coordinator, head_teacher",
+          "requestBody": {"name": "string", "bodyType": "string", "island": "string", "municipality": "string", "contactName": "string", "contactEmail": "string", "contactPhone": "string", "address": "text", "notes": "text"}
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/referral-bodies/:id",
+          "access": "coordinator, head_teacher"
+        }
       ]
     },
 
     "newsletter": {
-      "description": "Public registration page for organisations interested in safeskoolz",
-      "orgTypes": ["school", "authority", "trust", "ngo", "other"]
+      "routes": [
+        {
+          "method": "POST",
+          "path": "/api/newsletter/subscribe",
+          "access": "public",
+          "requestBody": {"email": "string", "organisationName": "string", "organisationType": "string (school|authority|trust|ngo|other)", "contactName": "string", "role": "string", "region": "string", "interests": "string[]"},
+          "response": "Always returns 200 with success message (prevents email enumeration)",
+          "logic": ["Rate limited", "Checks for duplicate email silently"]
+        }
+      ]
     },
 
-    "training": {
-      "description": "Role-specific feature guides and training materials",
-      "includes": ["Pupil quick-start guide", "Parent onboarding", "Staff step-by-step training", "Real-world scenarios"]
+    "other": {
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/api/data-retention/policy",
+          "access": "coordinator, head_teacher, senco, pta",
+          "response": "Static data retention policy document"
+        },
+        {
+          "method": "GET",
+          "path": "/api/healthz",
+          "access": "public",
+          "response": "{\"status\": \"ok\"}"
+        }
+      ]
+    }
+  },
+
+  "patternDetectionEngine": {
+    "sourceFile": "artifacts/api-server/src/lib/patternDetection.ts",
+    "execution": "Cron-scheduled every 60 minutes via setInterval in server startup + triggered on incident creation",
+    "rules": [
+      {
+        "id": "sexual_any",
+        "label": "Immediate Sexual Alert",
+        "alertLevel": "red",
+        "trigger": "Incident category is 'sexual' or 'sexualised'",
+        "threshold": "1 incident",
+        "timeWindow": "N/A (immediate)",
+        "notifies": ["coordinator", "head_teacher"]
+      },
+      {
+        "id": "same_pair_escalating",
+        "label": "Escalating Pattern",
+        "alertLevel": "red",
+        "trigger": "Same victim involved in multiple incidents of different categories",
+        "threshold": "3+ incidents, 2+ categories",
+        "timeWindow": "30 days",
+        "notifies": ["coordinator", "head_teacher"]
+      },
+      {
+        "id": "group_targeting",
+        "label": "Group Targeting",
+        "alertLevel": "red",
+        "trigger": "Same victim targeted by multiple different perpetrators",
+        "threshold": "3+ distinct perpetrators",
+        "timeWindow": "14 days",
+        "notifies": ["coordinator", "head_teacher"]
+      },
+      {
+        "id": "same_victim_3_incidents",
+        "label": "Repeat Victim",
+        "alertLevel": "amber",
+        "trigger": "Same victim involved in multiple incidents (fallback if not escalating/group targeting)",
+        "threshold": "3+ incidents",
+        "timeWindow": "30 days",
+        "notifies": ["coordinator"]
+      },
+      {
+        "id": "repeat_perpetrator",
+        "label": "Repeat Perpetrator",
+        "alertLevel": "amber",
+        "trigger": "Same perpetrator involved in multiple incidents",
+        "threshold": "3+ incidents",
+        "timeWindow": "30 days",
+        "notifies": ["coordinator"]
+      },
+      {
+        "id": "location_hotspot",
+        "label": "Location Hotspot",
+        "alertLevel": "amber",
+        "trigger": "Multiple incidents at the same specific location",
+        "threshold": "3+ incidents at same location",
+        "timeWindow": "14 days",
+        "notifies": ["coordinator"]
+      },
+      {
+        "id": "emotional_distress_pattern",
+        "label": "Emotional Distress Pattern",
+        "alertLevel": "amber",
+        "trigger": "Victim reports 'scared', 'sad', or 'worried' emotional states across incidents",
+        "threshold": "3+ distress incidents",
+        "timeWindow": "30 days",
+        "notifies": ["coordinator", "senco"]
+      },
+      {
+        "id": "mood_decline",
+        "label": "Mood Decline Scan",
+        "alertLevel": "amber",
+        "trigger": "Scheduled scan of pupil_diary entries for sustained low wellbeing",
+        "threshold": "5+ entries AND avg mood ≤ 2.0",
+        "timeWindow": "14 days",
+        "notifies": ["coordinator", "senco"],
+        "note": "This rule scans diary data, not incidents — runs on cron only"
+      }
+    ],
+    "deduplication": {
+      "mechanism": "Before creating alert, checks for existing 'open' alert with same ruleId + schoolId + victimId",
+      "result": "If match found → skips creation (returns false), preventing alert fatigue"
+    }
+  },
+
+  "escalationEngine": {
+    "sourceFile": "artifacts/api-server/src/lib/escalation.ts",
+    "tierLogic": {
+      "tier3_high": "Category = 'sexual' or 'coercive'",
+      "tier2_medium": "Category = 'physical', 'psychological', or 'online'",
+      "tier1_low": "All other categories"
+    },
+    "mandatoryReferral": {
+      "triggers": [
+        "Tier 3 escalation",
+        "Category = 'sexual' or 'coercive'",
+        "Linked to a repeating red-level pattern alert"
+      ],
+      "suggestedBodies": {
+        "sexual": "Child Protection Services / Policía Nacional",
+        "coercive": "Child Protection Services / Social Services",
+        "other": "Local Child Protection Authority"
+      },
+      "enforcement": "Protocol cannot be closed while mandatory external referral is pending (externalReferralRequired=true but no externalReferralAt)"
     }
   },
 
   "security": {
     "authentication": {
       "method": "JWT tokens (HS256)",
-      "pupilAuth": "PIN-based (4-digit, bcrypt hashed)",
-      "staffAuth": "Email + password (bcrypt, 12 rounds)",
-      "parentAuth": "Email + password",
-      "ptaAuth": "Email + password",
-      "sessionTimeout": "90 seconds inactivity for pupils only",
-      "rateLimiting": "Auth and newsletter endpoints",
-      "lockout": "Failed login attempt tracking with lockout"
+      "secret": "JWT_SECRET env var (mandatory — server crashes on startup if missing)",
+      "expiry": "8h default (configurable via JWT_EXPIRES_IN env var)",
+      "tokenLocation": "localStorage key 'safeschool_token'",
+      "headerFormat": "Authorization: Bearer <token>",
+      "pupilAuth": "PIN-based (4-digit, bcrypt hashed, 12 salt rounds)",
+      "staffAuth": "Email + password (bcrypt, 12 salt rounds)",
+      "parentAuth": "Email + password (bcrypt, 12 salt rounds)",
+      "lockout": {
+        "maxAttempts": 3,
+        "lockDuration": "Permanent (lockedUntil = 2099-12-31) until admin resets PIN/password",
+        "resetOnSuccess": "failed_login_attempts set to 0 on successful login"
+      },
+      "pupilSessionTimeout": "90 seconds inactivity → auto-logout (frontend timer, pupil role only)",
+      "rateLimiting": "express-rate-limit on auth and newsletter endpoints"
     },
     "dataProtection": [
-      "Cross-tenant data enforcement (all queries filtered by schoolId)",
-      "IDOR prevention on all endpoints",
-      "PTA PII middleware strips personal data from PTA responses",
-      "Immutable audit logs (PostgreSQL trigger prevents UPDATE/DELETE)",
-      "Teacher consent required before sharing incident details",
-      "Diary entries never exposed in alerts or logs",
-      "Privacy-conscious pupil search",
-      "Newsletter subscribe returns 200 regardless (prevents email enumeration)"
+      "Cross-tenant enforcement: ALL database queries filter by schoolId from JWT — no cross-school data leakage",
+      "IDOR prevention: All :id param endpoints verify resource belongs to requesting user's school",
+      "PTA PII middleware: Intercepts JSON responses for role='pta', recursively strips 40+ named PII fields",
+      "Immutable audit logs: PostgreSQL trigger prevents UPDATE and DELETE on audit_log table",
+      "Teacher consent: Incident description, victimIds, sensitive fields masked for teacher/head_of_year/support_staff until parent explicitly approves",
+      "Diary privacy: Pupil diary entries NEVER exposed in alerts, logs, API responses to other roles, or AI-generated alerts",
+      "AI safeguarding alerts use fixed safe message: 'A pupil's diary entry has been flagged for welfare review' — no diary text included",
+      "Mood trends privacy: PTA mood-trends endpoint requires ≥5 distinct pupils per week (HAVING COUNT(DISTINCT pupil_id) >= 5)",
+      "Privacy-conscious pupil search: Limited result fields returned",
+      "Newsletter enumeration prevention: POST /newsletter/subscribe always returns 200 regardless of duplicate",
+      "Sensitive fields never returned: passwordHash, pinHash stripped by formatUser() helper",
+      "PTA contacts: Parents see only first name + last initial of PTA members (e.g. 'John D.')"
     ],
-    "cors": "Restricted origins"
+    "cors": "Restricted origins configured in Express app",
+    "auditLog": {
+      "table": "audit_log",
+      "immutability": "PostgreSQL trigger prevents UPDATE/DELETE",
+      "trackedEvents": [
+        "pupil_login", "staff_login", "parent_login", "demo_login", "profile_updated",
+        "incident_created", "incident_status_updated", "incident_assessed",
+        "protocol_opened", "protocol_updated",
+        "alert_reviewed",
+        "behaviour_point_issued",
+        "diagnostic_response", "diagnostic_action_published",
+        "pta_message_sent", "pta_concern_submitted", "parent_pta_message",
+        "pin_reset"
+      ],
+      "fields": ["schoolId", "eventType", "actorRole", "actorId", "targetType", "targetId", "details (jsonb)", "ipAddress", "userAgent", "createdAt"]
+    }
   },
 
   "database": {
     "type": "PostgreSQL",
     "orm": "Drizzle ORM",
-    "tables": [
-      {
-        "name": "schools",
-        "columns": ["id (uuid PK)", "name", "legal_entity", "cif", "address", "country", "region", "created_at"]
+    "totalTables": 27,
+    "tables": {
+      "schools": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "name": {"type": "varchar(255)", "constraints": "NOT NULL"},
+          "legal_entity": {"type": "varchar(255)"},
+          "cif": {"type": "varchar(20)"},
+          "address": {"type": "text"},
+          "country": {"type": "varchar(10)", "constraints": "NOT NULL, DEFAULT 'ES'"},
+          "region": {"type": "varchar(50)", "constraints": "NOT NULL, DEFAULT 'Balearic Islands'"},
+          "active": {"type": "boolean", "constraints": "NOT NULL, DEFAULT true"},
+          "created_at": {"type": "timestamp with time zone", "constraints": "NOT NULL, DEFAULT now()"}
+        }
       },
-      {
-        "name": "users",
-        "columns": ["id (uuid PK)", "school_id (FK)", "role", "first_name", "last_name", "email", "pin_hash", "password_hash", "year_group", "class_name", "avatar_type", "avatar_value", "avatar_image_url", "parent_of (uuid[])", "active", "created_at", "last_login", "failed_login_attempts", "locked_until"]
+      "users": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "role": {"type": "varchar(30)", "constraints": "NOT NULL"},
+          "first_name": {"type": "varchar(100)", "constraints": "NOT NULL"},
+          "last_name": {"type": "varchar(100)", "constraints": "NOT NULL"},
+          "email": {"type": "varchar(255)", "constraints": "UNIQUE"},
+          "pin_hash": {"type": "varchar(255)"},
+          "password_hash": {"type": "varchar(255)"},
+          "year_group": {"type": "varchar(10)"},
+          "class_name": {"type": "varchar(50)"},
+          "avatar_type": {"type": "varchar(10)"},
+          "avatar_value": {"type": "text"},
+          "avatar_image_url": {"type": "text"},
+          "parent_of": {"type": "uuid[]"},
+          "failed_login_attempts": {"type": "integer", "constraints": "NOT NULL, DEFAULT 0"},
+          "locked_until": {"type": "timestamp"},
+          "active": {"type": "boolean", "constraints": "NOT NULL, DEFAULT true"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "last_login": {"type": "timestamp"}
+        },
+        "indexes": ["idx_users_school_id (school_id)", "idx_users_role (role)", "idx_users_school_role (school_id, role)"]
       },
-      {
-        "name": "incidents",
-        "columns": ["id (uuid PK)", "school_id (FK)", "reference_number", "reporter_id (FK)", "reporter_role", "category", "description", "location", "incident_date", "severity", "emotional_state_before", "emotional_state_after", "involved_persons (jsonb)", "safeguarding_check", "escalation_tier", "status", "teacher_consent_status", "teacher_consent_requested_at", "teacher_consent_responded_at", "teacher_consent_responded_by", "assigned_to (FK)", "resolution_notes", "created_at", "updated_at"]
+      "incidents": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "reference_number": {"type": "varchar(20)", "constraints": "NOT NULL, UNIQUE"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "reporter_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "reporter_role": {"type": "varchar(20)", "constraints": "NOT NULL"},
+          "anonymous": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "submission_device": {"type": "varchar(20)", "constraints": "DEFAULT 'web'"},
+          "category": {"type": "varchar(200)", "constraints": "NOT NULL"},
+          "escalation_tier": {"type": "integer", "constraints": "NOT NULL"},
+          "safeguarding_trigger": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "incident_date": {"type": "date", "constraints": "NOT NULL"},
+          "incident_time": {"type": "time"},
+          "location": {"type": "varchar(30)"},
+          "description": {"type": "text"},
+          "victim_ids": {"type": "uuid[]"},
+          "perpetrator_ids": {"type": "uuid[]"},
+          "person_involved_text": {"type": "text"},
+          "unknown_person_descriptions": {"type": "jsonb"},
+          "witness_ids": {"type": "uuid[]"},
+          "witness_text": {"type": "text"},
+          "emotional_state": {"type": "varchar(200)"},
+          "emotional_freetext": {"type": "text"},
+          "happening_to_me": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "happening_to_someone_else": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "i_saw_it": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "children_separated": {"type": "boolean"},
+          "coordinator_notified": {"type": "boolean"},
+          "immediate_action_taken": {"type": "text"},
+          "part_of_known_pattern": {"type": "boolean"},
+          "told_by_child": {"type": "boolean"},
+          "child_consent_to_share": {"type": "boolean"},
+          "formal_response_requested": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "request_external_referral": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "confidential_flag": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "status": {"type": "varchar(30)", "constraints": "NOT NULL, DEFAULT 'submitted'"},
+          "protocol_id": {"type": "uuid"},
+          "added_to_file": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "parent_visible": {"type": "boolean", "constraints": "NOT NULL, DEFAULT true"},
+          "teacher_consent_status": {"type": "varchar(20)", "constraints": "NOT NULL, DEFAULT 'not_requested'"},
+          "teacher_consent_requested_at": {"type": "timestamp"},
+          "teacher_consent_responded_at": {"type": "timestamp"},
+          "teacher_consent_responded_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "staff_notes": {"type": "text"},
+          "witness_statements": {"type": "jsonb"},
+          "parent_summary": {"type": "text"},
+          "assessed_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "assessed_at": {"type": "timestamp"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"}
+        },
+        "indexes": ["idx_incidents_school_id (school_id)", "idx_incidents_status (status)", "idx_incidents_created_at (created_at)", "idx_incidents_school_status (school_id, status)"]
       },
-      {
-        "name": "protocols",
-        "columns": ["id (uuid PK)", "school_id (FK)", "incident_id (FK)", "framework", "status", "opened_at", "closed_at", "measures (jsonb)", "referral_bodies (jsonb)", "coordinator_notes", "created_at", "updated_at"]
+      "protocols": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "reference_number": {"type": "varchar(20)", "constraints": "NOT NULL, UNIQUE"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "opened_by": {"type": "uuid", "constraints": "NOT NULL, FK → users.id"},
+          "opened_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "protocol_type": {"type": "varchar(40)", "constraints": "NOT NULL"},
+          "protocol_source": {"type": "varchar(30)"},
+          "gender_based_violence": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "context": {"type": "text"},
+          "linked_incident_ids": {"type": "uuid[]"},
+          "victim_id": {"type": "uuid", "constraints": "NOT NULL, FK → users.id"},
+          "alleged_perpetrator_ids": {"type": "uuid[]"},
+          "parent_notification_sent": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "parent_notification_at": {"type": "timestamp"},
+          "interviews_required": {"type": "boolean", "constraints": "NOT NULL, DEFAULT true"},
+          "risk_level": {"type": "varchar(20)"},
+          "risk_assessment": {"type": "text"},
+          "risk_factors": {"type": "text[]"},
+          "protective_factors": {"type": "text[]"},
+          "protective_measures": {"type": "text[]"},
+          "external_referral_required": {"type": "boolean", "constraints": "NOT NULL, DEFAULT false"},
+          "external_referral_body": {"type": "varchar(100)"},
+          "external_referral_body_id": {"type": "uuid"},
+          "external_referral_at": {"type": "timestamp"},
+          "family_context": {"type": "jsonb"},
+          "status": {"type": "varchar(30)", "constraints": "NOT NULL, DEFAULT 'open'"},
+          "resolution_notes": {"type": "text"},
+          "closed_at": {"type": "timestamp"},
+          "updated_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now(), auto-updates"}
+        },
+        "indexes": ["idx_protocols_school_id (school_id)", "idx_protocols_status (status)", "idx_protocols_school_status (school_id, status)"]
       },
-      {
-        "name": "pattern_alerts",
-        "columns": ["id (uuid PK)", "school_id (FK)", "rule", "alert_level", "target_pupil_id", "perpetrator_pupil_id", "related_incident_ids (uuid[])", "message", "status", "triggered_at", "reviewed_at", "reviewed_by"]
+      "pattern_alerts": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "rule_id": {"type": "varchar(60)", "constraints": "NOT NULL"},
+          "rule_label": {"type": "varchar(100)"},
+          "alert_level": {"type": "varchar(10)", "constraints": "NOT NULL"},
+          "victim_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "perpetrator_ids": {"type": "uuid[]"},
+          "linked_incident_ids": {"type": "uuid[]"},
+          "triggered_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "reviewed_at": {"type": "timestamp"},
+          "reviewed_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "status": {"type": "varchar(20)", "constraints": "NOT NULL, DEFAULT 'open'"},
+          "notes": {"type": "text"}
+        },
+        "indexes": ["idx_pattern_alerts_school_id (school_id)", "idx_pattern_alerts_status (status)", "idx_pattern_alerts_triggered_at (triggered_at)"]
       },
-      {
-        "name": "audit_log",
-        "columns": ["id (uuid PK)", "school_id (FK)", "event_type", "actor_role", "actor_id", "target_type", "target_id", "details (jsonb)", "ip_address", "user_agent", "created_at"],
-        "note": "Immutable — PostgreSQL trigger prevents UPDATE/DELETE"
+      "audit_log": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "event_type": {"type": "varchar", "constraints": "NOT NULL"},
+          "actor_role": {"type": "varchar"},
+          "actor_id": {"type": "uuid"},
+          "target_type": {"type": "varchar"},
+          "target_id": {"type": "uuid"},
+          "details": {"type": "jsonb"},
+          "ip_address": {"type": "varchar"},
+          "user_agent": {"type": "text"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"}
+        },
+        "indexes": ["idx_audit_log_school_id (school_id)", "idx_audit_log_event_type (event_type)", "idx_audit_log_created_at (created_at)"],
+        "immutability": "PostgreSQL trigger prevents UPDATE and DELETE operations"
       },
-      {
-        "name": "messages",
-        "columns": ["id (uuid PK)", "school_id (FK)", "sender_id (FK)", "recipient_id (FK)", "body", "is_urgent", "read_at", "created_at"]
+      "messages": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "sender_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "recipient_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "sender_role": {"type": "varchar"},
+          "priority": {"type": "varchar", "constraints": "DEFAULT 'normal'"},
+          "type": {"type": "varchar", "constraints": "DEFAULT 'message'"},
+          "body": {"type": "text"},
+          "location": {"type": "varchar"},
+          "read_at": {"type": "timestamp"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "parent_message_id": {"type": "uuid"}
+        }
       },
-      {
-        "name": "notifications",
-        "columns": ["id (uuid PK)", "school_id (FK)", "user_id (FK)", "type", "title", "body", "link", "read", "created_at"]
+      "notifications": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "recipient_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "trigger": {"type": "varchar"},
+          "channel": {"type": "varchar", "constraints": "DEFAULT 'in_app'"},
+          "subject": {"type": "varchar"},
+          "body": {"type": "text"},
+          "reference": {"type": "varchar"},
+          "sent_at": {"type": "timestamp"},
+          "acknowledged_at": {"type": "timestamp"},
+          "delivered": {"type": "boolean", "constraints": "DEFAULT false"}
+        }
       },
-      {
-        "name": "behaviour_points",
-        "columns": ["id (uuid PK)", "school_id (FK)", "pupil_id (FK)", "points", "reason", "category", "incident_id (FK)", "issued_by (FK)", "issued_at", "note"]
+      "behaviour_points": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "pupil_id": {"type": "uuid", "constraints": "NOT NULL, FK → users.id"},
+          "points": {"type": "integer", "constraints": "NOT NULL"},
+          "reason": {"type": "text", "constraints": "NOT NULL"},
+          "category": {"type": "varchar(50)", "constraints": "NOT NULL"},
+          "incident_id": {"type": "uuid"},
+          "issued_by": {"type": "uuid", "constraints": "NOT NULL, FK → users.id"},
+          "issued_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "note": {"type": "text"}
+        },
+        "indexes": ["idx_behaviour_points_school_id (school_id)", "idx_behaviour_points_pupil_id (pupil_id)", "idx_behaviour_points_issued_at (issued_at)"]
       },
-      {
-        "name": "pupil_diary",
-        "columns": ["id (uuid PK)", "school_id (FK)", "pupil_id (FK)", "mood (int, CHECK 1-5)", "note", "created_at"]
+      "pupil_diary": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "pupil_id": {"type": "uuid", "constraints": "NOT NULL, FK → users.id"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "mood": {"type": "integer", "constraints": "NOT NULL, CHECK (mood >= 1 AND mood <= 5)"},
+          "note": {"type": "text"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"}
+        },
+        "indexes": ["idx_pupil_diary_pupil_id (pupil_id)", "idx_pupil_diary_school_id (school_id)", "idx_pupil_diary_pupil_created (pupil_id, created_at)"]
       },
-      {
-        "name": "senco_caseload",
-        "columns": ["id (uuid PK)", "school_id (FK)", "pupil_id (FK)", "assigned_by (FK)", "reason", "priority", "status", "notes", "created_at"]
+      "diagnostic_surveys": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "title": {"type": "varchar"},
+          "status": {"type": "varchar", "constraints": "DEFAULT 'active'"},
+          "created_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "closed_at": {"type": "timestamp"}
+        },
+        "indexes": ["school_id", "status"]
       },
-      {
-        "name": "senco_tracking",
-        "columns": ["id (uuid PK)", "caseload_id (FK)", "pupil_id (FK)", "recorded_by (FK)", "recorded_at", "progress_rating", "feelings_rating", "attitude_to_learning", "attitude_to_others", "notes"]
+      "diagnostic_responses": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "survey_id": {"type": "uuid", "constraints": "FK → diagnostic_surveys.id"},
+          "user_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "question_key": {"type": "varchar"},
+          "answer": {"type": "integer"},
+          "comment": {"type": "text"},
+          "responded_at": {"type": "timestamp"}
+        },
+        "indexes": ["survey_id", "user_id", "(survey_id, question_key)"]
       },
-      {
-        "name": "case_tasks",
-        "columns": ["id (uuid PK)", "school_id (FK)", "protocol_id (FK)", "title", "assigned_to (FK)", "status", "due_date", "notes", "created_at", "completed_at"]
+      "diagnostic_actions": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "survey_id": {"type": "uuid", "constraints": "FK → diagnostic_surveys.id"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "action": {"type": "text"},
+          "category": {"type": "varchar"},
+          "owner": {"type": "varchar"},
+          "status": {"type": "varchar", "constraints": "DEFAULT 'planned'"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "published_at": {"type": "timestamp"}
+        },
+        "indexes": ["survey_id", "school_id"]
       },
-      {
-        "name": "diagnostic_surveys",
-        "columns": ["id (uuid PK)", "school_id (FK)", "title", "status", "created_at", "closed_at"]
+      "senco_caseload": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "senco_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "pupil_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "reason": {"type": "text"},
+          "added_at": {"type": "timestamp"},
+          "active": {"type": "boolean", "constraints": "DEFAULT true"}
+        }
       },
-      {
-        "name": "diagnostic_responses",
-        "columns": ["id (uuid PK)", "survey_id (FK)", "user_id (FK)", "question_key", "answer (int)", "created_at"]
+      "senco_tracking": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "caseload_id": {"type": "uuid", "constraints": "FK → senco_caseload.id"},
+          "pupil_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "recorded_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "recorded_at": {"type": "timestamp"},
+          "progress_rating": {"type": "integer"},
+          "feelings_rating": {"type": "integer"},
+          "attitude_to_learning": {"type": "integer"},
+          "attitude_to_others": {"type": "integer"},
+          "notes": {"type": "text"}
+        }
       },
-      {
-        "name": "diagnostic_actions",
-        "columns": ["id (uuid PK)", "survey_id (FK)", "action", "category", "published_at", "created_at"]
+      "case_tasks": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK, DEFAULT gen_random_uuid()"},
+          "school_id": {"type": "uuid", "constraints": "NOT NULL, FK → schools.id"},
+          "protocol_id": {"type": "uuid", "constraints": "FK → protocols.id"},
+          "task_type": {"type": "varchar"},
+          "title": {"type": "varchar"},
+          "description": {"type": "text"},
+          "assignee_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "priority": {"type": "varchar", "constraints": "DEFAULT 'normal'"},
+          "status": {"type": "varchar", "constraints": "DEFAULT 'pending'"},
+          "due_at": {"type": "timestamp"},
+          "completed_at": {"type": "timestamp"},
+          "completed_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "notes": {"type": "text"},
+          "created_at": {"type": "timestamp", "constraints": "NOT NULL, DEFAULT now()"},
+          "updated_at": {"type": "timestamp"}
+        }
       },
-      {
-        "name": "pta_messages",
-        "columns": ["id (uuid PK)", "school_id (FK)", "sender_id (FK)", "body", "read_at", "created_at"]
+      "pta_messages": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "sender_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "body": {"type": "text"},
+          "read_at": {"type": "timestamp"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "pta_concerns",
-        "columns": ["id (uuid PK)", "school_id (FK)", "submitted_by_id (FK)", "category", "subject", "body", "status", "coordinator_response", "responded_at", "responded_by_id", "created_at"]
+      "pta_concerns": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "submitted_by_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "category": {"type": "varchar"},
+          "subject": {"type": "varchar"},
+          "body": {"type": "text"},
+          "status": {"type": "varchar"},
+          "coordinator_response": {"type": "text"},
+          "responded_at": {"type": "timestamp"},
+          "responded_by_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "pta_policy_acknowledgements",
-        "columns": ["id (uuid PK)", "school_id (FK)", "user_id (FK)", "policy_version", "action_type", "comment", "created_at"]
+      "pta_policy_acknowledgements": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "user_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "policy_version": {"type": "varchar"},
+          "action_type": {"type": "varchar"},
+          "comment": {"type": "text"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "pta_codesign_responses",
-        "columns": ["id (uuid PK)", "school_id (FK)", "submitted_by_id (FK)", "question_key", "response", "created_at"]
+      "pta_codesign_responses": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "submitted_by_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "question_key": {"type": "varchar"},
+          "response": {"type": "text"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "pta_annual_reports",
-        "columns": ["id (uuid PK)", "school_id (FK)", "academic_year", "report_data (jsonb)", "status", "generated_by_id (FK)", "approved_by_id (FK)", "approved_at", "accessed_by_pta_at", "created_at"]
+      "pta_annual_reports": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "academic_year": {"type": "varchar"},
+          "report_data": {"type": "jsonb", "shape": "{totalIncidents, incidentsByCategory, protocolsByStatus, alertsSummary}"},
+          "status": {"type": "varchar", "values": "draft | approved"},
+          "generated_by_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "approved_by_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "approved_at": {"type": "timestamp"},
+          "accessed_by_pta_at": {"type": "timestamp"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "teacher_posts",
-        "columns": ["id (uuid PK)", "school_id (FK)", "author_id (FK)", "title", "body", "category", "audience", "created_at", "updated_at"]
+      "teacher_posts": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "author_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "title": {"type": "varchar"},
+          "body": {"type": "text"},
+          "category": {"type": "varchar", "constraints": "DEFAULT 'general'", "values": "general|safeguarding|wellbeing|curriculum|event|policy|heads_up"},
+          "audience": {"type": "varchar", "constraints": "DEFAULT 'everyone'", "values": "everyone|pupils|parents|staff|pupils_parents"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"},
+          "updated_at": {"type": "timestamp"}
+        },
+        "indexes": ["school_id", "author_id", "(school_id, audience)", "(school_id, created_at)"]
       },
-      {
-        "name": "annex_templates",
-        "columns": ["id (uuid PK)", "framework", "annex_code", "title", "description", "template_url", "version", "active", "created_at", "updated_at"]
+      "delegated_roles": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "user_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "role_type": {"type": "varchar"},
+          "mandate_scope": {"type": "varchar"},
+          "training_date": {"type": "date"},
+          "training_notes": {"type": "text"},
+          "appointed_at": {"type": "timestamp"},
+          "expires_at": {"type": "timestamp"},
+          "revoked_at": {"type": "timestamp"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "delegated_roles",
-        "columns": ["id (uuid PK)", "school_id (FK)", "user_id (FK)", "delegated_role", "delegated_by (FK)", "active", "created_at", "revoked_at"]
+      "annex_templates": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "framework": {"type": "varchar", "constraints": "NOT NULL"},
+          "annex_code": {"type": "varchar", "constraints": "NOT NULL"},
+          "title": {"type": "varchar", "constraints": "NOT NULL"},
+          "description": {"type": "text"},
+          "template_url": {"type": "text"},
+          "version": {"type": "varchar", "constraints": "DEFAULT '1.0'"},
+          "active": {"type": "boolean", "constraints": "DEFAULT true"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"},
+          "updated_at": {"type": "timestamp"}
+        }
       },
-      {
-        "name": "referral_bodies",
-        "columns": ["id (uuid PK)", "school_id (FK)", "name", "type", "jurisdiction", "contact_phone", "contact_email", "website", "notes", "active", "created_at"]
+      "referral_bodies": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "name": {"type": "varchar"},
+          "body_type": {"type": "varchar"},
+          "island": {"type": "varchar"},
+          "municipality": {"type": "varchar"},
+          "contact_name": {"type": "varchar"},
+          "contact_email": {"type": "varchar"},
+          "contact_phone": {"type": "varchar"},
+          "address": {"type": "text"},
+          "notes": {"type": "text"},
+          "active": {"type": "boolean", "constraints": "DEFAULT true"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       },
-      {
-        "name": "newsletter_subscribers",
-        "columns": ["id (uuid PK)", "email", "organisation_name", "organisation_type", "contact_name", "country", "interests (text[])", "subscribed_at"]
+      "newsletter_subscribers": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "organisation_type": {"type": "varchar"},
+          "organisation_name": {"type": "varchar"},
+          "contact_name": {"type": "varchar"},
+          "email": {"type": "varchar", "constraints": "UNIQUE"},
+          "role": {"type": "varchar"},
+          "region": {"type": "varchar"},
+          "interests": {"type": "text"},
+          "consent_given": {"type": "boolean", "constraints": "DEFAULT false"},
+          "subscribed_at": {"type": "timestamp"},
+          "unsubscribed_at": {"type": "timestamp"}
+        }
       },
-      {
-        "name": "interviews",
-        "columns": ["id (uuid PK)", "school_id (FK)", "incident_id (FK)", "protocol_id (FK)", "interviewee_id (FK)", "interviewer_id (FK)", "scheduled_at", "status", "notes", "outcome", "created_at"]
+      "interviews": {
+        "columns": {
+          "id": {"type": "uuid", "constraints": "PK"},
+          "protocol_id": {"type": "uuid", "constraints": "FK → protocols.id"},
+          "school_id": {"type": "uuid", "constraints": "FK → schools.id"},
+          "interviewee_id": {"type": "uuid", "constraints": "FK → users.id"},
+          "interviewee_role": {"type": "varchar"},
+          "conducted_by": {"type": "uuid", "constraints": "FK → users.id"},
+          "interview_date": {"type": "timestamp"},
+          "summary": {"type": "text"},
+          "annex_reference": {"type": "varchar"},
+          "document_url": {"type": "text"},
+          "created_at": {"type": "timestamp", "constraints": "DEFAULT now()"}
+        }
       }
-    ]
+    }
   },
 
-  "apiEndpoints": {
-    "authentication": [
-      { "method": "POST", "path": "/api/auth/pupil/login", "access": "public", "description": "Pupil PIN login" },
-      { "method": "POST", "path": "/api/auth/staff/login", "access": "public", "description": "Staff email+password login" },
-      { "method": "POST", "path": "/api/auth/parent/login", "access": "public", "description": "Parent email+password login" },
-      { "method": "POST", "path": "/api/auth/demo-login", "access": "public (env-gated)", "description": "Demo quick login" },
-      { "method": "GET", "path": "/api/auth/me", "access": "authenticated", "description": "Current user info" },
-      { "method": "PATCH", "path": "/api/auth/profile", "access": "authenticated", "description": "Update profile" }
+  "frontendRouting": {
+    "publicRoutes": [
+      {"path": "/login", "component": "Login", "description": "School selector → role-based login (PIN pad for pupils, email forms for staff/parent)"},
+      {"path": "/newsletter", "component": "NewsletterSignUp", "description": "Public organisation signup"}
     ],
-    "incidents": [
-      { "method": "GET", "path": "/api/incidents", "access": "authenticated (role-filtered)", "description": "List incidents" },
-      { "method": "POST", "path": "/api/incidents", "access": "authenticated", "description": "Create incident" },
-      { "method": "GET", "path": "/api/incidents/:id", "access": "authenticated", "description": "Get incident detail" },
-      { "method": "PATCH", "path": "/api/incidents/:id", "access": "coordinator/head_teacher", "description": "Update incident" },
-      { "method": "PATCH", "path": "/api/incidents/:id/status", "access": "coordinator/head_teacher", "description": "Update status" },
-      { "method": "POST", "path": "/api/incidents/:id/consent-request", "access": "coordinator", "description": "Request teacher consent from parent" },
-      { "method": "PATCH", "path": "/api/incidents/:id/consent-respond", "access": "parent", "description": "Approve/decline consent" }
-    ],
-    "protocols": [
-      { "method": "GET", "path": "/api/protocols", "access": "coordinator/head_teacher", "description": "List protocols" },
-      { "method": "POST", "path": "/api/protocols", "access": "coordinator/head_teacher", "description": "Create protocol" },
-      { "method": "GET", "path": "/api/protocols/:id", "access": "coordinator/head_teacher", "description": "Get protocol detail" },
-      { "method": "PATCH", "path": "/api/protocols/:id", "access": "coordinator/head_teacher", "description": "Update protocol" }
-    ],
-    "alerts": [
-      { "method": "GET", "path": "/api/alerts", "access": "coordinator/head_teacher/teacher/head_of_year/senco", "description": "List pattern alerts" },
-      { "method": "PATCH", "path": "/api/alerts/:id", "access": "coordinator/head_teacher", "description": "Update alert status" }
-    ],
-    "dashboard": [
-      { "method": "GET", "path": "/api/dashboard/coordinator", "access": "coordinator/head_teacher/senco", "description": "Coordinator dashboard stats" },
-      { "method": "GET", "path": "/api/dashboard/analytics", "access": "coordinator/head_teacher/senco", "description": "Full analytics" },
-      { "method": "GET", "path": "/api/dashboard/teacher-analytics", "access": "teacher/head_of_year/support_staff", "description": "Teacher analytics" },
-      { "method": "GET", "path": "/api/dashboard/parent", "access": "parent", "description": "Parent dashboard" },
-      { "method": "GET", "path": "/api/dashboard/child/:id", "access": "coordinator/head_teacher/senco", "description": "Child profile" },
-      { "method": "GET", "path": "/api/dashboard/school-overview", "access": "parent", "description": "Anonymised school analytics for parents" }
-    ],
-    "diagnostics": [
-      { "method": "GET", "path": "/api/diagnostics", "access": "authenticated", "description": "List surveys" },
-      { "method": "POST", "path": "/api/diagnostics", "access": "coordinator/head_teacher", "description": "Create survey" },
-      { "method": "GET", "path": "/api/diagnostics/active", "access": "authenticated", "description": "Get active survey" },
-      { "method": "GET", "path": "/api/diagnostics/:id/results", "access": "coordinator/head_teacher", "description": "Full confidential results" },
-      { "method": "GET", "path": "/api/diagnostics/:id/summary", "access": "authenticated (closed surveys only)", "description": "Published summary with aggregated scores" },
-      { "method": "GET", "path": "/api/diagnostics/:id/actions", "access": "authenticated", "description": "Agreed actions (published only for non-leadership)" },
-      { "method": "POST", "path": "/api/diagnostics/:id/respond", "access": "authenticated", "description": "Submit response" },
-      { "method": "PATCH", "path": "/api/diagnostics/:id", "access": "coordinator/head_teacher", "description": "Update survey status" },
-      { "method": "POST", "path": "/api/diagnostics/:id/actions", "access": "coordinator/head_teacher", "description": "Add action" },
-      { "method": "POST", "path": "/api/diagnostics/:id/seed-demo", "access": "coordinator (dev only)", "description": "Seed demo data" }
-    ],
-    "behaviour": [
-      { "method": "GET", "path": "/api/behaviour/levels", "access": "public", "description": "Get escalation levels" },
-      { "method": "GET", "path": "/api/behaviour/pupil/:pupilId", "access": "authenticated", "description": "Get pupil behaviour record" },
-      { "method": "GET", "path": "/api/behaviour/summary", "access": "staff", "description": "Class/school behaviour summary" },
-      { "method": "POST", "path": "/api/behaviour/points", "access": "staff", "description": "Issue behaviour points" },
-      { "method": "GET", "path": "/api/behaviour/my-record", "access": "pupil", "description": "Own behaviour record" }
-    ],
-    "diary": [
-      { "method": "GET", "path": "/api/diary/entries", "access": "pupil only", "description": "Get own diary entries" },
-      { "method": "POST", "path": "/api/diary/entries", "access": "pupil only", "description": "Create diary entry (triggers AI scan)" },
-      { "method": "DELETE", "path": "/api/diary/entries/:id", "access": "pupil only", "description": "Delete own entry" }
-    ],
-    "messages": [
-      { "method": "GET", "path": "/api/messages", "access": "authenticated", "description": "Get messages" },
-      { "method": "POST", "path": "/api/messages", "access": "authenticated", "description": "Send message" },
-      { "method": "PATCH", "path": "/api/messages/:id/read", "access": "authenticated", "description": "Mark as read" },
-      { "method": "GET", "path": "/api/messages/conversations", "access": "authenticated", "description": "Get conversations" },
-      { "method": "GET", "path": "/api/messages/child-alerts", "access": "parent", "description": "Child urgent alerts" },
-      { "method": "GET", "path": "/api/safe-contacts", "access": "pupil", "description": "Get safe contacts list" },
-      { "method": "GET", "path": "/api/parent-contacts", "access": "pupil", "description": "Get parent contacts" }
-    ],
-    "pta": [
-      { "method": "GET", "path": "/api/pta/dashboard", "access": "pta", "description": "PTA dashboard with anonymised KPIs" },
-      { "method": "GET", "path": "/api/pta/messages", "access": "pta/coordinator", "description": "PTA-coordinator messages" },
-      { "method": "POST", "path": "/api/pta/messages", "access": "pta/coordinator", "description": "Send PTA message" },
-      { "method": "GET", "path": "/api/pta/policy", "access": "pta", "description": "Get current policy" },
-      { "method": "POST", "path": "/api/pta/policy/acknowledge", "access": "pta", "description": "Acknowledge policy" },
-      { "method": "POST", "path": "/api/pta/policy/flag", "access": "pta", "description": "Flag policy concern" },
-      { "method": "GET", "path": "/api/pta/concerns", "access": "pta/coordinator", "description": "List concerns" },
-      { "method": "POST", "path": "/api/pta/concerns", "access": "pta", "description": "Submit concern" },
-      { "method": "GET", "path": "/api/pta/report/latest", "access": "pta", "description": "Get latest approved report" },
-      { "method": "GET", "path": "/api/pta/report/all", "access": "coordinator/head_teacher", "description": "List all reports" },
-      { "method": "POST", "path": "/api/pta/report/generate", "access": "coordinator/head_teacher", "description": "Generate annual report" },
-      { "method": "POST", "path": "/api/pta/report/approve", "access": "coordinator/head_teacher", "description": "Approve report for PTA" },
-      { "method": "GET", "path": "/api/pta/codesign", "access": "pta/coordinator", "description": "Get co-design questions" },
-      { "method": "POST", "path": "/api/pta/codesign/response", "access": "pta", "description": "Submit co-design response" },
-      { "method": "GET", "path": "/api/pta/mood-trends", "access": "pta", "description": "School-wide mood trends (12-week rolling)" },
-      { "method": "GET", "path": "/api/pta/resources", "access": "pta", "description": "Resources library" },
-      { "method": "GET", "path": "/api/parent/pta-contacts", "access": "parent", "description": "Get PTA member names" },
-      { "method": "POST", "path": "/api/parent/pta-message", "access": "parent", "description": "Message PTA from parent" }
-    ],
-    "senco": [
-      { "method": "GET", "path": "/api/senco/caseload", "access": "senco", "description": "List caseload" },
-      { "method": "POST", "path": "/api/senco/caseload", "access": "senco", "description": "Add pupil to caseload" },
-      { "method": "DELETE", "path": "/api/senco/caseload/:id", "access": "senco", "description": "Remove from caseload" },
-      { "method": "GET", "path": "/api/senco/caseload/:id/tracking", "access": "senco", "description": "Get tracking history" },
-      { "method": "POST", "path": "/api/senco/caseload/:id/tracking", "access": "senco", "description": "Add tracking record" },
-      { "method": "GET", "path": "/api/senco/pupils-available", "access": "senco", "description": "Pupils not yet on caseload" }
-    ],
-    "schoolAdmin": [
-      { "method": "GET", "path": "/api/schools", "access": "public", "description": "List schools (login)" },
-      { "method": "GET", "path": "/api/schools/:schoolId/pupils", "access": "public", "description": "List pupils for login (minimal data)" },
-      { "method": "GET", "path": "/api/schools/:schoolId/staff", "access": "coordinator/head_teacher", "description": "List staff" },
-      { "method": "GET", "path": "/api/my-pupils", "access": "staff", "description": "Get class/year group pupils" },
-      { "method": "GET", "path": "/api/pupils/search", "access": "staff/pupil", "description": "Privacy-conscious search" },
-      { "method": "POST", "path": "/api/pupils/reset-pin/:pupilId", "access": "teacher/coordinator", "description": "Reset pupil PIN" },
-      { "method": "POST", "path": "/api/pupils/bulk-reset-pins", "access": "teacher/coordinator", "description": "Bulk reset PINs" },
-      { "method": "POST", "path": "/api/users/:id/avatar", "access": "authenticated", "description": "Update avatar" }
-    ],
-    "other": [
-      { "method": "GET", "path": "/api/notifications", "access": "authenticated", "description": "Get notifications" },
-      { "method": "PATCH", "path": "/api/notifications/:id/read", "access": "authenticated", "description": "Mark notification read" },
-      { "method": "GET", "path": "/api/annex-templates", "access": "authenticated", "description": "List annex templates" },
-      { "method": "POST", "path": "/api/annex-templates", "access": "coordinator/head_teacher", "description": "Create template" },
-      { "method": "GET", "path": "/api/delegated-roles", "access": "coordinator/head_teacher", "description": "List delegated roles" },
-      { "method": "POST", "path": "/api/delegated-roles", "access": "coordinator/head_teacher", "description": "Assign role" },
-      { "method": "GET", "path": "/api/referral-bodies", "access": "authenticated", "description": "List referral bodies" },
-      { "method": "POST", "path": "/api/referral-bodies", "access": "coordinator/head_teacher", "description": "Add referral body" },
-      { "method": "GET", "path": "/api/case-tasks", "access": "coordinator/senco", "description": "List case tasks" },
-      { "method": "POST", "path": "/api/case-tasks", "access": "coordinator/senco", "description": "Create case task" },
-      { "method": "GET", "path": "/api/teacher-posts", "access": "authenticated", "description": "List school updates" },
-      { "method": "POST", "path": "/api/teacher-posts", "access": "staff", "description": "Create school update" },
-      { "method": "DELETE", "path": "/api/teacher-posts/:id", "access": "author/coordinator", "description": "Delete post" },
-      { "method": "POST", "path": "/api/newsletter/subscribe", "access": "public", "description": "Newsletter signup" },
-      { "method": "GET", "path": "/api/data-retention/policy", "access": "coordinator/senco/pta", "description": "Data retention policy" },
-      { "method": "GET", "path": "/api/healthz", "access": "public", "description": "Health check" }
+    "protectedRoutes": [
+      {"path": "/", "component": "Dashboard", "description": "Role router → dispatches to CoordinatorDashboard, TeacherDashboard, PupilDashboard, or ParentDashboard"},
+      {"path": "/report", "component": "ReportIncident", "description": "Dual-mode incident form (child-friendly vs professional)"},
+      {"path": "/incidents", "component": "IncidentsList", "description": "Incident list with filtering, search, pagination"},
+      {"path": "/incidents/:id", "component": "IncidentDetail", "description": "Incident detail with consent workflow and assessment form"},
+      {"path": "/protocols", "component": "ProtocolsList", "description": "Protocol management list"},
+      {"path": "/protocols/new", "component": "NewProtocol", "description": "Create new protocol form"},
+      {"path": "/protocols/:id", "component": "ProtocolDetail", "description": "Protocol detail with interviews, notifications, linked incidents"},
+      {"path": "/class", "component": "MyClass", "description": "Class/year group pupil list"},
+      {"path": "/alerts", "component": "AlertsList", "description": "Pattern alerts with review actions"},
+      {"path": "/notifications", "component": "NotificationsList", "description": "Notification centre"},
+      {"path": "/education", "component": "Education", "description": "Rights education — UNCRC, LOPIVI, Convivèxit, Machista Violence"},
+      {"path": "/messages", "component": "MessagesPage", "description": "Messaging with conversations and compose"},
+      {"path": "/caseload", "component": "CaseloadPage", "description": "SENCO caseload management"},
+      {"path": "/behaviour", "component": "BehaviourPage", "description": "Behaviour tracker"},
+      {"path": "/training", "component": "TrainingPage", "description": "Role-specific training guides"},
+      {"path": "/pta", "component": "PtaPortal", "description": "PTA portal with 6 tabs"},
+      {"path": "/diagnostics", "component": "Diagnostics", "description": "Survey list and taking UI"},
+      {"path": "/diagnostics/:id/results", "component": "DiagnosticsResults", "description": "Results (full or summary based on role)"},
+      {"path": "/diary", "component": "DiaryPage", "description": "Pupil feelings diary"},
+      {"path": "/learnings", "component": "LearningsPage", "description": "School updates feed"},
+      {"path": "/settings", "component": "Settings", "description": "User profile, avatar, preferences"}
     ]
   },
-
-  "frontendPages": [
-    { "path": "/", "component": "Login", "access": "public" },
-    { "path": "/dashboard", "component": "Role-specific dashboard", "access": "authenticated" },
-    { "path": "/incidents", "component": "Incident list + detail", "access": "authenticated" },
-    { "path": "/incidents/new", "component": "Report incident form", "access": "authenticated" },
-    { "path": "/incidents/:id", "component": "Incident detail", "access": "authenticated" },
-    { "path": "/protocols", "component": "Protocol management", "access": "coordinator/head_teacher" },
-    { "path": "/alerts", "component": "Pattern alerts list", "access": "staff" },
-    { "path": "/messages", "component": "Messaging", "access": "authenticated" },
-    { "path": "/diary", "component": "Pupil feelings diary", "access": "pupil only" },
-    { "path": "/behaviour", "component": "Behaviour tracker", "access": "authenticated" },
-    { "path": "/diagnostics", "component": "Diagnostic surveys", "access": "authenticated" },
-    { "path": "/diagnostics/:id/results", "component": "Diagnostic results (role-filtered)", "access": "authenticated" },
-    { "path": "/class", "component": "My Class / Year Group", "access": "staff" },
-    { "path": "/senco", "component": "SENCO caseload", "access": "senco" },
-    { "path": "/pta", "component": "PTA portal", "access": "pta" },
-    { "path": "/learnings", "component": "School updates", "access": "authenticated" },
-    { "path": "/education", "component": "Learn / Rights education", "access": "authenticated" },
-    { "path": "/training", "component": "Feature training guides", "access": "authenticated" },
-    { "path": "/notifications", "component": "Notifications", "access": "authenticated" },
-    { "path": "/settings", "component": "User settings", "access": "authenticated" },
-    { "path": "/newsletter", "component": "Public newsletter signup", "access": "public" }
-  ],
 
   "demoCredentials": {
-    "coordinator": { "email": "coordinator@safeschool.dev", "password": "password123" },
-    "headTeacher": { "email": "head@safeschool.dev", "password": "password123" },
+    "coordinator": {"email": "coordinator@safeschool.dev", "password": "password123"},
+    "headTeacher": {"email": "head@safeschool.dev", "password": "password123"},
     "teachers": [
-      { "email": "teacher@safeschool.dev", "password": "password123", "note": "Head of Year Y6" },
-      { "email": "teacher2@safeschool.dev", "password": "password123" },
-      { "email": "teacher3@safeschool.dev", "password": "password123" },
-      { "email": "teacher4@safeschool.dev", "password": "password123" }
+      {"email": "teacher@safeschool.dev", "password": "password123", "note": "Head of Year Y6"},
+      {"email": "teacher2@safeschool.dev", "password": "password123"},
+      {"email": "teacher3@safeschool.dev", "password": "password123"},
+      {"email": "teacher4@safeschool.dev", "password": "password123"}
     ],
-    "supportStaff": { "email": "support@safeschool.dev", "password": "password123" },
-    "senco": { "email": "senco@safeschool.dev", "password": "password123" },
+    "supportStaff": {"email": "support@safeschool.dev", "password": "password123"},
+    "senco": {"email": "senco@safeschool.dev", "password": "password123"},
     "parents": [
-      { "email": "parent.a@safeschool.dev", "password": "parent123" },
-      { "email": "parent.b@safeschool.dev", "password": "parent123" }
+      {"email": "parent.a@safeschool.dev", "password": "parent123"},
+      {"email": "parent.b@safeschool.dev", "password": "parent123"}
     ],
     "pta": [
-      { "email": "pta.chair@safeschool.dev", "password": "pta123" },
-      { "email": "pta.member1@safeschool.dev", "password": "pta123" }
+      {"email": "pta.chair@safeschool.dev", "password": "pta123"},
+      {"email": "pta.member1@safeschool.dev", "password": "pta123"}
     ],
-    "pupils": "All pupil PINs = 1234 (or check seed output)"
+    "pupils": "All pupil PINs = 1234"
   },
 
   "seededDemoData": {
-    "school": "Morna International College",
+    "school": {"name": "Morna International College", "id": "0a6a9fba-5ecb-474f-8544-a7f2caafd924", "region": "Balearic Islands", "country": "ES"},
     "yearGroups": ["Y3", "Y4", "Y5", "Y6"],
     "pupils": "~20 pupils across 4 year groups with animal emoji avatars",
     "diagnosticSurveys": [
-      { "status": "active", "title": "School Onboarding Diagnostic" },
-      { "status": "closed", "count": 2, "note": "With seeded responses from all role groups" }
+      {"status": "active", "id": "10b79069-d410-4a3f-a8b8-45b9891f8479", "title": "School Onboarding Diagnostic"},
+      {"status": "closed", "id": "0021416f-bb05-4802-aa6b-2bf0ee664a22", "note": "With seeded responses from all role groups"},
+      {"status": "closed", "id": "ec4e6485-b686-4e9d-8569-11bdd2025860", "note": "With seeded responses from all role groups"}
     ],
     "ptaAnnualReport": {
       "academicYear": "2025-2026",
@@ -521,7 +2117,20 @@
       "protocols": 15,
       "patternAlerts": 40
     },
-    "incidents": "169 seeded incidents across all categories",
-    "patternAlerts": "40 seeded pattern alerts"
+    "incidents": "169 seeded incidents across all categories and escalation tiers",
+    "patternAlerts": "40 seeded pattern alerts (mix of red and amber)",
+    "protocols": "15 seeded protocols linked to incidents"
+  },
+
+  "internalHelpers": {
+    "formatUser": "Strips passwordHash, pinHash, and sensitive fields from user object before API response",
+    "enrichIncidents": "Maps user IDs to names, redacts sensitive fields based on viewer role",
+    "enrichProtocols": "Adds victimName and openedByName to protocol objects",
+    "generateIncidentRef": "Generates unique incident reference number (e.g. INC-2025-001)",
+    "generateProtocolRef": "Generates unique protocol reference number",
+    "writeAudit": "Writes to immutable audit_log table. Signature: writeAudit({schoolId, eventType, actor, targetType, targetId, details, req})",
+    "getRoleGroup": "Collapses specific roles into 3 reporting groups: pupil, parent (includes pta), staff (all others)",
+    "getQuestionsForRole": "Filters QUESTION_BANK for role-applicable questions with correct displayText",
+    "scanDiaryEntry": "Async AI safeguarding scan of diary note text via gpt-5-nano"
   }
 }

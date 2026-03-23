@@ -85,7 +85,7 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/training",
         navHighlight: "Training",
-        title: "How To Use SafeSkoolZ",
+        title: "How To Use safeskoolz",
         description: "Step-by-step guides explain every feature: how to report an incident, how to use your diary, how messages work, how to send an urgent help alert, and how the behaviour system works. Each guide has numbered steps you can follow along with.",
         benefit: "If you're ever unsure how something works, the answer is here.",
       },
@@ -107,8 +107,8 @@ function getStepsForRole(role: string): DemoStep[] {
         page: "/settings",
         navHighlight: "My Settings",
         title: "Your Avatar & Settings",
-        description: "Pick your animal avatar from the grid — dog, cat, rabbit, bear, fox, owl, penguin, lion, panda, unicorn, and more. Your chosen animal appears next to your name everywhere in SafeSkoolZ. You can change it any time.",
-        benefit: "Your avatar is your identity in SafeSkoolZ — pick the one that feels like you.",
+        description: "Pick your animal avatar from the grid — dog, cat, rabbit, bear, fox, owl, penguin, lion, panda, unicorn, and more. Your chosen animal appears next to your name everywhere in safeskoolz. You can change it any time.",
+        benefit: "Your avatar is your identity in safeskoolz — pick the one that feels like you.",
       },
     ];
   }
@@ -166,7 +166,7 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/training",
         navHighlight: "Training",
-        title: "How To Use SafeSkoolZ",
+        title: "How To Use safeskoolz",
         description: "Step-by-step guides for every feature — viewing incidents, checking behaviour points and levels, messaging staff, and reporting concerns. Each guide has numbered steps you can follow along with.",
         benefit: "Never feel lost — everything is explained here.",
       },
@@ -456,7 +456,7 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/training",
         navHighlight: "Training",
-        title: "How To Use SafeSkoolZ",
+        title: "How To Use safeskoolz",
         description: "Step-by-step guides for every PTA feature: navigating the dashboard, messaging the coordinator, reviewing policy, accessing the annual report, using the co-design workspace, and understanding the resources library.",
         benefit: "Get up to speed quickly. Every PTA feature explained step by step.",
       },

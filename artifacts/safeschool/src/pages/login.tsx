@@ -167,7 +167,7 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-secondary shadow-xl shadow-primary/20 mb-6 text-white transform -rotate-3 hover:rotate-0 transition-transform duration-300">
             <ShieldCheck size={40} strokeWidth={2.5} />
           </div>
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">SafeSkoolZ</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">safeskoolz</h1>
           <p className="mt-3 text-muted-foreground text-lg">A safe space to speak up and seek help.</p>
         </motion.div>
 
@@ -374,7 +374,7 @@ export default function Login() {
                 <Building2 size={24} className="text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-base">Bring SafeSkoolZ to your school</p>
+                <p className="font-bold text-base">Bring safeskoolz to your school</p>
                 <p className="text-sm text-teal-100 mt-0.5">Schools & authorities — sign up to our newsletter and register your interest</p>
               </div>
               <ChevronRight size={20} className="text-teal-200 flex-shrink-0" />
@@ -383,7 +383,7 @@ export default function Login() {
         </Link>
 
         <p className="text-center text-sm text-muted-foreground mt-4">
-          Protected by SafeSkoolZ. Your reports are confidential.
+          Protected by safeskoolz. Your reports are confidential.
         </p>
         <p className="text-center text-[10px] text-muted-foreground/60 mt-2">
           Powered by Cloudworkz

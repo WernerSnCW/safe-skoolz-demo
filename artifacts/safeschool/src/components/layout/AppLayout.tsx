@@ -184,7 +184,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <ShieldCheck size={24} strokeWidth={2.5} />
           </div>
           <span className="font-display font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-            SafeSkoolZ
+            safeskoolz
           </span>
         </div>
 
@@ -246,7 +246,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="md:hidden glass-panel sticky top-0 z-30 px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShieldCheck className="text-primary" size={24} />
-          <span className="font-display font-bold text-lg">SafeSkoolZ</span>
+          <span className="font-display font-bold text-lg">safeskoolz</span>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

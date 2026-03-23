@@ -1,0 +1,248 @@
+{
+  "platform": {
+    "name": "SafeSkoolZ",
+    "tagline": "A safe space to speak up and seek help",
+    "poweredBy": "Cloudworkz",
+    "school": "Morna International College, Ibiza",
+    "compliance": [
+      "LOPIVI (Spain child protection)",
+      "Convivèxit (Balearic anti-bullying protocol)",
+      "Machista Violence protocols"
+    ],
+    "techStack": "React + Vite frontend, Express API, PostgreSQL, OpenAI AI scanning"
+  },
+  "roles": [
+    { "id": "pupil", "label": "Pupil", "loginMethod": "School + Name + 4-digit PIN" },
+    { "id": "parent", "label": "Parent", "loginMethod": "Email + Password" },
+    { "id": "teacher", "label": "Teacher / Head of Year", "loginMethod": "Email + Password" },
+    { "id": "support_staff", "label": "Support Staff", "loginMethod": "Email + Password" },
+    { "id": "senco", "label": "SENCO (Special Educational Needs Coordinator)", "loginMethod": "Email + Password" },
+    { "id": "coordinator", "label": "Safeguarding Coordinator (DSL)", "loginMethod": "Email + Password" },
+    { "id": "head_teacher", "label": "Head Teacher", "loginMethod": "Email + Password" },
+    { "id": "pta", "label": "PTA Member/Chair", "loginMethod": "Email + Password" }
+  ],
+  "modules": {
+    "authentication": {
+      "description": "Multi-role login system with separate flows for pupils (PIN-based), staff (email/password), parents, and PTA members",
+      "features": [
+        "Pupil PIN login with lockout after failed attempts",
+        "Staff/Parent/PTA email login",
+        "Demo mode with one-click role login",
+        "JWT token auth",
+        "Avatar/profile customisation",
+        "PIN reset by teachers"
+      ]
+    },
+    "incidentReporting": {
+      "description": "Core safeguarding feature — pupils, parents, and staff can report incidents with guided forms",
+      "features": [
+        "Multi-step incident form with emotional state tracking",
+        "Incident types: bullying, cyberbullying, physical, verbal, relational, sexual, discriminatory",
+        "Who is involved: happening to me / someone else / I saw it",
+        "Emotional state picker with freetext",
+        "Anonymous reporting option",
+        "File/evidence attachment support",
+        "Automatic reference number generation",
+        "Incident severity assessment by staff",
+        "Status workflow: reported → under_review → investigating → resolved → closed",
+        "Consent request/response flow (staff must get consent before viewing certain details)",
+        "Parent notification of incidents involving their child"
+      ]
+    },
+    "protocols": {
+      "description": "Formal safeguarding protocols triggered by serious incidents, compliant with LOPIVI/Convivèxit",
+      "features": [
+        "Protocol creation linked to incidents",
+        "Framework types: LOPIVI, Convivèxit, Machista Violence, Child Protection",
+        "Protocol stages tracking",
+        "Annex template system (structured legal documents per framework)",
+        "Referral body management (external agencies, police, social services)",
+        "Protocol status: open → active → monitoring → closed",
+        "Interview records attached to protocols",
+        "Case tasks for action tracking within protocols",
+        "Delegated role assignments (temporary permissions)"
+      ]
+    },
+    "diary": {
+      "description": "Private digital diary for pupils with physical notebook aesthetic",
+      "features": [
+        "Leather-bound diary visual design with lined paper",
+        "6 switchable themes: Classic, Ocean, Rose, Forest, Midnight, Sunset",
+        "Standard Unicode emoji picker for expression",
+        "Private entries — only visible to the pupil",
+        "AI-powered safeguarding scanner (GPT-5-nano) — flags serious concerns",
+        "AI flagging creates pattern alerts for welfare lead WITHOUT revealing diary content",
+        "Parent view of child's diary (read-only)",
+        "Entry deletion by pupil"
+      ]
+    },
+    "diagnostics": {
+      "description": "Whole-school safeguarding climate survey with role-specific questions",
+      "questionCategories": [
+        "Awareness & Prevalence (bullying awareness)",
+        "Trust & Reporting (confidence in reporting systems)",
+        "Culture & Wellbeing (feeling safe, kindness, inclusion)",
+        "Safeguarding Knowledge (policy awareness, training adequacy)",
+        "System Readiness (DSL appointment, policy currency, reporting systems)"
+      ],
+      "features": [
+        "Emoji-face Likert scale for pupils (with intelligent emoji reversal for negative questions)",
+        "Standard Likert scale for staff/parents",
+        "Role-specific question bank (pupils get simpler wording)",
+        "Survey lifecycle: create → active → closed",
+        "Results dashboard with radar charts, bar charts, participation stats",
+        "AI-generated action plan from results",
+        "Action plan with KPIs, baselines, targets, timeframes",
+        "Publishable action plans",
+        "Animated completion screen with role-specific messaging",
+        "Multiple survey support"
+      ]
+    },
+    "behaviour": {
+      "description": "Behaviour tracking system with points and levels",
+      "features": [
+        "Behaviour point categories: Kindness, Respect, Teamwork, Effort, Leadership",
+        "Levels: Bronze → Silver → Gold → Platinum → Diamond",
+        "Staff can award points to pupils",
+        "Pupil view of own behaviour record",
+        "Parent view of child's behaviour",
+        "Class behaviour summary for teachers"
+      ]
+    },
+    "messaging": {
+      "description": "Secure in-app messaging between users",
+      "features": [
+        "Direct messages between staff, parents, pupils",
+        "Conversation threading",
+        "Read receipts",
+        "Parent-to-PTA messaging channel",
+        "Safe contacts list (designated trusted adults)",
+        "Child alert notifications for parents"
+      ]
+    },
+    "notifications": {
+      "description": "System-wide notification centre",
+      "features": [
+        "Push notifications for incidents, messages, protocol updates",
+        "Acknowledgement tracking",
+        "Unread badge counts in navigation",
+        "Role-filtered notifications"
+      ]
+    },
+    "ptaPortal": {
+      "description": "Dedicated portal for PTA members with governance tools",
+      "tabs": ["Dashboard", "Coordinator Channel", "Policy", "Annual Report", "Co-Design", "Resources"],
+      "features": [
+        "KPI dashboard with charts (incident trends, safeguarding metrics)",
+        "Direct messaging channel to Safeguarding Coordinator",
+        "Concern raising system",
+        "Safeguarding policy review and acknowledgement",
+        "Policy flagging (raise concerns about policy gaps)",
+        "Auto-generated anonymised annual safeguarding report",
+        "Report approval workflow",
+        "Co-design workspace (collaborative policy improvement)",
+        "Mood/wellbeing trend tracking",
+        "Curated safeguarding resource library (documents, videos, links)",
+        "Parent-to-PTA contact and messaging"
+      ]
+    },
+    "dashboards": {
+      "description": "Role-specific dashboards with relevant data",
+      "variants": {
+        "pupil": "Quick actions (report, diary), recent behaviour points, wellbeing check",
+        "parent": "Child overview cards, recent incidents, behaviour summary, PTA contact",
+        "teacher": "Class overview, recent incidents, behaviour leaderboard, analytics",
+        "coordinator": "School-wide stats, incident pipeline, protocol status, pattern alerts, analytics charts",
+        "pta": "Redirects to PTA Portal dashboard"
+      }
+    },
+    "alerts": {
+      "description": "Pattern detection and AI-generated alerts for safeguarding leads",
+      "features": [
+        "AI diary content scanning (flags concerns without revealing content)",
+        "Pattern alert types: frequency, pattern, ai_flag, manual",
+        "Alert severity levels",
+        "Alert acknowledgement and resolution workflow",
+        "Linked to specific pupils with privacy protection"
+      ]
+    },
+    "sencoCaseload": {
+      "description": "SENCO-specific caseload management for pupils with additional needs",
+      "features": [
+        "Pupil caseload assignment",
+        "Progress tracking entries per pupil",
+        "Available pupils list for new assignments",
+        "Caseload removal"
+      ]
+    },
+    "myClass": {
+      "description": "Teacher's class management view",
+      "features": [
+        "Pupil roster with avatars",
+        "Pupil search",
+        "PIN reset capability",
+        "Bulk PIN reset",
+        "Quick access to pupil behaviour and incident history"
+      ]
+    },
+    "education": {
+      "description": "Safeguarding education content hub",
+      "features": ["Educational resources about safeguarding", "Age-appropriate content", "Available to all roles"]
+    },
+    "training": {
+      "description": "Professional development and training module",
+      "features": ["Training materials for staff", "Available to all roles including parents and PTA"]
+    },
+    "schoolUpdates": {
+      "description": "School-wide news and updates feed",
+      "features": [
+        "Teacher/staff can create posts",
+        "Post deletion by author",
+        "Chronological feed visible to all roles"
+      ]
+    },
+    "newsletter": {
+      "description": "Public-facing newsletter signup for prospective schools",
+      "features": ["Email subscription", "Interest registration for schools/authorities"]
+    },
+    "settings": {
+      "description": "User preferences and profile management",
+      "features": ["Avatar selection and customisation", "Profile updates"]
+    },
+    "auditLog": {
+      "description": "Comprehensive audit trail for compliance",
+      "features": [
+        "All significant actions logged with actor, target, event type",
+        "IP tracking",
+        "Tamper-proof chronological log"
+      ]
+    },
+    "dataRetention": {
+      "description": "Data retention policy management",
+      "features": ["Configurable retention policies", "GDPR/LOPD compliance"]
+    }
+  },
+  "databaseTables": [
+    "users", "schools", "incidents", "protocols", "interviews", "messages",
+    "notifications", "behaviour_points", "pupil_diary", "diagnostic_surveys",
+    "diagnostic_responses", "diagnostic_actions", "pattern_alerts", "case_tasks",
+    "delegated_roles", "annex_templates", "referral_bodies", "audit_log",
+    "senco_caseload", "senco_tracking", "teacher_posts", "newsletter_subscribers",
+    "pta_messages", "pta_concerns", "pta_policy_acknowledgements",
+    "pta_codesign_responses", "pta_annual_reports"
+  ],
+  "aiFeatures": [
+    {
+      "name": "Diary Safeguarding Scanner",
+      "model": "gpt-5-nano",
+      "trigger": "After each diary entry POST",
+      "behaviour": "Scans for serious safeguarding concerns (abuse, self-harm, neglect, exploitation). If flagged, creates a pattern_alert for the welfare lead with a FIXED safe message — diary text is NEVER stored in alerts or logs."
+    },
+    {
+      "name": "Diagnostic Action Plan Generator",
+      "model": "AI-powered",
+      "trigger": "On demand from survey results",
+      "behaviour": "Analyses survey responses across all roles and generates structured action plans with KPIs, baselines, targets, and timeframes aligned to LOPIVI/Convivèxit frameworks."
+    }
+  ]
+}

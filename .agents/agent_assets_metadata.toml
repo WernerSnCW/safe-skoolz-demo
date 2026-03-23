@@ -18,3 +18,9 @@ id = "p29P0QmjYJPtJT0q3GwIb"
 uri = "file://safeschool_review_report.md"
 type = "text"
 title = "SafeSchool v0.3 — Full Application Review Report"
+
+[[outputs]]
+id = "2BMUqTQjvQLHKrlsKX7yX"
+uri = "file://safeskoolz-platform-functions.json"
+type = "unspecified"
+title = "SafeSkoolZ Platform - Complete Functions JSON"

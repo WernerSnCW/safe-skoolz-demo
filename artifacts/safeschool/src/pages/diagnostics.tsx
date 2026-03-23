@@ -21,6 +21,14 @@ const FACE_EMOJIS = [
   { value: 5, emoji: "\uD83D\uDE04", label: "Definitely!" },
 ];
 
+const FACE_EMOJIS_REVERSED = [
+  { value: 1, emoji: "\uD83D\uDE04", label: "Not at all" },
+  { value: 2, emoji: "\uD83D\uDE42", label: "A little" },
+  { value: 3, emoji: "\uD83D\uDE10", label: "Sort of" },
+  { value: 4, emoji: "\uD83D\uDE15", label: "Yes" },
+  { value: 5, emoji: "\uD83D\uDE1E", label: "Definitely!" },
+];
+
 const LIKERT_LABELS = ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -507,7 +515,7 @@ function SurveyForm({ surveyId, questions, user }: { surveyId: string; questions
             </h3>
 
             <div className="flex justify-center gap-3 md:gap-5 flex-wrap">
-              {FACE_EMOJIS.map(face => (
+              {(currentQ.reverseEmoji ? FACE_EMOJIS_REVERSED : FACE_EMOJIS).map(face => (
                 <button
                   key={face.value}
                   type="button"

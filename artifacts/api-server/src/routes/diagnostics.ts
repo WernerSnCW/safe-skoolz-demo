@@ -12,6 +12,7 @@ type QuestionDef = {
   roles: string[];
   text: Record<string, string>;
   scale: { low: string; high: string };
+  reverseEmoji?: boolean;
 };
 
 const QUESTION_BANK: QuestionDef[] = [
@@ -25,6 +26,7 @@ const QUESTION_BANK: QuestionDef[] = [
       parent: "How much of a problem do you believe bullying is at your child's school?",
     },
     scale: { low: "Not at all", high: "A lot" },
+    reverseEmoji: true,
   },
   {
     key: "aware_types",
@@ -284,6 +286,7 @@ router.get("/diagnostics/active", authMiddleware, async (req: Request, res: Resp
       category: q.category,
       text: q.displayText,
       scale: q.scale,
+      reverseEmoji: q.reverseEmoji || false,
     })),
     alreadyCompleted,
     previousAnswers: alreadyCompleted ? existingResponses : undefined,

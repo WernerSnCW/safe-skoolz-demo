@@ -18,7 +18,7 @@ const MOBILE_PRIORITY_HREFS: Record<string, string[]> = {
   senco: ["/", "/caseload", "/incidents", "/messages"],
   coordinator: ["/", "/incidents", "/protocols", "/alerts"],
   head_teacher: ["/", "/incidents", "/protocols", "/alerts"],
-  pta: ["/", "/pta", "/education", "/notifications"],
+  pta: ["/pta", "/education", "/notifications", "/learnings"],
 };
 
 function getMobileNavItems(navItems: any[], role: string) {
@@ -144,8 +144,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
     if (user.role === "pta") {
       return [
-        ...base,
-        { name: "PTA Portal", href: "/pta", icon: Users },
+        { name: "PTA Dashboard", href: "/pta", icon: Home },
         { name: "School Updates", href: "/learnings", icon: Megaphone },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },

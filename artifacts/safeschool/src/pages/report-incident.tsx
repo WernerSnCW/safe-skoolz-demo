@@ -481,6 +481,7 @@ export default function ReportIncident() {
   const createMutation = useCreateIncident();
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [submittedResult, setSubmittedResult] = useState<any>(null);
 
   const [selectedVictims, setSelectedVictims] = useState<PupilResult[]>([]);
   const [selectedPerps, setSelectedPerps] = useState<PupilResult[]>([]);
@@ -518,7 +519,7 @@ export default function ReportIncident() {
     }
 
     try {
-      await createMutation.mutateAsync({
+      const result = await createMutation.mutateAsync({
         data: {
           category: data.categories.join(","),
           incidentDate: new Date(data.incidentDate).toISOString(),
@@ -539,6 +540,7 @@ export default function ReportIncident() {
           unknownPersonDescriptions: allUnknownDescs.length > 0 ? allUnknownDescs : undefined,
         }
       });
+      setSubmittedResult(result);
       setIsSuccess(true);
       setSubmitError("");
     } catch (error) {
@@ -548,20 +550,153 @@ export default function ReportIncident() {
   };
 
   if (isSuccess) {
+    const guidance = submittedResult?.protocolGuidance;
+    const refNum = submittedResult?.referenceNumber || "";
+
+    if (isPupil) {
+      return (
+        <div className="max-w-2xl mx-auto mt-12">
+          <Card className="text-center p-12 bg-primary/5 border-primary/20">
+            <div className="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/30">
+              <CheckCircle2 size={48} />
+            </div>
+            <h2 className="text-3xl font-display font-bold mb-4">Report Submitted</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Thank you for telling us. A trusted adult in school will read this and decide how to help. If you feel very scared or unsafe right now, tell an adult you trust straight away. You are safe.
+            </p>
+            <Button size="lg" onClick={() => setLocation("/")}>Return to Dashboard</Button>
+          </Card>
+        </div>
+      );
+    }
+
     return (
-      <div className="max-w-2xl mx-auto mt-12">
-        <Card className="text-center p-12 bg-primary/5 border-primary/20">
-          <div className="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/30">
-            <CheckCircle2 size={48} />
+      <div className="max-w-3xl mx-auto mt-8 space-y-6">
+        <Card className="text-center p-8 bg-primary/5 border-primary/20">
+          <div className="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl shadow-primary/30">
+            <CheckCircle2 size={40} />
           </div>
-          <h2 className="text-3xl font-display font-bold mb-4">{isPupil ? "Report Submitted" : "Incident Logged"}</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            {isPupil
-              ? "Thank you for telling us. A trusted adult in school will read this and decide how to help. If you feel very scared or unsafe right now, tell an adult you trust straight away. You are safe."
-              : "The incident has been recorded and assigned a reference number. The safeguarding team will be notified if escalation is required."}
+          <h2 className="text-2xl font-display font-bold mb-2">Incident Logged</h2>
+          {refNum && <p className="text-sm font-mono text-muted-foreground mb-2">Reference: {refNum}</p>}
+          <p className="text-muted-foreground">
+            {guidance
+              ? "This incident has been classified as serious. Follow the protocol guidance below."
+              : "The incident has been recorded. The safeguarding team will be notified if escalation is required."}
           </p>
-          <Button size="lg" onClick={() => setLocation("/")}>Return to Dashboard</Button>
         </Card>
+
+        {guidance && (
+          <>
+            <Card className={`border-2 ${guidance.severity === "critical" ? "border-red-300 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20" : "border-amber-300 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20"}`}>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className={`p-2 rounded-xl ${guidance.severity === "critical" ? "bg-red-100 dark:bg-red-900/40 text-red-600" : "bg-amber-100 dark:bg-amber-900/40 text-amber-600"}`}>
+                    <AlertTriangle size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${guidance.severity === "critical" ? "bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200" : "bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200"}`}>
+                        Tier {guidance.tier} &mdash; {guidance.severity === "critical" ? "CRITICAL" : "SERIOUS"}
+                      </span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {guidance.protocol} Protocol
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-lg mt-1">{guidance.headline}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{guidance.protocolFullName}</p>
+                  </div>
+                </div>
+
+                <div className="mb-4 p-3 rounded-lg bg-card border border-border">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Info size={14} className="text-muted-foreground" />
+                    <span className="text-xs font-bold text-muted-foreground">TIMEFRAME</span>
+                  </div>
+                  <p className="text-sm font-medium">{guidance.timeframe}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-primary/30">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <ShieldCheck size={20} className="text-primary" />
+                  What to do now
+                </h3>
+                <div className="space-y-3">
+                  {guidance.immediateSteps.map((s: any) => (
+                    <div key={s.step} className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+                        {s.step}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-sm">{s.action}</p>
+                        <p className="text-sm text-muted-foreground">{s.detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-red-200 dark:border-red-900">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <AlertTriangle size={20} />
+                  Do NOT
+                </h3>
+                <ul className="space-y-2">
+                  {guidance.doNots.map((d: string, i: number) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <span className="text-red-500 mt-0.5 shrink-0">&times;</span>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="p-5">
+                  <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+                    <Info size={16} className="text-primary" />
+                    Who has been notified
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {guidance.whoToNotify.map((w: string, i: number) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
+                        {w}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-5">
+                  <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+                    <Info size={16} className="text-primary" />
+                    Legal basis
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-3">{guidance.legalBasis}</p>
+                  {guidance.externalReferral?.required && (
+                    <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
+                      <p className="text-xs font-bold text-red-700 dark:text-red-400">
+                        Mandatory external referral: {guidance.externalReferral.body}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+
+        <div className="flex justify-center pt-2">
+          <Button size="lg" onClick={() => setLocation("/")}>Return to Dashboard</Button>
+        </div>
       </div>
     );
   }

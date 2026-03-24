@@ -8,7 +8,7 @@ import {
   AssessIncidentBody,
 } from "@workspace/api-zod";
 import { authMiddleware, requireRole, type JwtPayload } from "../lib/auth";
-import { determineEscalationTier, isSafeguardingTrigger } from "../lib/escalation";
+import { determineEscalationTier, isSafeguardingTrigger, buildProtocolGuidance } from "../lib/escalation";
 import { generateIncidentRef } from "../lib/referenceNumber";
 import { writeAudit } from "../lib/auditHelper";
 import { runPatternDetection } from "../lib/patternDetection";
@@ -243,7 +243,17 @@ router.post("/incidents", authMiddleware, async (req, res): Promise<void> => {
   runPatternDetection(incident).catch(console.error);
 
   const enriched = await enrichIncidents([incident], user.role, undefined, user.userId);
-  res.status(201).json(enriched[0]);
+  const result: any = { ...enriched[0] };
+
+  if (user.role !== "pupil") {
+    const cats = data.category.split(",").map((c: string) => c.trim().toLowerCase());
+    const guidance = buildProtocolGuidance(cats, escalationTier, safeguardingTrigger);
+    if (guidance) {
+      result.protocolGuidance = guidance;
+    }
+  }
+
+  res.status(201).json(result);
 });
 
 router.get("/incidents/:id", authMiddleware, async (req, res): Promise<void> => {

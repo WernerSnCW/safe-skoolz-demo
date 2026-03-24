@@ -6,7 +6,7 @@ import { Button, Input, Label, Card, CardContent } from "@/components/ui-polishe
 import { ShieldCheck, User, Users, GraduationCap, AlertTriangle, Play, UserCheck, Building2, ChevronRight, Lock, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const IS_DEMO = import.meta.env.DEV || import.meta.env.VITE_DEMO_MODE === "true";
+const IS_DEMO = true;
 
 const STAFF_ACCOUNTS = IS_DEMO ? [
   { label: "Coordinator A", subtitle: "Coordinator", email: "coordinator@safeschool.dev", password: "password123" },
@@ -66,6 +66,9 @@ export default function Login() {
   useEffect(() => {
     if (schools && schools.length > 0 && !selectedSchoolId) {
       setSelectedSchoolId(schools[0].id);
+      if (schools.length === 1 && pupilStep === "school") {
+        setPupilStep("accessCode");
+      }
     }
   }, [schools, selectedSchoolId]);
 
@@ -226,7 +229,11 @@ export default function Login() {
   const isPending = staffLogin.isPending || parentLogin.isPending || pupilLoading;
 
   const resetPupilFlow = () => {
-    setPupilStep("school");
+    if (schools && schools.length === 1) {
+      setPupilStep("accessCode");
+    } else {
+      setPupilStep("school");
+    }
     setAccessCode("");
     setLoginSessionToken("");
     setProfiles([]);

@@ -531,12 +531,32 @@ export default function Login() {
           </CardContent>
         </Card>
 
+        <Link href="/how-it-works">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mt-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 p-5 text-white shadow-lg shadow-indigo-200/50 cursor-pointer hover:shadow-xl hover:scale-[1.01] transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Play size={24} className="text-white fill-white/30" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-base">See how it works</p>
+                <p className="text-sm text-indigo-200 mt-0.5">Follow Sofia's story &mdash; see how pupils, parents, teachers, and coordinators work together</p>
+              </div>
+              <ChevronRight size={20} className="text-indigo-200 flex-shrink-0" />
+            </div>
+          </motion.div>
+        </Link>
+
         <Link href="/newsletter">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-5 text-white shadow-lg shadow-teal-200/50 cursor-pointer hover:shadow-xl hover:scale-[1.01] transition-all"
+            transition={{ delay: 0.35 }}
+            className="mt-3 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 p-5 text-white shadow-lg shadow-teal-200/50 cursor-pointer hover:shadow-xl hover:scale-[1.01] transition-all"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">

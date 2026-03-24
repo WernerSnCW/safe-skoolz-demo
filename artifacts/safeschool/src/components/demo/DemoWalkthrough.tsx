@@ -496,12 +496,14 @@ function getStepsForRole(role: string): DemoStep[] {
 
 export function DemoProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [startPage, setStartPage] = useState("/");
   const steps = user ? getStepsForRole(user.role) : [];
 
   const startDemo = useCallback(() => {
+    setStartPage("/");
     setCurrentStep(0);
     setIsActive(true);
     if (steps.length > 0) {
@@ -513,7 +515,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     setIsActive(false);
     setCurrentStep(0);
     sessionStorage.removeItem("safeschool_start_demo");
-  }, []);
+    setTimeout(() => setLocation("/"), 50);
+  }, [setLocation]);
 
   useEffect(() => {
     if (user && steps.length > 0 && sessionStorage.getItem("safeschool_start_demo") === "true") {

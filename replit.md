@@ -39,7 +39,7 @@ The project is a pnpm workspace monorepo, separating deployable applications (`a
 - **PTA Portal:** Dashboard with anonymized KPIs, messaging, policy acknowledgment, and annual reports. Includes a "School-wide Mood Trend Chart" derived from pupil diary data.
 - **Newsletter / Register Interest:** Public page for organizations to sign up for updates.
 - **Analytics:** Anonymized school-wide analytics and detailed staff dashboards.
-- **Security Enhancements:** Demo login gating, JWT secret validation, secure endpoint access (IDOR checks), restricted CORS, cross-tenant data enforcement, mandatory referral engine for critical incidents, immutable audit logs.
+- **Security Enhancements:** Demo login gating, JWT secret validation, secure endpoint access (IDOR checks), restricted CORS, cross-tenant data enforcement, mandatory referral engine for critical incidents, immutable audit logs. **Prototype mode:** All passwords, PINs, and access codes accept any value (bcrypt checks bypassed).
 - **Data Integrity:** Correct parent notification logic and alert scope filtering.
 - **Rate Limiting:** Implemented on authentication and newsletter endpoints.
 - **Pattern Detection:** Seven rules (e.g., `same_victim_3_incidents`, `mood_decline`) trigger alerts with scheduled cron scans and deduplication. The `mood_decline` rule scans pupil diaries for sustained low mood.

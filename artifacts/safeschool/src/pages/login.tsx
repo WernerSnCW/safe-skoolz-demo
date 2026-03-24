@@ -9,24 +9,24 @@ import { motion, AnimatePresence } from "framer-motion";
 const IS_DEMO = true;
 
 const STAFF_ACCOUNTS = IS_DEMO ? [
-  { label: "Coordinator A", subtitle: "Coordinator", email: "coordinator@safeschool.dev", password: "password123" },
-  { label: "Head Teacher A", subtitle: "Head Teacher", email: "head@safeschool.dev", password: "password123" },
-  { label: "Teacher A", subtitle: "Head of Year · Y6 · 6A", email: "teacher@safeschool.dev", password: "password123" },
-  { label: "Teacher B", subtitle: "Teacher · 5B", email: "teacher2@safeschool.dev", password: "password123" },
-  { label: "Teacher C", subtitle: "Teacher · 4A", email: "teacher3@safeschool.dev", password: "password123" },
-  { label: "Teacher D", subtitle: "Teacher · 3A", email: "teacher4@safeschool.dev", password: "password123" },
-  { label: "SENCO A", subtitle: "SENCO", email: "senco@safeschool.dev", password: "password123" },
-  { label: "Support Staff A", subtitle: "Support Staff", email: "support@safeschool.dev", password: "password123" },
+  { label: "Sarah Mitchell", subtitle: "Safeguarding Coordinator", email: "coordinator@safeschool.dev", password: "password123" },
+  { label: "James Crawford", subtitle: "Head Teacher", email: "head@safeschool.dev", password: "password123" },
+  { label: "Emma Davies", subtitle: "Head of Year · Y6 · 6A", email: "teacher@safeschool.dev", password: "password123" },
+  { label: "David Wilson", subtitle: "Teacher · 5B", email: "teacher2@safeschool.dev", password: "password123" },
+  { label: "Laura Bennett", subtitle: "Teacher · 4A", email: "teacher3@safeschool.dev", password: "password123" },
+  { label: "Tom Harris", subtitle: "Teacher · 3A", email: "teacher4@safeschool.dev", password: "password123" },
+  { label: "Helen Clarke", subtitle: "SENCO", email: "senco@safeschool.dev", password: "password123" },
+  { label: "Chris Taylor", subtitle: "Support Staff", email: "support@safeschool.dev", password: "password123" },
 ] : [];
 
 const PARENT_ACCOUNTS = IS_DEMO ? [
-  { label: "Albert", subtitle: "Bob's dad", email: "parent.a@safeschool.dev", password: "parent123" },
-  { label: "Jennifer", subtitle: "Caroline's mum", email: "parent.b@safeschool.dev", password: "parent123" },
+  { label: "Albert", subtitle: "Bob's parent", email: "parent.a@safeschool.dev", password: "parent123" },
+  { label: "Jennifer", subtitle: "Caroline's parent", email: "parent.b@safeschool.dev", password: "parent123" },
 ] : [];
 
 const PTA_ACCOUNTS = IS_DEMO ? [
-  { label: "PTA Chair A", subtitle: "PTA Chair", email: "pta.chair@safeschool.dev", password: "pta123" },
-  { label: "PTA Member 1", subtitle: "PTA Member", email: "pta.member1@safeschool.dev", password: "pta123" },
+  { label: "Rachel Foster", subtitle: "PTA Chair", email: "pta.chair@safeschool.dev", password: "pta123" },
+  { label: "Mark Stevens", subtitle: "PTA Member", email: "pta.member1@safeschool.dev", password: "pta123" },
 ] : [];
 
 type PupilProfile = {

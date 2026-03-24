@@ -7,7 +7,7 @@ import {
   MessageSquare, Shield, ChevronDown, ChevronUp, Sparkles,
   UserCircle, GraduationCap, ClipboardCheck, BookHeart,
   FileText, Activity, Gauge, Send, Search, Zap, CheckCircle2,
-  ArrowDown
+  ArrowDown, MousePointerClick, Hand, ChevronRight
 } from "lucide-react";
 
 interface StoryStep {
@@ -431,13 +431,34 @@ function MockupElement({ el }: { el: { type: string; content: string; color?: st
     );
   }
   if (el.type === "chart") {
+    const parts = el.content.split("\u2022").map(s => s.trim());
     return (
       <div className="px-3 py-2.5 rounded-lg bg-muted/50 border border-border text-xs">
-        <div className="flex items-center gap-1.5 mb-1">
+        <div className="flex items-center gap-1.5 mb-2">
           <BarChart3 size={12} className="text-muted-foreground" />
           <span className="font-bold text-muted-foreground uppercase tracking-wide" style={{ fontSize: "10px" }}>Data</span>
         </div>
-        <p className="font-mono text-foreground/70">{el.content}</p>
+        {parts.length > 1 ? (
+          <div className="space-y-1.5">
+            {parts.map((p, idx) => {
+              const numMatch = p.match(/(\d+\.?\d*)/);
+              const val = numMatch ? parseFloat(numMatch[1]) : 0;
+              const maxVal = Math.max(val, 5);
+              const pct = Math.min((val / maxVal) * 100, 100);
+              const barColors = ["bg-primary/60", "bg-amber-400/60", "bg-indigo-400/60", "bg-teal-400/60"];
+              return (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="font-mono text-foreground/70 text-[10px] min-w-0 flex-1 truncate">{p}</span>
+                  <div className="w-16 h-1.5 rounded-full bg-border/50 shrink-0">
+                    <div className={`h-full rounded-full ${barColors[idx % barColors.length]}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="font-mono text-foreground/70">{el.content}</p>
+        )}
       </div>
     );
   }
@@ -464,7 +485,8 @@ function MockupElement({ el }: { el: { type: string; content: string; color?: st
     );
   }
   return (
-    <div className="px-3 py-2 rounded-lg bg-card border border-border text-xs text-muted-foreground">
+    <div className="px-3 py-2.5 rounded-lg bg-white dark:bg-card border border-border/80 text-xs text-muted-foreground flex items-center gap-2">
+      <div className="w-1 h-4 rounded-full bg-primary/20 shrink-0" />
       {el.content}
     </div>
   );
@@ -768,11 +790,24 @@ function RoleFeaturesSection() {
 
   return (
     <div className="mt-16">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-display font-bold mb-2">What each role can do</h2>
-        <p className="text-muted-foreground max-w-xl mx-auto">
-          Sofia's story shows pattern detection. But safeskoolz is used every day by pupils, parents, teachers, and coordinators for much more.
-        </p>
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 rounded-3xl" />
+        <div className="relative text-center py-8 px-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-3">
+            <Sparkles size={12} />
+            INTERACTIVE DEMO
+          </div>
+          <h2 className="text-3xl font-display font-bold mb-2">What each role can do</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-4">
+            Sofia's story shows pattern detection. But safeskoolz is used every day by pupils, parents, teachers, and coordinators for much more.
+          </p>
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            <motion.div animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
+              <MousePointerClick size={14} className="text-primary" />
+            </motion.div>
+            Choose a role, then explore their features
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-center gap-2 sm:gap-3 mb-6 flex-wrap">
@@ -782,14 +817,17 @@ function RoleFeaturesSection() {
             <button
               key={r.id}
               onClick={() => switchRole(i)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-2 ${
+              className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border-2 ${
                 i === activeRole
-                  ? `${r.bgColor} ${r.borderColor} ${r.color}`
-                  : "bg-card border-border text-muted-foreground hover:border-primary/30"
+                  ? `${r.bgColor} ${r.borderColor} ${r.color} shadow-md`
+                  : "bg-card border-border text-muted-foreground hover:border-primary/30 hover:shadow-sm"
               }`}
             >
               <RI size={18} />
               {r.role}
+              {i === activeRole && (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-current" />
+              )}
             </button>
           );
         })}
@@ -816,24 +854,33 @@ function RoleFeaturesSection() {
               </div>
             </div>
 
-            <div className="px-4 sm:px-6 pt-4 flex gap-2 overflow-x-auto pb-1">
-              {role.features.map((f, i) => {
-                const FI = f.icon;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => setActiveFeature(i)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border whitespace-nowrap ${
-                      i === activeFeature
-                        ? `${role.bgColor} ${role.borderColor} ${role.color}`
-                        : "bg-card border-border text-muted-foreground hover:border-primary/30"
-                    }`}
-                  >
-                    <FI size={13} />
-                    {f.page}
-                  </button>
-                );
-              })}
+            <div className="px-4 sm:px-6 pt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Hand size={13} className="text-muted-foreground" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  {role.features.length} features &mdash; click to explore
+                </span>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {role.features.map((f, i) => {
+                  const FI = f.icon;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setActiveFeature(i)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border whitespace-nowrap ${
+                        i === activeFeature
+                          ? `${role.bgColor} ${role.borderColor} ${role.color} shadow-sm`
+                          : "bg-card border-border text-muted-foreground hover:border-primary/30 hover:shadow-sm"
+                      }`}
+                    >
+                      <FI size={13} />
+                      {f.page}
+                      {i === activeFeature && <ChevronDown size={11} className="opacity-50" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -911,9 +958,32 @@ export default function HowItWorksPage() {
             </div>
           </div>
           <h1 className="text-4xl sm:text-5xl font-display font-bold mb-3">How safeskoolz works</h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
             Follow Sofia's story through the actual platform &mdash; see every screen, every alert, every action that protects a child.
           </p>
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium"
+          >
+            <motion.div animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}>
+              <MousePointerClick size={16} />
+            </motion.div>
+            Click the timeline below to explore each week
+          </motion.div>
+        </div>
+
+        <div className="relative mb-4">
+          <div className="h-1.5 rounded-full bg-border/50 mb-1">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70"
+              initial={{ width: 0 }}
+              animate={{ width: `${((activeStep + 1) / STEPS.length) * 100}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground text-right">{activeStep + 1} of {STEPS.length} stages</p>
         </div>
 
         <div className="relative mb-8">
@@ -929,14 +999,23 @@ export default function HowItWorksPage() {
                     i === activeStep ? "scale-110" : i < activeStep ? "opacity-70" : "opacity-40"
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                    i === activeStep
-                      ? `${s.bgColor} ${s.borderColor} ${s.color}`
-                      : i < activeStep
-                      ? "bg-primary/10 border-primary/30 text-primary"
-                      : "bg-muted border-border text-muted-foreground"
-                  }`}>
-                    <StepIcon size={18} />
+                  <div className="relative">
+                    {i === activeStep && (
+                      <motion.div
+                        className={`absolute inset-0 rounded-full ${s.borderColor} border-2`}
+                        animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                      />
+                    )}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all relative z-10 ${
+                      i === activeStep
+                        ? `${s.bgColor} ${s.borderColor} ${s.color} shadow-md`
+                        : i < activeStep
+                        ? "bg-primary/10 border-primary/30 text-primary"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/20"
+                    }`}>
+                      <StepIcon size={18} />
+                    </div>
                   </div>
                   <span className={`text-[10px] sm:text-xs font-bold whitespace-nowrap ${
                     i === activeStep ? s.color : "text-muted-foreground"
@@ -976,26 +1055,35 @@ export default function HowItWorksPage() {
               </div>
 
               {step.screens.length > 1 && (
-                <div className="px-6 pt-4 flex gap-2 flex-wrap">
-                  {step.screens.map((scr, i) => {
-                    const RIcon = scr.roleIcon;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setActiveScreen(i)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all border ${
-                          i === activeScreen
-                            ? `${step.bgColor} ${step.borderColor} ${step.color}`
-                            : "bg-card border-border text-muted-foreground hover:border-primary/30"
-                        }`}
-                      >
-                        <RIcon size={14} />
-                        <span>{scr.role}</span>
-                        <span className="opacity-50">&middot;</span>
-                        <span className="opacity-70">{scr.page}</span>
-                      </button>
-                    );
-                  })}
+                <div className="px-6 pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Hand size={13} className="text-muted-foreground" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      {step.screens.length} viewpoints &mdash; click to switch
+                    </span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {step.screens.map((scr, i) => {
+                      const RIcon = scr.roleIcon;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setActiveScreen(i)}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all border ${
+                            i === activeScreen
+                              ? `${step.bgColor} ${step.borderColor} ${step.color} shadow-sm`
+                              : "bg-card border-border text-muted-foreground hover:border-primary/30 hover:shadow-sm"
+                          }`}
+                        >
+                          <RIcon size={14} />
+                          <span>{scr.role}</span>
+                          <span className="opacity-50">&middot;</span>
+                          <span className="opacity-70">{scr.page}</span>
+                          {i === activeScreen && <ChevronDown size={12} className="opacity-60" />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -1037,18 +1125,23 @@ export default function HowItWorksPage() {
           <button
             onClick={() => goTo(Math.max(0, activeStep - 1))}
             disabled={activeStep === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border text-sm font-medium hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-sm font-bold hover:bg-muted hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           >
             <ArrowLeft size={16} /> Previous
           </button>
-          <span className="text-xs text-muted-foreground">{activeStep + 1} of {STEPS.length}</span>
-          <button
-            onClick={() => goTo(Math.min(STEPS.length - 1, activeStep + 1))}
-            disabled={activeStep === STEPS.length - 1}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            Next <ArrowRight size={16} />
-          </button>
+          {activeStep < STEPS.length - 1 ? (
+            <button
+              onClick={() => goTo(activeStep + 1)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+            >
+              See what happens next <ArrowRight size={16} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-bold">
+              <CheckCircle2 size={16} />
+              Story complete
+            </div>
+          )}
         </div>
 
         <RoleFeaturesSection />

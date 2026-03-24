@@ -78,9 +78,9 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/diagnostics",
         navHighlight: "Diagnostic",
-        title: "Safeguarding Survey",
-        description: "When a survey is active, you'll answer questions about how safe you feel at school using emoji faces — from sad to happy. Questions cover: whether bullying happens, do you know how to report it, do you feel safe, and are people kind to each other. For questions about bad things (like 'does bullying happen?'), the happy face means 'not at all' — because no bullying is a good thing! Your answers help the school understand how everyone feels.",
-        benefit: "Your voice matters. The school uses your answers to make things better for everyone.",
+        title: "Safeguarding Survey & Results",
+        description: "When a survey is active, you'll answer questions about how safe you feel at school using emoji faces — from sad to happy. Questions cover: whether bullying happens, do you know how to report it, do you feel safe, and are people kind to each other. For questions about bad things (like 'does bullying happen?'), the happy face means 'not at all' — because no bullying is a good thing! Once the survey closes, you can come back here to see the results: how the whole school scored on safety, trust, and wellbeing — and how pupils, staff, and parents see things differently.",
+        benefit: "Your voice matters. You can see the results too — real data on how safe your school feels.",
       },
       {
         page: "/training",
@@ -159,9 +159,9 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/diagnostics",
         navHighlight: "Diagnostic",
-        title: "Safeguarding Survey",
-        description: "When a survey is active, you'll answer questions about your perception of the school's safeguarding culture — how much of a problem you think bullying is, whether you believe your child feels safe, how confident you are in the reporting system, and how well the school communicates. Your responses are anonymous and help the school measure and improve its safeguarding climate.",
-        benefit: "Your voice shapes how the school improves. Honest answers lead to real action plans.",
+        title: "Safeguarding Survey & Insights",
+        description: "When a survey is active, you'll answer questions about your perception of the school's safeguarding culture — how much of a problem you think bullying is, whether you believe your child feels safe, how confident you are in the reporting system, and how well the school communicates. Your responses are anonymous. Once the survey closes, you can see the results here: overall safeguarding scores, how pupils, staff, and parents scored each area, and where perception gaps exist between groups. Action plans show what the school commits to improving.",
+        benefit: "Your voice shapes real improvements. See the scores, the gaps, and the action plans that follow.",
       },
       {
         page: "/training",
@@ -254,9 +254,9 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/diagnostics",
         navHighlight: "Diagnostic",
-        title: "Safeguarding Climate Survey",
-        description: "Launch diagnostic surveys to measure how pupils, staff, and parents perceive the school's safeguarding culture. Each role gets tailored questions about awareness, trust, reporting, wellbeing, and policy knowledge. View results with radar charts and bar charts showing scores by category and role group. Generate AI-powered action plans with KPIs, baselines, targets, and timeframes.",
-        benefit: "Data-driven safeguarding improvement. Measure what matters and track progress over time.",
+        title: "Safeguarding Climate Survey & Insights",
+        description: "Complete safeguarding surveys about awareness, trust, reporting, and wellbeing. Once the survey closes, you can see the results: overall safeguarding climate scores, how pupils, staff, and parents scored each category, perception gap analysis (where groups see things differently), and what the school is committing to improve. Coordinators can launch surveys and generate AI-powered action plans with KPIs and targets.",
+        benefit: "See real data on how safe the school feels — and what's being done about the gaps.",
       },
       {
         page: "/training",
@@ -402,9 +402,9 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/diagnostics",
         navHighlight: "Diagnostic",
-        title: "Safeguarding Climate Survey",
-        description: "Create and launch diagnostic surveys to measure how pupils, staff, and parents perceive the school's safeguarding culture. Each role gets tailored questions. View results with radar charts and bar charts. Generate AI-powered action plans with KPIs, baselines, targets, and timeframes aligned to LOPIVI and Convivèxit requirements.",
-        benefit: "Evidence-based safeguarding improvement. Measure, plan, and track progress systematically.",
+        title: "Safeguarding Climate Survey & Insights",
+        description: "Create and launch diagnostic surveys to measure how pupils, staff, and parents perceive the school's safeguarding culture. Each role gets tailored questions. View results with radar charts and bar charts — overall scores, group-by-group breakdowns, and perception gap analysis highlighting where pupils, staff, and parents see things differently. Generate AI-powered action plans with KPIs, baselines, targets, and timeframes aligned to LOPIVI and Convivèxit requirements. All participants can see a summary of results once the survey closes.",
+        benefit: "Everyone sees the data. Evidence-based improvement with full transparency across the school community.",
       },
       {
         page: "/training",
@@ -449,9 +449,9 @@ function getStepsForRole(role: string): DemoStep[] {
       {
         page: "/diagnostics",
         navHighlight: "Diagnostic",
-        title: "Safeguarding Survey",
-        description: "When a survey is active, you'll answer questions about the school's safeguarding culture from the PTA perspective — policy effectiveness, communication quality, trust in reporting systems, and overall safeguarding readiness. Your responses help shape the school's improvement plan.",
-        benefit: "Your expertise as a parent and PTA member directly influences school safeguarding priorities.",
+        title: "Safeguarding Survey & School Insights",
+        description: "When a survey is active, you'll answer questions about the school's safeguarding culture from the PTA perspective — policy effectiveness, communication quality, trust in reporting systems, and overall safeguarding readiness. Once the survey closes, you can see the full results: overall safeguarding scores across five categories, how pupils, staff, and parents rated each area, and where the biggest perception gaps lie. Action plans with measurable targets show how leadership is responding.",
+        benefit: "Anonymised data you can reference at governor meetings. See the scores, the gaps, and what's being done.",
       },
       {
         page: "/training",
@@ -639,46 +639,49 @@ export function DemoOverlay() {
         </div>
 
         <div className="bg-card/95 backdrop-blur-lg border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm mt-0.5">
+          <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs sm:text-sm mt-0.5">
                 {currentStep + 1}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-bold text-foreground text-sm">{currentStepData.title}</h3>
-                  <span className="text-xs text-muted-foreground shrink-0">{currentStep + 1}/{totalSteps}</span>
+                  <h3 className="font-bold text-foreground text-xs sm:text-sm leading-tight">{currentStepData.title}</h3>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">{currentStep + 1}/{totalSteps}</span>
                 </div>
-                <div className="max-h-28 overflow-y-auto pr-1">
-                  <p className="text-xs text-muted-foreground leading-relaxed">{currentStepData.description}</p>
+                <div className="max-h-16 sm:max-h-28 overflow-y-auto pr-1">
+                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">{currentStepData.description}</p>
                 </div>
-                <p className="text-xs text-primary font-medium mt-1">{currentStepData.benefit}</p>
+                <p className="text-[11px] sm:text-xs text-primary font-medium mt-0.5 sm:mt-1 line-clamp-2">{currentStepData.benefit}</p>
               </div>
 
-              <div className="shrink-0 flex items-center gap-1.5 mt-0.5">
+              <div className="shrink-0 flex items-center gap-1 sm:gap-1.5 mt-0.5">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={prevStep}
                   disabled={isFirst}
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  aria-label="Previous step"
                 >
-                  <ChevronLeft size={16} />
+                  <ChevronLeft size={14} />
                 </Button>
                 <Button
                   size="sm"
                   onClick={nextStep}
-                  className="h-8 gap-1 px-3"
+                  className="h-7 sm:h-8 gap-1 px-2.5 sm:px-3 text-xs sm:text-sm"
+                  aria-label={isLast ? "Finish tour" : "Next step"}
                 >
                   {isLast ? "Done" : "Next"}
-                  {!isLast && <ChevronRight size={14} />}
+                  {!isLast && <ChevronRight size={12} />}
                 </Button>
                 <button
                   onClick={stopDemo}
-                  className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-md"
+                  className="h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded-md"
+                  aria-label="Close tour"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               </div>
             </div>

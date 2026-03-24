@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui-polished";
 import { motion } from "framer-motion";
+import { Play } from "lucide-react";
+import { useDemo } from "@/components/demo/DemoWalkthrough";
 import PupilDashboard from "./dashboard/PupilDashboard";
 import CoordinatorDashboardView from "./dashboard/CoordinatorDashboard";
 import TeacherDashboard from "./dashboard/TeacherDashboard";
@@ -18,12 +20,35 @@ function PtaDashboardRedirect() {
   );
 }
 
+function DemoTourBanner() {
+  const { startDemo, isActive } = useDemo();
+  if (isActive) return null;
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      onClick={startDemo}
+      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/30 transition-all group mb-6"
+    >
+      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+        <Play size={16} className="fill-primary/20 group-hover:fill-white/20" />
+      </div>
+      <div className="text-left flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground">Take a guided tour</p>
+        <p className="text-xs text-muted-foreground">See what every feature does — step by step</p>
+      </div>
+    </motion.button>
+  );
+}
+
 export default function Dashboard() {
   const { user } = useAuth();
   if (!user) return null;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      {user.role !== "pta" && <DemoTourBanner />}
       {user.role === "pupil" ? (
         <PupilDashboard user={user} />
       ) : user.role === "parent" ? (

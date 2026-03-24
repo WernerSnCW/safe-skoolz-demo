@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { 
   ShieldCheck, Home, AlertTriangle, FileText, Shield,
-  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle, ClipboardList, Gauge, GraduationCap, ClipboardCheck, BookHeart, Megaphone
+  Bell, Settings, LogOut, Menu, X, Users, Activity, BookOpen, MessageCircle, ClipboardList, Gauge, GraduationCap, ClipboardCheck, BookHeart, Megaphone, BookMarked
 } from "lucide-react";
 import { useListNotifications } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,6 +67,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "My Behaviour", href: "/behaviour", icon: Gauge },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Case Studies", href: "/case-studies", icon: BookMarked },
         { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "My Settings", href: "/settings", icon: Settings },
       ];
@@ -82,6 +83,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Case Studies", href: "/case-studies", icon: BookMarked },
         { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
@@ -100,6 +102,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Case Studies", href: "/case-studies", icon: BookMarked },
         { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
@@ -116,6 +119,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Messages", href: "/messages", icon: MessageCircle },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Case Studies", href: "/case-studies", icon: BookMarked },
         { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
@@ -136,6 +140,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "Alerts", href: "/alerts", icon: Activity },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Case Studies", href: "/case-studies", icon: BookMarked },
         { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
@@ -148,6 +153,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         { name: "School Updates", href: "/learnings", icon: Megaphone },
         { name: "Training", href: "/training", icon: GraduationCap },
         { name: "Learn", href: "/education", icon: BookOpen },
+        { name: "Case Studies", href: "/case-studies", icon: BookMarked },
         { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
         { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
         { name: "Settings", href: "/settings", icon: Settings },
@@ -168,6 +174,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       { name: "Diagnostic", href: "/diagnostics", icon: ClipboardCheck },
       { name: "Training", href: "/training", icon: GraduationCap },
       { name: "Learn", href: "/education", icon: BookOpen },
+      { name: "Case Studies", href: "/case-studies", icon: BookMarked },
       { name: "Notifications", href: "/notifications", icon: Bell, badge: unreadCount },
       { name: "Settings", href: "/settings", icon: Settings },
     ];

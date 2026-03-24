@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useStaffLogin, useParentLogin, useListSchools } from "@workspace/api-client-react";
 import { Button, Input, Label, Card, CardContent } from "@/components/ui-polished";
-import { ShieldCheck, User, Users, GraduationCap, AlertTriangle, Play, UserCheck, Building2, ChevronRight, Lock, ArrowLeft } from "lucide-react";
+import { ShieldCheck, User, Users, GraduationCap, AlertTriangle, Play, UserCheck, Building2, ChevronRight, Lock, ArrowLeft, Heart, Shield, BarChart3, Bell, Eye, ClipboardCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const IS_DEMO = true;
@@ -290,6 +290,94 @@ export default function Login() {
               </button>
             ))}
           </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              {activeTab === "pupil" && (
+                <div className="px-6 sm:px-8 pt-5 pb-3 border-b border-border/30 bg-teal-50/30 dark:bg-teal-950/10">
+                  <p className="text-sm font-bold text-teal-700 dark:text-teal-400 mb-2">What safeskoolz does for you</p>
+                  <div className="grid gap-1.5">
+                    <div className="flex items-start gap-2">
+                      <Heart size={13} className="text-teal-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For me</span> — A safe way to tell someone if something is wrong, even anonymously</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Users size={13} className="text-teal-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For my friends</span> — Report things happening to someone else without anyone knowing it was you</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Building2 size={13} className="text-teal-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For my school</span> — Helps adults see problems early so they can keep everyone safe</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === "staff" && (
+                <div className="px-6 sm:px-8 pt-5 pb-3 border-b border-border/30 bg-indigo-50/30 dark:bg-indigo-950/10">
+                  <p className="text-sm font-bold text-indigo-700 dark:text-indigo-400 mb-2">What safeskoolz does for you</p>
+                  <div className="grid gap-1.5">
+                    <div className="flex items-start gap-2">
+                      <ClipboardCheck size={13} className="text-indigo-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For me</span> — Log incidents in 60 seconds with guided protocol steps for serious cases</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Eye size={13} className="text-indigo-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For my pupils</span> — Spot patterns across classes that no single teacher could see alone</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Shield size={13} className="text-indigo-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For their parents</span> — Parents get notified privately when the school acts on something involving their child</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === "parent" && (
+                <div className="px-6 sm:px-8 pt-5 pb-3 border-b border-border/30 bg-amber-50/30 dark:bg-amber-950/10">
+                  <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-2">What safeskoolz does for you</p>
+                  <div className="grid gap-1.5">
+                    <div className="flex items-start gap-2">
+                      <Bell size={13} className="text-amber-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For me</span> — Get private notifications when the school identifies or acts on something involving your child</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Heart size={13} className="text-amber-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For my child</span> — Know your child has a safe, anonymous way to speak up if something is wrong</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <BarChart3 size={13} className="text-amber-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For my school</span> — See real data on how safe children feel, not just promises</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === "pta" && (
+                <div className="px-6 sm:px-8 pt-5 pb-3 border-b border-border/30 bg-purple-50/30 dark:bg-purple-950/10">
+                  <p className="text-sm font-bold text-purple-700 dark:text-purple-400 mb-2">What safeskoolz does for you</p>
+                  <div className="grid gap-1.5">
+                    <div className="flex items-start gap-2">
+                      <BarChart3 size={13} className="text-purple-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For me</span> — Anonymised safeguarding data you can share at governor meetings with confidence</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Users size={13} className="text-purple-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For parents</span> — Give families evidence that their concerns are heard and acted on</p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Shield size={13} className="text-purple-500 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground/80">For the school</span> — Hold leadership accountable with outcome data, not just policies</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
 
           <CardContent className="p-6 sm:p-8">
             <div role="alert" aria-live="assertive" aria-atomic="true">

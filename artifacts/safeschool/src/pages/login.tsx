@@ -427,14 +427,14 @@ export default function Login() {
                     </button>
                     <div className="text-center py-2">
                       <Lock size={32} className="mx-auto text-primary/60 mb-2" />
-                      <p className="text-sm text-muted-foreground">Enter the school access code your teacher gave you</p>
+                      <p className="text-sm text-muted-foreground">Enter the class access code your teacher gave you</p>
                     </div>
                     <div>
-                      <Label htmlFor="accessCode">School Access Code</Label>
+                      <Label htmlFor="accessCode">Class Access Code</Label>
                       <Input
                         id="accessCode"
                         type="text"
-                        placeholder="e.g. MORNA2025"
+                        placeholder="e.g. 6A-MORNA"
                         value={accessCode}
                         onChange={e => setAccessCode(e.target.value.toUpperCase())}
                         required

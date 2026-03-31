@@ -9,6 +9,7 @@ export const schoolLoginCodesTable = pgTable("school_login_codes", {
   codeType: varchar("code_type", { length: 30 }).default("pupil_login").notNull(),
   codeHash: varchar("code_hash", { length: 255 }).notNull(),
   yearGroup: varchar("year_group", { length: 10 }),
+  className: varchar("class_name", { length: 50 }),
   active: boolean("active").default(true).notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

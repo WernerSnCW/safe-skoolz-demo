@@ -1,6 +1,7 @@
 import { db } from "@workspace/db";
 import { schoolsTable, usersTable, schoolLoginCodesTable, delegatedRolesTable, pupilDiaryTable } from "@workspace/db";
 import { sql } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 const SCHOOL_ID = "0a6a9fba-5ecb-474f-8544-a7f2caafd924";
 
@@ -10,7 +11,7 @@ const PARENT_PIN_HASH = "$2b$12$q8Dk4X07xODPCFpqUqI6Je6qbzHFFi6JZt4jDrjyltQf.Skl
 const PTA_PW_HASH = "$2b$12$Z5PFcen9T8fY8BcHn.S8Zu014gw4hclPy6256N86JVnb3Jsq/Moyq";
 const PUPIL_PIN_HASH = "$2b$12$NG29nWH9VuEHR9q1/Yx4ru1djVHYKWVILTvNG.OXFHKnPQTWu7gX6";
 const BOB_PIN_HASH = "$2b$12$dUnw1VoDGDIyn8Y2MA8xwe5seNC0A.KT1sHmFEHzCP4xIXHzwamMu";
-const CODE_HASH = "$2b$12$cEZbSR0Pjg869.HMVJMzJOJS6IET4yOq5JL9fzlhoIMIJA4xE0gcG";
+
 
 const BOB_ID = "bea9c727-d295-4337-9fa4-3c0b8821c898";
 const CAROLINE_ID = "7fc4f9b9-cf90-4561-96fd-bcc939691e28";
@@ -41,11 +42,23 @@ export async function seedDemoData() {
     region: "Balearic Islands",
   });
 
-  await db.insert(schoolLoginCodesTable).values({
-    schoolId: SCHOOL_ID,
-    codeType: "pupil_login",
-    codeHash: CODE_HASH,
-  });
+  // Per-class access codes — each class gets its own code
+  const classCodes = [
+    { code: "3A-MORNA", className: "3A" },
+    { code: "4A-MORNA", className: "4A" },
+    { code: "5B-MORNA", className: "5B" },
+    { code: "6A-MORNA", className: "6A" },
+  ];
+  for (const { code, className } of classCodes) {
+    const codeHash = await bcrypt.hash(code, 12);
+    await db.insert(schoolLoginCodesTable).values({
+      schoolId: SCHOOL_ID,
+      codeType: "pupil_login",
+      codeHash,
+      className,
+    });
+  }
+  console.log("[seed] Created per-class access codes:", classCodes.map(c => c.code).join(", "));
 
   const staffUsers: any[] = [
     { id: SARAH_ID, role: "coordinator", firstName: "Sarah", lastName: "Mitchell", email: "coordinator@safeschool.dev", passwordHash: STAFF_PW_HASH },

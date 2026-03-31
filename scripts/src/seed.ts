@@ -11,15 +11,23 @@ async function seed() {
   if (existingSchools.length > 0) {
     const existingCodes = await db.select().from(schoolLoginCodesTable).where(eq(schoolLoginCodesTable.schoolId, existingSchools[0].id));
     if (existingCodes.length === 0) {
-      const accessCode = "MORNA2025";
-      const accessCodeHash = await bcrypt.hash(accessCode, BCRYPT_ROUNDS);
-      await db.insert(schoolLoginCodesTable).values({
-        schoolId: existingSchools[0].id,
-        codeType: "pupil_login",
-        codeHash: accessCodeHash,
-        active: true,
-      });
-      console.log(`  Inserted missing school access code: ${accessCode}`);
+      const classCodes = [
+        { code: "3A-MORNA", className: "3A" },
+        { code: "4A-MORNA", className: "4A" },
+        { code: "5B-MORNA", className: "5B" },
+        { code: "6A-MORNA", className: "6A" },
+      ];
+      for (const { code, className } of classCodes) {
+        const codeHash = await bcrypt.hash(code, BCRYPT_ROUNDS);
+        await db.insert(schoolLoginCodesTable).values({
+          schoolId: existingSchools[0].id,
+          codeType: "pupil_login",
+          codeHash: codeHash,
+          className,
+          active: true,
+        });
+      }
+      console.log(`  Inserted per-class access codes: ${classCodes.map(c => c.code).join(", ")}`);
     }
     console.log("Database already seeded. Skipping.");
     process.exit(0);
@@ -39,15 +47,23 @@ async function seed() {
 
   console.log(`Created school: ${school.name} (${school.id})`);
 
-  const accessCode = "MORNA2025";
-  const accessCodeHash = await bcrypt.hash(accessCode, BCRYPT_ROUNDS);
-  await db.insert(schoolLoginCodesTable).values({
-    schoolId: school.id,
-    codeType: "pupil_login",
-    codeHash: accessCodeHash,
-    active: true,
-  });
-  console.log(`  School access code: ${accessCode}`);
+  const classCodes = [
+    { code: "3A-MORNA", className: "3A" },
+    { code: "4A-MORNA", className: "4A" },
+    { code: "5B-MORNA", className: "5B" },
+    { code: "6A-MORNA", className: "6A" },
+  ];
+  for (const { code, className } of classCodes) {
+    const codeHash = await bcrypt.hash(code, BCRYPT_ROUNDS);
+    await db.insert(schoolLoginCodesTable).values({
+      schoolId: school.id,
+      codeType: "pupil_login",
+      codeHash: codeHash,
+      className,
+      active: true,
+    });
+  }
+  console.log(`  Per-class access codes: ${classCodes.map(c => c.code).join(", ")}`);
 
   function generateRandomPin(): string {
     return Math.floor(1000 + Math.random() * 9000).toString();

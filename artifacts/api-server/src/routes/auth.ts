@@ -41,31 +41,35 @@ router.post("/auth/pupil/start", async (req, res): Promise<void> => {
       )
     );
 
-  let codeValid = false;
+  let matchedCode: (typeof codes)[number] | null = null;
   for (const code of codes) {
     if (code.expiresAt && new Date(code.expiresAt) < new Date()) continue;
     const match = await bcrypt.compare(accessCode.toUpperCase().trim(), code.codeHash);
     if (match) {
-      codeValid = true;
+      matchedCode = code;
       break;
     }
   }
 
-  if (!codeValid) {
+  if (!matchedCode) {
     res.status(401).json({ error: "Invalid access code" });
     return;
+  }
+
+  // Build pupil query — filter by class if the code is class-specific
+  const pupilFilters = [
+    eq(usersTable.schoolId, schoolId),
+    eq(usersTable.role, "pupil"),
+    eq(usersTable.active, true),
+  ];
+  if (matchedCode.className) {
+    pupilFilters.push(eq(usersTable.className, matchedCode.className));
   }
 
   const pupils = await db
     .select()
     .from(usersTable)
-    .where(
-      and(
-        eq(usersTable.schoolId, schoolId),
-        eq(usersTable.role, "pupil"),
-        eq(usersTable.active, true)
-      )
-    );
+    .where(and(...pupilFilters));
 
   const loginSessionToken = crypto.randomBytes(32).toString("hex");
   const profileEntries: { loginKey: string; pupilId: string }[] = [];

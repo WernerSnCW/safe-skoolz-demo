@@ -15,11 +15,15 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (same-origin via proxy, server-to-server, health checks)
     if (!origin) return callback(null, true);
-    // If CORS_ORIGINS is configured, only allow listed origins
+    // Allow explicitly listed origins
     if (allowedOrigins.length > 0 && allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    // Block cross-origin requests when no origins are configured or origin not in list
+    // Allow Replit origins in development (*.replit.dev, *.replit.app, *.repl.co)
+    if (process.env.REPL_ID && /\.replit\.(dev|app)|\.repl\.co$/.test(origin)) {
+      return callback(null, true);
+    }
+    // Block all other cross-origin requests
     callback(new Error("Not allowed by CORS"));
   },
   credentials: true,

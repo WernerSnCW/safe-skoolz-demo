@@ -42,9 +42,13 @@ async function startup() {
     console.error("[db] Failed to apply audit log trigger:", err);
   });
 
-  await seedDemoData().catch((err) => {
-    console.error("[seed] Failed to seed demo data:", err);
-  });
+  if (process.env.DEMO_MODE === "true") {
+    await seedDemoData().catch((err) => {
+      console.error("[seed] Failed to seed demo data:", err);
+    });
+  } else {
+    console.log("[seed] Demo seeding skipped (DEMO_MODE is not enabled)");
+  }
 }
 
 startup();

@@ -39,6 +39,7 @@ The project is a pnpm workspace monorepo, separating deployable applications (`a
 - **PTA Portal:** Dashboard with anonymized KPIs, messaging, policy acknowledgment, and annual reports. Includes a "School-wide Mood Trend Chart" derived from pupil diary data.
 - **Newsletter / Register Interest:** Public page for organizations to sign up for updates.
 - **Analytics:** Anonymized school-wide analytics and detailed staff dashboards.
+- **Demo Mode:** Set `DEMO_MODE=true` env var to auto-seed the database with realistic demo data on startup: 12 incidents (verbal, physical, online, safeguarding), 2 protocols (Convivèxit bullying + LOPIVI child protection), 3 pattern alerts (repeated victim, repeated perpetrator, emotional distress), notifications, messages, PTA annual report, and pupil diary entries. Seeding is transactional and skipped if data already exists.
 - **Security Enhancements:** Demo login gating, JWT secret validation, secure endpoint access (IDOR checks), restricted CORS, cross-tenant data enforcement, mandatory referral engine for critical incidents, immutable audit logs. **Prototype mode:** All passwords, PINs, and access codes accept any value (bcrypt checks bypassed).
 - **Data Integrity:** Correct parent notification logic and alert scope filtering.
 - **Rate Limiting:** Implemented on authentication and newsletter endpoints.

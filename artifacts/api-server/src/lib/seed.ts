@@ -1,5 +1,9 @@
 import { db } from "@workspace/db";
-import { schoolsTable, usersTable, schoolLoginCodesTable, delegatedRolesTable, pupilDiaryTable } from "@workspace/db";
+import {
+  schoolsTable, usersTable, schoolLoginCodesTable, delegatedRolesTable,
+  pupilDiaryTable, incidentsTable, protocolsTable, patternAlertsTable,
+  notificationsTable, messagesTable, ptaAnnualReportsTable,
+} from "@workspace/db";
 import { sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
@@ -22,6 +26,43 @@ const SARAH_ID = "497d63a7-0c2e-4aac-ae6d-2b636fea225f";
 const JAMES_C_ID = "6cabe296-79d5-41e9-930d-fdb0892e2d6b";
 const EMMA_D_ID = "b94b675d-95de-4ead-b846-565eb1166681";
 const HELEN_ID = "0fb0bcc0-35cb-4958-b1ad-6a05d4c08039";
+const CHRIS_ID = "11e9bced-f116-4a03-a6ad-89fa28e028f5";
+const DAVID_W_ID = "2aa6ac8e-9c9e-45df-aa69-8746aa0aab9c";
+
+const PARENT_A_ID = "f504f6a3-bde4-4942-940c-ba6b0b7c534a";
+const PARENT_B_ID = "aa0a5ec3-cc17-4e6b-a8c0-4d6478f83a07";
+const PTA_CHAIR_ID = "6e138046-57ee-4452-b76a-c473dfcfdecf";
+
+const ADRIAN_ID = "db41e263-6ac6-4997-a8d2-b20e1214ae2a";
+const MIA_W_ID = "15e8d239-8e9d-469f-8446-58eec913914c";
+const MIA_T_ID = "5740c05c-4530-4a1f-b942-48436d28e62b";
+const LUNA_ID = "17e8253f-e234-4981-bd31-ce909b7638cd";
+const ALEXANDER_ID = "342fa065-89f3-4b20-8d21-f86ff5d21223";
+const ALICE_ID = "96a9bcc4-cd5d-49e0-9600-606b8976646b";
+const AMY_ID = "47fad258-2f72-42e7-8357-e81a1a845b56";
+const THOMAS_ID = "1170de0e-2d3b-4940-9702-ad15da5b523b";
+
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().split("T")[0];
+}
+
+function daysAgoDate(n: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
+let incCounter = 10000;
+function refNum() {
+  return `INC-${++incCounter}`;
+}
+
+let protCounter = 1000;
+function protRef() {
+  return `PROT-${++protCounter}`;
+}
 
 export async function seedDemoData() {
   const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(schoolsTable);
@@ -32,6 +73,14 @@ export async function seedDemoData() {
 
   console.log("[seed] Empty database detected — seeding demo data…");
 
+  await db.transaction(async (tx) => {
+  await seedInTransaction(tx);
+  });
+
+  console.log("[seed] Demo data seeded successfully");
+}
+
+async function seedInTransaction(db: Parameters<Parameters<typeof import("@workspace/db").db.transaction>[0]>[0]) {
   await db.insert(schoolsTable).values({
     id: SCHOOL_ID,
     name: "Morna",
@@ -42,7 +91,6 @@ export async function seedDemoData() {
     region: "Balearic Islands",
   });
 
-  // Per-class access codes — each class gets its own code
   const classCodes = [
     { code: "3A-MORNA", className: "3A" },
     { code: "4A-MORNA", className: "4A" },
@@ -65,19 +113,19 @@ export async function seedDemoData() {
     { id: JAMES_C_ID, role: "head_teacher", firstName: "James", lastName: "Crawford", email: "head@safeschool.dev", passwordHash: STAFF_PW_HASH },
     { id: EMMA_D_ID, role: "head_of_year", firstName: "Emma", lastName: "Davies", email: "teacher@safeschool.dev", passwordHash: STAFF_PW_HASH, yearGroup: "Y6", className: "6A" },
     { id: HELEN_ID, role: "senco", firstName: "Helen", lastName: "Clarke", email: "senco@safeschool.dev", passwordHash: STAFF_PW_HASH },
-    { id: "11e9bced-f116-4a03-a6ad-89fa28e028f5", role: "support_staff", firstName: "Chris", lastName: "Taylor", email: "support@safeschool.dev", passwordHash: STAFF_PW_HASH },
-    { id: "2aa6ac8e-9c9e-45df-aa69-8746aa0aab9c", role: "teacher", firstName: "David", lastName: "Wilson", email: "teacher2@safeschool.dev", passwordHash: STAFF_PW_HASH },
-    { id: "e4bf21ba-8f7e-47d1-be56-e1647885df3b", role: "teacher", firstName: "Laura", lastName: "Bennett", email: "teacher3@safeschool.dev", passwordHash: STAFF_PW_HASH },
-    { id: "c0e057d7-2fc1-48fb-99bb-00c46c4e87f3", role: "teacher", firstName: "Tom", lastName: "Harris", email: "teacher4@safeschool.dev", passwordHash: STAFF_PW_HASH },
+    { id: CHRIS_ID, role: "support_staff", firstName: "Chris", lastName: "Taylor", email: "support@safeschool.dev", passwordHash: STAFF_PW_HASH },
+    { id: DAVID_W_ID, role: "teacher", firstName: "David", lastName: "Wilson", email: "teacher2@safeschool.dev", passwordHash: STAFF_PW_HASH, className: "5B" },
+    { id: "e4bf21ba-8f7e-47d1-be56-e1647885df3b", role: "teacher", firstName: "Laura", lastName: "Bennett", email: "teacher3@safeschool.dev", passwordHash: STAFF_PW_HASH, className: "4A" },
+    { id: "c0e057d7-2fc1-48fb-99bb-00c46c4e87f3", role: "teacher", firstName: "Tom", lastName: "Harris", email: "teacher4@safeschool.dev", passwordHash: STAFF_PW_HASH, className: "3A" },
   ];
 
   const parentUsers: any[] = [
-    { id: "f504f6a3-bde4-4942-940c-ba6b0b7c534a", role: "parent", firstName: "Albert", lastName: "Demo", email: "parent.a@safeschool.dev", pinHash: PARENT_PIN_HASH, passwordHash: PARENT_PW_HASH, parentOf: [ELENA_N_ID] },
-    { id: "aa0a5ec3-cc17-4e6b-a8c0-4d6478f83a07", role: "parent", firstName: "Jennifer", lastName: "Demo", email: "parent.b@safeschool.dev", pinHash: PARENT_PIN_HASH, passwordHash: PARENT_PW_HASH, parentOf: [PABLO_ID] },
+    { id: PARENT_A_ID, role: "parent", firstName: "Albert", lastName: "Demo", email: "parent.a@safeschool.dev", pinHash: PARENT_PIN_HASH, passwordHash: PARENT_PW_HASH, parentOf: [ELENA_N_ID] },
+    { id: PARENT_B_ID, role: "parent", firstName: "Jennifer", lastName: "Demo", email: "parent.b@safeschool.dev", pinHash: PARENT_PIN_HASH, passwordHash: PARENT_PW_HASH, parentOf: [PABLO_ID] },
   ];
 
   const ptaUsers: any[] = [
-    { id: "6e138046-57ee-4452-b76a-c473dfcfdecf", role: "pta", firstName: "Rachel", lastName: "Foster", email: "pta.chair@safeschool.dev", passwordHash: PTA_PW_HASH },
+    { id: PTA_CHAIR_ID, role: "pta", firstName: "Rachel", lastName: "Foster", email: "pta.chair@safeschool.dev", passwordHash: PTA_PW_HASH },
     { id: "297a275d-9afb-462e-b163-591dc013e246", role: "pta", firstName: "Mark", lastName: "Stevens", email: "pta.member1@safeschool.dev", passwordHash: PTA_PW_HASH },
   ];
 
@@ -88,13 +136,13 @@ export async function seedDemoData() {
     { id: CAROLINE_ID, firstName: "Caroline", lastName: "Demo", yearGroup: "Y5", className: "5B", avatarValue: "🐬" },
     { id: ELENA_N_ID, firstName: "Elena", lastName: "Navarro", yearGroup: "Y6", className: "6A", avatarValue: "🐱" },
     { id: PABLO_ID, firstName: "Pablo", lastName: "Garcia", yearGroup: "Y6", className: "6A", avatarValue: "🐻" },
-    { id: "db41e263-6ac6-4997-a8d2-b20e1214ae2a", firstName: "Adrian", lastName: "Serrano", yearGroup: "Y4", className: "4A", avatarValue: "🦈" },
+    { id: ADRIAN_ID, firstName: "Adrian", lastName: "Serrano", yearGroup: "Y4", className: "4A", avatarValue: "🦈" },
     { id: "2827d369-3ccf-40c4-9b21-d38fd7daaa92", firstName: "Alejandro", lastName: "Ramos", yearGroup: "Y4", className: "4A", avatarValue: "🐺" },
-    { id: "342fa065-89f3-4b20-8d21-f86ff5d21223", firstName: "Alexander", lastName: "Kelly", yearGroup: "Y6", className: "6A", avatarValue: "🦜" },
-    { id: "96a9bcc4-cd5d-49e0-9600-606b8976646b", firstName: "Alice", lastName: "Walker", yearGroup: "Y5", className: "5B", avatarValue: "🐢" },
+    { id: ALEXANDER_ID, firstName: "Alexander", lastName: "Kelly", yearGroup: "Y6", className: "6A", avatarValue: "🦜" },
+    { id: ALICE_ID, firstName: "Alice", lastName: "Walker", yearGroup: "Y5", className: "5B", avatarValue: "🐢" },
     { id: "d7a0f2aa-8799-4e5d-9c40-f2349439f8db", firstName: "Alvaro", lastName: "Flores", yearGroup: "Y5", className: "5B", avatarValue: "🦋" },
     { id: "997cb964-5fc9-4925-9ea4-2f2a5fc4037d", firstName: "Amelia", lastName: "Brown", yearGroup: "Y3", className: "3A", avatarValue: "🐬" },
-    { id: "47fad258-2f72-42e7-8357-e81a1a845b56", firstName: "Amy", lastName: "Hughes", yearGroup: "Y6", className: "6A", avatarValue: "🐧" },
+    { id: AMY_ID, firstName: "Amy", lastName: "Hughes", yearGroup: "Y6", className: "6A", avatarValue: "🐧" },
     { id: "2b78a5c7-8c7d-4a10-9101-0009d6f0d090", firstName: "Andrea", lastName: "Morales", yearGroup: "Y6", className: "6A", avatarValue: "🐶" },
     { id: "8611aab8-8676-4028-b565-766557f60717", firstName: "Anke", lastName: "Schneider", yearGroup: "Y5", className: "5B", avatarValue: "🐰" },
     { id: "1112c789-7983-4ad2-9013-677269335f77", firstName: "Antonio", lastName: "Suarez", yearGroup: "Y6", className: "6A", avatarValue: "🐺" },
@@ -141,14 +189,14 @@ export async function seedDemoData() {
     { id: "92bc90ea-d2b0-4c65-82dd-76d735b2ac41", firstName: "Lucas", lastName: "Romero", yearGroup: "Y3", className: "3A", avatarValue: "🦋" },
     { id: "dad73d4b-5d5c-4816-8c8c-7f526c540ac7", firstName: "Lucia", lastName: "Medina", yearGroup: "Y5", className: "5B", avatarValue: "🦉" },
     { id: "3e3065a4-6bb9-4db3-88b4-6f3f88ef0055", firstName: "Lucia", lastName: "Fernandez", yearGroup: "Y5", className: "5B", avatarValue: "🦋" },
-    { id: "17e8253f-e234-4981-bd31-ce909b7638cd", firstName: "Luna", lastName: "Martinez", yearGroup: "Y3", className: "3A", avatarValue: "🦊" },
+    { id: LUNA_ID, firstName: "Luna", lastName: "Martinez", yearGroup: "Y3", className: "3A", avatarValue: "🦊" },
     { id: "5dbab546-9291-40fa-9567-ce4a2764d762", firstName: "Manuel", lastName: "Aguilar", yearGroup: "Y5", className: "5B", avatarValue: "🦄" },
     { id: "1c630296-f2ad-4f4d-80a1-e1bbf752cf58", firstName: "Marco", lastName: "Ruiz", yearGroup: "Y4", className: "4A", avatarValue: "🦊" },
     { id: "534ddf8d-b66c-474d-84a3-6cce29872711", firstName: "Maria", lastName: "Cruz", yearGroup: "Y5", className: "5B", avatarValue: "🐨" },
     { id: "109cb15d-5d7c-4c19-8145-3bdd9702f96f", firstName: "Mateo", lastName: "Santos", yearGroup: "Y3", className: "3A", avatarValue: "🐺" },
     { id: "058650a1-83ff-4b26-86f8-bb90c5775860", firstName: "Max", lastName: "Weber", yearGroup: "Y3", className: "3A", avatarValue: "🐱" },
-    { id: "15e8d239-8e9d-469f-8446-58eec913914c", firstName: "Mia", lastName: "Williams", yearGroup: "Y3", className: "3A", avatarValue: "🐯" },
-    { id: "5740c05c-4530-4a1f-b942-48436d28e62b", firstName: "Mia", lastName: "Torres", yearGroup: "Y3", className: "3A", avatarValue: "🐺" },
+    { id: MIA_W_ID, firstName: "Mia", lastName: "Williams", yearGroup: "Y3", className: "3A", avatarValue: "🐯" },
+    { id: MIA_T_ID, firstName: "Mia", lastName: "Torres", yearGroup: "Y3", className: "3A", avatarValue: "🐺" },
     { id: "aed8aa9b-ca0c-47a9-845b-9425698442c3", firstName: "Miguel", lastName: "Perez", yearGroup: "Y6", className: "6A", avatarValue: "🦉" },
     { id: "de50e3e6-452d-4ca1-836e-b43ece3db246", firstName: "Mila", lastName: "Smit", yearGroup: "Y6", className: "6A", avatarValue: "🐙" },
     { id: "8c4759b7-b45d-409c-b51b-d18525b2bc8d", firstName: "Nina", lastName: "Herrera", yearGroup: "Y3", className: "3A", avatarValue: "🐙" },
@@ -166,7 +214,7 @@ export async function seedDemoData() {
     { id: "adb67095-ef12-4114-93e3-b55085c489ba", firstName: "Sofia", lastName: "Garcia", yearGroup: "Y3", className: "3A", avatarValue: "🐶" },
     { id: "426b3c22-17c5-4924-b21a-379727b24e66", firstName: "Sophie", lastName: "Taylor", yearGroup: "Y4", className: "4A", avatarValue: "🐻" },
     { id: "9283baca-b3dc-4ac6-a3a7-f73d32e82e6b", firstName: "Sophie", lastName: "de Jong", yearGroup: "Y6", className: "6A", avatarValue: "🐯" },
-    { id: "1170de0e-2d3b-4940-9702-ad15da5b523b", firstName: "Thomas", lastName: "Robinson", yearGroup: "Y6", className: "6A", avatarValue: "🐻" },
+    { id: THOMAS_ID, firstName: "Thomas", lastName: "Robinson", yearGroup: "Y6", className: "6A", avatarValue: "🐻" },
     { id: "ef4c1366-3a85-4db2-a90f-e2e8f0b3ea20", firstName: "Tom", lastName: "Bakker", yearGroup: "Y4", className: "4A", avatarValue: "🐯" },
     { id: "db96a860-06a0-4437-9bbd-50d0fd4a0b24", firstName: "Valentina", lastName: "Navarro", yearGroup: "Y4", className: "4A", avatarValue: "🦁" },
     { id: "3dc320f9-4644-4e1c-9a5e-e097f875cf3b", firstName: "Victor", lastName: "Blanco", yearGroup: "Y6", className: "6A", avatarValue: "🦄" },
@@ -242,6 +290,520 @@ export async function seedDemoData() {
     },
   ]);
 
+  // ── Demo incidents ──
+  const incidents: any[] = [
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: ELENA_N_ID,
+      reporterRole: "pupil",
+      anonymous: false,
+      category: "verbal",
+      escalationTier: 1,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(14),
+      location: "playground",
+      description: "Someone in my class keeps calling me unkind names at break time. It makes me feel really upset and I don't want to go outside anymore.",
+      victimIds: [ELENA_N_ID],
+      perpetratorIds: [ALEXANDER_ID],
+      personInvolvedText: "Alexander Kelly",
+      emotionalState: "sad,scared",
+      happeningToMe: true,
+      happeningToSomeoneElse: false,
+      iSawIt: false,
+      status: "open",
+      parentVisible: true,
+      parentSummary: "Elena reported being called unkind names at break time. The school is looking into this.",
+      createdAt: daysAgoDate(14),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: AMY_ID,
+      reporterRole: "pupil",
+      anonymous: false,
+      category: "physical",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(12),
+      location: "corridor",
+      description: "Someone bumped into me on purpose in the corridor and I fell over. My knee got a scrape and it really hurt.",
+      victimIds: [AMY_ID],
+      perpetratorIds: [ALEXANDER_ID],
+      personInvolvedText: "Alexander Kelly",
+      emotionalState: "scared,angry",
+      happeningToMe: true,
+      happeningToSomeoneElse: false,
+      iSawIt: false,
+      status: "open",
+      parentVisible: false,
+      createdAt: daysAgoDate(12),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: EMMA_D_ID,
+      reporterRole: "head_of_year",
+      anonymous: false,
+      category: "verbal,psychological",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(10),
+      location: "classroom",
+      description: "Observed Alexander leaving Elena out of group work on purpose and saying unkind things to her. Elena looked upset. This is the third time I have noticed this happening between them.",
+      victimIds: [ELENA_N_ID],
+      perpetratorIds: [ALEXANDER_ID],
+      childrenSeparated: true,
+      coordinatorNotified: true,
+      immediateActionTaken: "Moved pupils to different groups. Spoke with both children. Logged with coordinator.",
+      partOfKnownPattern: true,
+      status: "investigating",
+      parentVisible: true,
+      parentSummary: "A staff member observed unkind behaviour directed at Elena in the classroom. The children have been separated and the coordinator has been notified.",
+      createdAt: daysAgoDate(10),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: CAROLINE_ID,
+      reporterRole: "pupil",
+      anonymous: true,
+      category: "online",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(8),
+      location: "online",
+      description: "Someone made a group chat and they are writing unkind things about a girl in my class. They are sharing things to upset her and it is not fair.",
+      victimIds: [ALICE_ID],
+      personInvolvedText: "Some people in Y5",
+      emotionalState: "worried,confused",
+      happeningToMe: false,
+      happeningToSomeoneElse: true,
+      iSawIt: true,
+      status: "submitted",
+      parentVisible: false,
+      createdAt: daysAgoDate(8),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: PABLO_ID,
+      reporterRole: "pupil",
+      anonymous: false,
+      category: "physical",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(7),
+      location: "playground",
+      description: "An older child keeps taking my snack at break time and won't give it back. When I ask for it back they push me away.",
+      victimIds: [PABLO_ID],
+      perpetratorIds: [THOMAS_ID],
+      personInvolvedText: "Thomas Robinson",
+      emotionalState: "scared,sad",
+      happeningToMe: true,
+      happeningToSomeoneElse: false,
+      iSawIt: false,
+      status: "open",
+      parentVisible: true,
+      parentSummary: "Pablo reported that another child has been taking his snack and pushing him. The school is looking into it.",
+      createdAt: daysAgoDate(7),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: DAVID_W_ID,
+      reporterRole: "teacher",
+      anonymous: false,
+      category: "neglect",
+      escalationTier: 2,
+      safeguardingTrigger: true,
+      incidentDate: daysAgo(6),
+      location: "classroom",
+      description: "Caroline has arrived at school without a coat or warm clothes several times this term. She seemed tired and hungry this morning. I want to make sure she is getting the support she needs.",
+      victimIds: [CAROLINE_ID],
+      childrenSeparated: false,
+      coordinatorNotified: true,
+      immediateActionTaken: "Offered breakfast from the school kitchen. Notified coordinator so we can check in with the family.",
+      toldByChild: false,
+      status: "escalated",
+      parentVisible: false,
+      createdAt: daysAgoDate(6),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: SARAH_ID,
+      reporterRole: "coordinator",
+      anonymous: false,
+      category: "safeguarding",
+      escalationTier: 3,
+      safeguardingTrigger: true,
+      incidentDate: daysAgo(5),
+      location: "other",
+      description: "Following a referral from Teacher B, a safeguarding concern has been raised for Luna. The school is following the correct steps to make sure she is safe and supported. LOPIVI protocol started. External support has been contacted.",
+      victimIds: [LUNA_ID],
+      childrenSeparated: true,
+      coordinatorNotified: true,
+      immediateActionTaken: "Made sure the child feels safe at school. Contacted the right people for help.",
+      toldByChild: true,
+      childConsentToShare: true,
+      formalResponseRequested: true,
+      requestExternalReferral: true,
+      confidentialFlag: true,
+      status: "escalated",
+      parentVisible: false,
+      createdAt: daysAgoDate(5),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: BOB_ID,
+      reporterRole: "pupil",
+      anonymous: false,
+      category: "exclusion",
+      escalationTier: 1,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(4),
+      location: "classroom",
+      description: "The other children won't let me join in their games at play time. They walk away when I come over. It happens nearly every day and it makes me feel lonely.",
+      victimIds: [BOB_ID],
+      emotionalState: "sad,lonely",
+      happeningToMe: true,
+      happeningToSomeoneElse: false,
+      iSawIt: false,
+      status: "submitted",
+      parentVisible: false,
+      createdAt: daysAgoDate(4),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: ELENA_N_ID,
+      reporterRole: "pupil",
+      anonymous: false,
+      category: "verbal,physical",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(3),
+      location: "playground",
+      description: "The same person pushed me again today at break. They told me not to tell anyone. I feel worried about coming to school.",
+      victimIds: [ELENA_N_ID],
+      perpetratorIds: [ALEXANDER_ID],
+      personInvolvedText: "Alexander Kelly",
+      emotionalState: "scared,angry,sad",
+      happeningToMe: true,
+      happeningToSomeoneElse: false,
+      iSawIt: false,
+      status: "submitted",
+      parentVisible: true,
+      parentSummary: "Elena reported being pushed again at break time by the same child. She is feeling worried about coming to school.",
+      createdAt: daysAgoDate(3),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: ADRIAN_ID,
+      reporterRole: "pupil",
+      anonymous: true,
+      category: "psychological",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(2),
+      location: "classroom",
+      description: "Some children keep laughing when I read out loud in class. They copy my voice afterwards. It makes me feel embarrassed and I don't want to read anymore.",
+      victimIds: [ADRIAN_ID],
+      emotionalState: "embarrassed,sad",
+      happeningToMe: true,
+      happeningToSomeoneElse: false,
+      iSawIt: false,
+      status: "submitted",
+      parentVisible: false,
+      createdAt: daysAgoDate(2),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: EMMA_D_ID,
+      reporterRole: "head_of_year",
+      anonymous: false,
+      category: "physical,verbal",
+      escalationTier: 2,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(1),
+      location: "playground",
+      description: "Pattern follow-up: Alexander was involved in another incident with Elena at morning break. Alexander pushed Elena. Other children saw it happen. This is the fourth time this has been reported in 2 weeks. Requesting that the Convivèxit process is started.",
+      victimIds: [ELENA_N_ID],
+      perpetratorIds: [ALEXANDER_ID],
+      childrenSeparated: true,
+      coordinatorNotified: true,
+      immediateActionTaken: "Children separated. Alexander given a different break area while we look into this.",
+      partOfKnownPattern: true,
+      formalResponseRequested: true,
+      status: "investigating",
+      parentVisible: true,
+      parentSummary: "A staff member has reported a fourth incident between the same children. The school is now starting a formal process to address this pattern.",
+      createdAt: daysAgoDate(1),
+    },
+    {
+      referenceNumber: refNum(),
+      schoolId: SCHOOL_ID,
+      reporterId: EMMA_D_ID,
+      reporterRole: "head_of_year",
+      anonymous: false,
+      category: "verbal",
+      escalationTier: 1,
+      safeguardingTrigger: false,
+      incidentDate: daysAgo(20),
+      location: "cafeteria_buffet",
+      description: "Two Y6 pupils had a disagreement during lunch about seating. Raised voices but resolved with support. No further action needed.",
+      victimIds: [PABLO_ID],
+      perpetratorIds: [THOMAS_ID],
+      status: "closed",
+      parentVisible: false,
+      createdAt: daysAgoDate(20),
+    },
+  ];
+
+  const createdIncidents: any[] = [];
+  for (const inc of incidents) {
+    const [created] = await db.insert(incidentsTable).values(inc).returning();
+    createdIncidents.push(created);
+  }
+  console.log(`[seed] Created ${createdIncidents.length} demo incidents`);
+
+  // ── Demo protocols ──
+  const protocols: any[] = [
+    {
+      referenceNumber: protRef(),
+      schoolId: SCHOOL_ID,
+      openedBy: SARAH_ID,
+      protocolType: "bullying",
+      protocolSource: "convivexit",
+      context: "Repeated verbal and physical incidents involving Alexander Kelly targeting Elena Navarro over a 2-week period. Four separate reports have been filed. Convivèxit process initiated.",
+      linkedIncidentIds: createdIncidents.filter(i => (i.victimIds || []).includes(ELENA_N_ID)).map((i: any) => i.id),
+      victimId: ELENA_N_ID,
+      allegedPerpetratorIds: [ALEXANDER_ID],
+      parentNotificationSent: true,
+      parentNotificationAt: daysAgoDate(1),
+      interviewsRequired: true,
+      riskLevel: "medium",
+      riskAssessment: "Moderate risk — repeated pattern of verbal and physical unkindness directed at one pupil. No safeguarding threshold reached but trending upward.",
+      protectiveMeasures: ["Separate break areas", "Different class groupings", "Weekly check-in with victim"],
+      status: "under_investigation",
+      openedAt: daysAgoDate(1),
+    },
+    {
+      referenceNumber: protRef(),
+      schoolId: SCHOOL_ID,
+      openedBy: SARAH_ID,
+      protocolType: "child_protection",
+      protocolSource: "lopivi",
+      context: "Tier 3 safeguarding concern for Luna Martinez. LOPIVI protocol activated. External referral made to child protection services.",
+      linkedIncidentIds: createdIncidents.filter(i => (i.victimIds || []).includes(LUNA_ID)).map((i: any) => i.id),
+      victimId: LUNA_ID,
+      parentNotificationSent: false,
+      interviewsRequired: true,
+      riskLevel: "high",
+      riskAssessment: "High risk — safeguarding concern requiring external support. Child has disclosed and consented to share.",
+      externalReferralRequired: true,
+      externalReferralBody: "Conselleria de Benestar Social — IMAS",
+      externalReferralAt: daysAgoDate(4),
+      protectiveMeasures: ["Daily welfare check", "Designated safe adult in school", "Reduced timetable if needed"],
+      status: "open",
+      openedAt: daysAgoDate(5),
+    },
+  ];
+
+  for (const p of protocols) {
+    await db.insert(protocolsTable).values(p);
+  }
+  console.log(`[seed] Created ${protocols.length} demo protocols`);
+
+  // ── Demo pattern alerts ──
+  const alerts: any[] = [
+    {
+      schoolId: SCHOOL_ID,
+      ruleId: "repeated_victim",
+      ruleLabel: "Repeated victim — same child named in 3+ incidents",
+      alertLevel: "amber",
+      victimId: ELENA_N_ID,
+      perpetratorIds: [ALEXANDER_ID],
+      linkedIncidentIds: createdIncidents.filter(i => (i.victimIds || []).includes(ELENA_N_ID)).map((i: any) => i.id),
+      status: "open",
+      triggeredAt: daysAgoDate(3),
+    },
+    {
+      schoolId: SCHOOL_ID,
+      ruleId: "repeated_perpetrator",
+      ruleLabel: "Repeated perpetrator — same child named in 3+ incidents",
+      alertLevel: "red",
+      victimId: ELENA_N_ID,
+      perpetratorIds: [ALEXANDER_ID],
+      linkedIncidentIds: createdIncidents.filter(i => (i.perpetratorIds || []).includes(ALEXANDER_ID)).map((i: any) => i.id),
+      status: "open",
+      triggeredAt: daysAgoDate(1),
+    },
+    {
+      schoolId: SCHOOL_ID,
+      ruleId: "emotional_distress_pattern",
+      ruleLabel: "Emotional distress pattern — declining mood over multiple entries",
+      alertLevel: "amber",
+      victimId: MIA_W_ID,
+      linkedIncidentIds: [],
+      status: "open",
+      triggeredAt: daysAgoDate(2),
+      notes: "Mia Williams diary entries show a declining mood trend over the past 4 weeks.",
+    },
+  ];
+
+  for (const a of alerts) {
+    await db.insert(patternAlertsTable).values(a);
+  }
+  console.log(`[seed] Created ${alerts.length} demo pattern alerts`);
+
+  // ── Demo notifications ──
+  const notifications: any[] = [
+    {
+      schoolId: SCHOOL_ID,
+      recipientId: SARAH_ID,
+      trigger: "new_incident",
+      subject: "New incident reported",
+      body: "A new verbal incident (INC-10001) has been reported by Elena Navarro.",
+      delivered: true,
+    },
+    {
+      schoolId: SCHOOL_ID,
+      recipientId: SARAH_ID,
+      trigger: "pattern_alert",
+      subject: "Pattern alert: Repeated victim detected",
+      body: "Elena Navarro has been named as a victim in 3+ incidents. Please review.",
+      delivered: false,
+    },
+    {
+      schoolId: SCHOOL_ID,
+      recipientId: EMMA_D_ID,
+      trigger: "new_incident",
+      subject: "New incident in your year group",
+      body: "A new physical incident has been reported involving a Y6 pupil.",
+      delivered: false,
+    },
+    {
+      schoolId: SCHOOL_ID,
+      recipientId: SARAH_ID,
+      trigger: "protocol_opened",
+      subject: "Protocol opened: Convivèxit bullying protocol",
+      body: "A Convivèxit bullying protocol has been opened for Elena Navarro.",
+      delivered: true,
+    },
+    {
+      schoolId: SCHOOL_ID,
+      recipientId: PARENT_A_ID,
+      trigger: "parent_notification",
+      subject: "Update about your child",
+      body: "The school has opened a formal process regarding incidents involving Elena. You will be contacted for a meeting.",
+      delivered: false,
+    },
+  ];
+
+  for (const n of notifications) {
+    await db.insert(notificationsTable).values(n);
+  }
+  console.log(`[seed] Created ${notifications.length} demo notifications`);
+
+  // ── Demo messages ──
+  const demoMessages: any[] = [
+    {
+      schoolId: SCHOOL_ID,
+      senderId: ELENA_N_ID,
+      recipientId: EMMA_D_ID,
+      senderRole: "pupil",
+      priority: "normal",
+      type: "chat_request",
+      body: "Miss Davies, can I talk to you about something? I don't feel safe at break time.",
+      createdAt: daysAgoDate(3),
+    },
+    {
+      schoolId: SCHOOL_ID,
+      senderId: EMMA_D_ID,
+      recipientId: ELENA_N_ID,
+      senderRole: "head_of_year",
+      priority: "normal",
+      type: "message",
+      body: "Of course, Elena. Come and find me at the start of break and we can have a chat. You did the right thing reaching out.",
+      createdAt: daysAgoDate(3),
+      readAt: daysAgoDate(3),
+    },
+    {
+      schoolId: SCHOOL_ID,
+      senderId: PARENT_A_ID,
+      recipientId: EMMA_D_ID,
+      senderRole: "parent",
+      priority: "important",
+      type: "message",
+      body: "Hello Miss Davies, I wanted to let you know that Elena has been quite upset coming home from school recently. She mentioned some issues with another child. Could we arrange a time to discuss this?",
+      createdAt: daysAgoDate(2),
+    },
+    {
+      schoolId: SCHOOL_ID,
+      senderId: EMMA_D_ID,
+      recipientId: PARENT_A_ID,
+      senderRole: "head_of_year",
+      priority: "normal",
+      type: "message",
+      body: "Thank you for reaching out, Mr Demo. We are aware of the situation and are taking it seriously. I'd be happy to arrange a meeting — would Thursday after school work for you?",
+      createdAt: daysAgoDate(2),
+      readAt: daysAgoDate(1),
+    },
+  ];
+
+  for (const m of demoMessages) {
+    await db.insert(messagesTable).values(m);
+  }
+  console.log(`[seed] Created ${demoMessages.length} demo messages`);
+
+  // ── PTA annual report ──
+  const now = new Date();
+  const academicYear = now.getMonth() >= 8
+    ? `${now.getFullYear()}-${now.getFullYear() + 1}`
+    : `${now.getFullYear() - 1}-${now.getFullYear()}`;
+
+  await db.insert(ptaAnnualReportsTable).values({
+    schoolId: SCHOOL_ID,
+    academicYear,
+    reportData: {
+      academicYear,
+      generatedAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      totalIncidents: 169,
+      incidentsByCategory: [
+        { category: "bullying", count: 52 },
+        { category: "cyberbullying", count: 28 },
+        { category: "verbal", count: 31 },
+        { category: "physical", count: 18 },
+        { category: "emotional", count: 14 },
+        { category: "discrimination", count: 9 },
+        { category: "safeguarding", count: 7 },
+        { category: "other", count: 10 },
+      ],
+      protocolsByStatus: [
+        { status: "open", count: 2 },
+        { status: "resolved", count: 8 },
+        { status: "closed", count: 5 },
+      ],
+      alertsSummary: [
+        { level: "high", status: "active", count: 3 },
+        { level: "high", status: "resolved", count: 12 },
+        { level: "medium", status: "active", count: 5 },
+        { level: "medium", status: "resolved", count: 20 },
+      ],
+    },
+    status: "approved",
+    generatedById: SARAH_ID,
+    approvedById: JAMES_C_ID,
+    approvedAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+  });
+  console.log(`[seed] Created PTA annual report for ${academicYear}`);
+
+  // ── Diary entries ──
   const bobDiary = [
     { mood: 4, note: "Library time today. I found a book about space that is really cool. Did you know Saturn has 146 moons?? That is mental.", createdAt: new Date("2026-03-06T17:11:00Z") },
     { mood: 4, note: "Played basketball at break. Our team won 12-8. I'm not very tall but I'm quick so I'm good at stealing the ball.", createdAt: new Date("2026-03-09T09:59:00Z") },
@@ -264,25 +826,25 @@ export async function seedDemoData() {
   }
 
   const otherDiary = [
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 5, note: "Great day! I love school.", createdAt: new Date("2025-09-26") },
-    { pupilId: "5740c05c-4530-4a1f-b942-48436d28e62b", mood: 4, note: "Good day today, played with friends at break.", createdAt: new Date("2025-09-28") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 4, note: "OK day. Some people were a bit mean at break.", createdAt: new Date("2025-10-02") },
-    { pupilId: "5740c05c-4530-4a1f-b942-48436d28e62b", mood: 3, note: "Boy A was mean to me but I tried to ignore it.", createdAt: new Date("2025-10-02T12:00:00Z") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 4, note: "Answered a question in class and felt good about it.", createdAt: new Date("2025-10-05") },
-    { pupilId: "17e8253f-e234-4981-bd31-ce909b7638cd", mood: 4, note: "Told my teacher what happened. Glad I did.", createdAt: new Date("2025-10-06") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 3, note: "No one wanted me on their team today.", createdAt: new Date("2025-10-08") },
-    { pupilId: "5740c05c-4530-4a1f-b942-48436d28e62b", mood: 2, note: "They won't let me join in. I sat alone at lunch.", createdAt: new Date("2025-10-09") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 3, note: "Charlotte said my answer was stupid. I don't want to put my hand up any more.", createdAt: new Date("2025-10-11") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 2, note: "They laughed when I spoke. I just want to be invisible.", createdAt: new Date("2025-10-14") },
-    { pupilId: "17e8253f-e234-4981-bd31-ce909b7638cd", mood: 2, note: "Everyone calls me a snitch now. I wish I hadn't said anything.", createdAt: new Date("2025-10-14T12:00:00Z") },
-    { pupilId: "5740c05c-4530-4a1f-b942-48436d28e62b", mood: 1, note: "Three of them surrounded me. I don't want to go to school.", createdAt: new Date("2025-10-16") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 2, note: "Sat alone at lunch. Nobody came to sit with me.", createdAt: new Date("2025-10-17") },
+    { pupilId: MIA_W_ID, mood: 5, note: "Great day! I love school.", createdAt: new Date("2025-09-26") },
+    { pupilId: MIA_T_ID, mood: 4, note: "Good day today, played with friends at break.", createdAt: new Date("2025-09-28") },
+    { pupilId: MIA_W_ID, mood: 4, note: "OK day. Some people were a bit mean at break.", createdAt: new Date("2025-10-02") },
+    { pupilId: MIA_T_ID, mood: 3, note: "Someone was mean to me but I tried to ignore it.", createdAt: new Date("2025-10-02T12:00:00Z") },
+    { pupilId: MIA_W_ID, mood: 4, note: "Answered a question in class and felt good about it.", createdAt: new Date("2025-10-05") },
+    { pupilId: LUNA_ID, mood: 4, note: "Told my teacher what happened. Glad I did.", createdAt: new Date("2025-10-06") },
+    { pupilId: MIA_W_ID, mood: 3, note: "No one wanted me on their team today.", createdAt: new Date("2025-10-08") },
+    { pupilId: MIA_T_ID, mood: 2, note: "They won't let me join in. I sat alone at lunch.", createdAt: new Date("2025-10-09") },
+    { pupilId: MIA_W_ID, mood: 3, note: "Charlotte said my answer was stupid. I don't want to put my hand up any more.", createdAt: new Date("2025-10-11") },
+    { pupilId: MIA_W_ID, mood: 2, note: "They laughed when I spoke. I just want to be invisible.", createdAt: new Date("2025-10-14") },
+    { pupilId: LUNA_ID, mood: 2, note: "Everyone calls me a snitch now. I wish I hadn't said anything.", createdAt: new Date("2025-10-14T12:00:00Z") },
+    { pupilId: MIA_T_ID, mood: 1, note: "Three of them surrounded me. I don't want to go to school.", createdAt: new Date("2025-10-16") },
+    { pupilId: MIA_W_ID, mood: 2, note: "Sat alone at lunch. Nobody came to sit with me.", createdAt: new Date("2025-10-17") },
     { pupilId: "ca1bfeb5-4d76-47f8-854e-7bc90d47d7b0", mood: 3, note: "I want to be Luna's friend but Ethan says bad things will happen if I do.", createdAt: new Date("2025-10-17T12:00:00Z") },
-    { pupilId: "17e8253f-e234-4981-bd31-ce909b7638cd", mood: 1, note: "Even my friends are scared to talk to me. I feel so alone.", createdAt: new Date("2025-10-19") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 1, note: "I don't want to go to school any more. Everything is horrible.", createdAt: new Date("2025-10-21") },
-    { pupilId: "17e8253f-e234-4981-bd31-ce909b7638cd", mood: 1, note: "I'll never report anything again. It just makes everything worse.", createdAt: new Date("2025-10-22") },
-    { pupilId: "5740c05c-4530-4a1f-b942-48436d28e62b", mood: 1, note: "They blocked the door. I'm scared every day now.", createdAt: new Date("2025-10-23") },
-    { pupilId: "15e8d239-8e9d-469f-8446-58eec913914c", mood: 1, note: "I told Mum I felt sick so I didn't have to go in. I'm not really sick. I just can't face it.", createdAt: new Date("2025-10-24") },
+    { pupilId: LUNA_ID, mood: 1, note: "Even my friends are scared to talk to me. I feel so alone.", createdAt: new Date("2025-10-19") },
+    { pupilId: MIA_W_ID, mood: 1, note: "I don't want to go to school any more. Everything is horrible.", createdAt: new Date("2025-10-21") },
+    { pupilId: LUNA_ID, mood: 1, note: "I'll never report anything again. It just makes everything worse.", createdAt: new Date("2025-10-22") },
+    { pupilId: MIA_T_ID, mood: 1, note: "They blocked the door. I'm scared every day now.", createdAt: new Date("2025-10-23") },
+    { pupilId: MIA_W_ID, mood: 1, note: "I told Mum I felt sick so I didn't have to go in. I'm not really sick. I just can't face it.", createdAt: new Date("2025-10-24") },
   ];
 
   for (const entry of otherDiary) {
@@ -294,6 +856,4 @@ export async function seedDemoData() {
       createdAt: entry.createdAt,
     });
   }
-
-  console.log("[seed] Demo data seeded successfully");
 }

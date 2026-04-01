@@ -29,6 +29,7 @@ timeoutMs = 20000
 
 [userenv.shared]
 DEMO_MODE = "true"
+VITE_DEMO_MODE = "true"
 
 [userenv.development]
 

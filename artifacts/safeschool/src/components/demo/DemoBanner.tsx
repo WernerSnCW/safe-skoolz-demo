@@ -42,7 +42,7 @@ export function DemoBanner() {
 
   return (
     <>
-      <div className="bg-gradient-to-r from-amber-500/90 to-orange-500/90 text-white text-sm">
+      <div className="bg-gradient-to-r from-primary to-secondary text-primary-foreground text-sm">
         <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <Info size={16} className="shrink-0" />
@@ -64,8 +64,8 @@ export function DemoBanner() {
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-2">
-              <RefreshCw size={28} className="text-amber-600 dark:text-amber-400" />
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-2">
+              <RefreshCw size={28} className="text-primary" />
             </div>
             <AlertDialogTitle className="text-center text-xl">Reset Demo Data?</AlertDialogTitle>
             <AlertDialogDescription className="text-center text-sm leading-relaxed">
@@ -76,7 +76,7 @@ export function DemoBanner() {
             <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleReset}
-              className="rounded-xl bg-amber-600 hover:bg-amber-700 text-white"
+              className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <RotateCcw size={16} className="mr-1.5" />
               Reset Everything

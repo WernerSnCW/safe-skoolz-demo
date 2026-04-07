@@ -86,32 +86,43 @@ export async function resetDemoData() {
   // Temporarily drop the audit log immutability trigger so we can truncate
   await db.execute(sql`DROP TRIGGER IF EXISTS audit_log_no_update ON audit_log`);
 
-  // Truncate all tables in dependency order (children first)
+  // Truncate all existing tables using a dynamic query so missing tables don't cause errors
   await db.execute(sql`
-    TRUNCATE TABLE
-      audit_log,
-      pta_messages, pta_concerns, pta_policy_acknowledgements, pta_codesign_responses, pta_annual_reports,
-      diagnostic_actions, diagnostic_responses, diagnostic_surveys,
-      senco_tracking, senco_caseload,
-      behaviour_points,
-      pupil_diary,
-      teacher_posts,
-      case_tasks,
-      interviews,
-      incident_disclosure_permissions,
-      messages,
-      notifications,
-      pattern_alerts,
-      protocols,
-      incidents,
-      annex_templates,
-      referral_bodies,
-      newsletter_subscribers,
-      delegated_roles,
-      school_login_codes,
-      users,
-      schools
-    CASCADE
+    DO $$
+    DECLARE
+      tbl text;
+      tables text[] := ARRAY[
+        'audit_log',
+        'pta_messages', 'pta_concerns', 'pta_policy_acknowledgements', 'pta_codesign_responses', 'pta_annual_reports',
+        'diagnostic_actions', 'diagnostic_responses', 'diagnostic_surveys',
+        'senco_tracking', 'senco_caseload',
+        'behaviour_points',
+        'pupil_diary',
+        'teacher_posts',
+        'case_tasks',
+        'interviews',
+        'incident_disclosure_permissions',
+        'messages',
+        'notifications',
+        'pattern_alerts',
+        'protocols',
+        'incidents',
+        'annex_templates',
+        'referral_bodies',
+        'newsletter_subscribers',
+        'delegated_roles',
+        'school_login_codes',
+        'users',
+        'schools'
+      ];
+    BEGIN
+      FOREACH tbl IN ARRAY tables LOOP
+        IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = tbl AND table_schema = 'public') THEN
+          EXECUTE format('TRUNCATE TABLE %I CASCADE', tbl);
+        END IF;
+      END LOOP;
+    END
+    $$;
   `);
 
   // Restore audit log immutability trigger
@@ -123,7 +134,10 @@ export async function resetDemoData() {
       RETURN NULL;
     END;
     $$ LANGUAGE plpgsql;
+  `);
 
+  await db.execute(sql`
+    DROP TRIGGER IF EXISTS audit_log_no_update ON audit_log;
     CREATE TRIGGER audit_log_no_update
       BEFORE UPDATE OR DELETE ON audit_log
       FOR EACH ROW

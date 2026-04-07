@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useStaffLogin, useParentLogin, useListSchools } from "@workspace/api-client-react";
 import { Button, Input, Label, Card, CardContent } from "@/components/ui-polished";
-import { ShieldCheck, User, Users, GraduationCap, AlertTriangle, Play, UserCheck, Building2, ChevronRight, Lock, ArrowLeft, Heart, Shield, BarChart3, Bell, Eye, ClipboardCheck } from "lucide-react";
+import { ShieldCheck, User, Users, GraduationCap, AlertTriangle, Play, UserCheck, Building2, ChevronRight, Lock, ArrowLeft, Heart, Shield, BarChart3, Bell, Eye, ClipboardCheck, Copy, Check, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const IS_DEMO = import.meta.env.VITE_DEMO_MODE === "true";
@@ -618,6 +618,22 @@ export default function Login() {
           </CardContent>
         </Card>
 
+        {IS_DEMO && <DemoCredentialsCard demoAccounts={demoAccounts} onQuickLogin={async (email, password, role) => {
+          setError("");
+          try {
+            let res;
+            if (role === "parent") {
+              res = await parentLogin.mutateAsync({ data: { email, password } });
+            } else {
+              res = await staffLogin.mutateAsync({ data: { email, password } });
+            }
+            setToken(res.token);
+            setLocation("/");
+          } catch {
+            setError("Login failed. Please try again.");
+          }
+        }} />}
+
         <Link href="/how-it-works">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -666,5 +682,140 @@ export default function Login() {
         </p>
       </div>
     </div>
+  );
+}
+
+function DemoCredentialsCard({ demoAccounts, onQuickLogin }: {
+  demoAccounts: { staff: DemoAccount[]; parent: DemoAccount[]; pta: DemoAccount[] };
+  onQuickLogin: (email: string, password: string, role: string) => Promise<void>;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [loggingIn, setLoggingIn] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
+  const handleQuickLogin = async (email: string, password: string, role: string) => {
+    setLoggingIn(email);
+    try {
+      await onQuickLogin(email, password, role);
+    } finally {
+      setLoggingIn(null);
+    }
+  };
+
+  const sections: { title: string; labelClass: string; rowClass: string; btnClass: string; accounts: DemoAccount[]; role: string }[] = [
+    {
+      title: "Staff", role: "staff", accounts: demoAccounts.staff,
+      labelClass: "text-indigo-600 dark:text-indigo-400",
+      rowClass: "bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200/30 dark:border-indigo-800/30",
+      btnClass: "bg-indigo-600 hover:bg-indigo-700",
+    },
+    {
+      title: "Parents", role: "parent", accounts: demoAccounts.parent,
+      labelClass: "text-amber-600 dark:text-amber-400",
+      rowClass: "bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/30 dark:border-amber-800/30",
+      btnClass: "bg-amber-600 hover:bg-amber-700",
+    },
+    {
+      title: "PTA", role: "pta", accounts: demoAccounts.pta,
+      labelClass: "text-purple-600 dark:text-purple-400",
+      rowClass: "bg-purple-50/50 dark:bg-purple-950/20 border-purple-200/30 dark:border-purple-800/30",
+      btnClass: "bg-purple-600 hover:bg-purple-700",
+    },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15 }}
+      className="mt-4"
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl bg-card border border-border/50 shadow-sm hover:shadow-md transition-all text-sm font-semibold text-foreground"
+      >
+        <span className="flex items-center gap-2">
+          <Lock size={16} className="text-primary" />
+          Demo Account Credentials
+        </span>
+        <ChevronDown size={16} className={`text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 rounded-2xl bg-card border border-border/50 shadow-sm p-4 space-y-4">
+              {/* Pupil credentials */}
+              <div>
+                <p className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-2">Pupil Login</p>
+                <div className="p-3 rounded-xl bg-teal-50/50 dark:bg-teal-950/20 border border-teal-200/30 dark:border-teal-800/30 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Access Codes:</span>
+                    <div className="flex gap-1.5 flex-wrap justify-end">
+                      {["6A-MORNA", "5B-MORNA", "4A-MORNA", "3A-MORNA"].map(code => (
+                        <button
+                          key={code}
+                          onClick={() => copyToClipboard(code, code)}
+                          className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800/40 transition-colors"
+                        >
+                          {copied === code ? <Check size={12} /> : code}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">PIN (all pupils):</span>
+                    <button
+                      onClick={() => copyToClipboard("1234", "pin")}
+                      className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-800/40 transition-colors flex items-center gap-1"
+                    >
+                      {copied === "pin" ? <Check size={12} /> : <>1234 <Copy size={10} /></>}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Staff / Parent / PTA credentials */}
+              {sections.map(({ title, labelClass, rowClass, btnClass, accounts, role }) => (
+                <div key={title}>
+                  <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${labelClass}`}>{title}</p>
+                  <div className="space-y-1.5">
+                    {accounts.map(a => (
+                      <div
+                        key={a.email}
+                        className={`flex items-center justify-between p-2.5 rounded-xl border ${rowClass}`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold truncate">{a.label}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{a.subtitle}</p>
+                        </div>
+                        <button
+                          onClick={() => handleQuickLogin(a.email, a.password, role)}
+                          disabled={!!loggingIn}
+                          className={`ml-2 shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-lg text-white disabled:opacity-50 transition-colors ${btnClass}`}
+                        >
+                          {loggingIn === a.email ? "..." : "Login"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

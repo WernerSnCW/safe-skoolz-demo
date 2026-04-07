@@ -20,6 +20,7 @@ import dataRetentionRouter from "./dataRetention";
 import diagnosticsRouter from "./diagnostics";
 import diaryRouter from "./diary";
 import teacherPostsRouter from "./teacherPosts";
+import demoRouter from "./demo";
 
 const router: IRouter = Router();
 
@@ -44,5 +45,6 @@ router.use(dataRetentionRouter);
 router.use(diagnosticsRouter);
 router.use(diaryRouter);
 router.use(teacherPostsRouter);
+router.use(demoRouter);
 
 export default router;

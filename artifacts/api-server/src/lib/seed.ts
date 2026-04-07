@@ -80,6 +80,68 @@ export async function seedDemoData() {
   console.log("[seed] Demo data seeded successfully");
 }
 
+export async function resetDemoData() {
+  console.log("[seed] Resetting demo data…");
+
+  // Temporarily drop the audit log immutability trigger so we can truncate
+  await db.execute(sql`DROP TRIGGER IF EXISTS audit_log_no_update ON audit_log`);
+
+  // Truncate all tables in dependency order (children first)
+  await db.execute(sql`
+    TRUNCATE TABLE
+      audit_log,
+      pta_messages, pta_concerns, pta_policy_acknowledgements, pta_codesign_responses, pta_annual_reports,
+      diagnostic_actions, diagnostic_responses, diagnostic_surveys,
+      senco_tracking, senco_caseload,
+      behaviour_points,
+      pupil_diary,
+      teacher_posts,
+      case_tasks,
+      interviews,
+      incident_disclosure_permissions,
+      messages,
+      notifications,
+      pattern_alerts,
+      protocols,
+      incidents,
+      annex_templates,
+      referral_bodies,
+      newsletter_subscribers,
+      delegated_roles,
+      school_login_codes,
+      users,
+      schools
+    CASCADE
+  `);
+
+  // Restore audit log immutability trigger
+  await db.execute(sql`
+    CREATE OR REPLACE FUNCTION prevent_audit_log_modify()
+    RETURNS TRIGGER AS $$
+    BEGIN
+      RAISE EXCEPTION 'audit_log is append-only: UPDATE and DELETE operations are not permitted';
+      RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER audit_log_no_update
+      BEFORE UPDATE OR DELETE ON audit_log
+      FOR EACH ROW
+      EXECUTE FUNCTION prevent_audit_log_modify();
+  `);
+
+  // Reset counters
+  incCounter = 10000;
+  protCounter = 1000;
+
+  // Re-seed
+  await db.transaction(async (tx) => {
+    await seedInTransaction(tx);
+  });
+
+  console.log("[seed] Demo data reset successfully");
+}
+
 async function seedInTransaction(db: Parameters<Parameters<typeof import("@workspace/db").db.transaction>[0]>[0]) {
   await db.insert(schoolsTable).values({
     id: SCHOOL_ID,
